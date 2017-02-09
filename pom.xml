@@ -1,0 +1,372 @@
+<!--
+     ============LICENSE_START=======================================================
+     MODEL LOADER SERVICE
+     ================================================================================
+     Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+     ================================================================================
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     
+     http://www.apache.org/licenses/LICENSE-2.0
+     
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+     ============LICENSE_END=========================================================
+   -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.openecomp.aai.model-loader</groupId>
+	<artifactId>model-loader</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>war</packaging>
+	
+	<properties>
+		<docker.location>${basedir}/target</docker.location>
+		<docker.url>${dockerurl}</docker.url>
+		<docker.imagetag>${dockertag}</docker.imagetag>
+		<docker.login>${dockerlogin}</docker.login>
+		<docker.password>${dockerpassword}</docker.password>
+		<docker.registry>${dockerregistry}</docker.registry>
+		<dependency.scope>provided</dependency.scope>
+		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
+		<maven.compiler.source>1.8</maven.compiler.source>
+    	<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+	
+	<repositories>
+	        <repository>
+          		<id>maven-central</id>
+          		<name>maven-central</name>
+          		<url>http://central.maven.org/maven2/</url>
+          		<releases>
+            			<enabled>true</enabled>
+            			<updatePolicy>never</updatePolicy>
+          		</releases>
+          		<snapshots>
+            			<enabled>false</enabled>
+          		</snapshots>
+        	</repository>
+        	<repository>
+          		<id>ecomp-nexus</id>
+          		<name>ecomp-nexus</name>
+          		<url>https://ecomp-nexus:8443/repository/maven-releases/</url>
+          		<releases>
+            			<enabled>true</enabled>
+            			<updatePolicy>never</updatePolicy>
+          		</releases>
+          		<snapshots>
+            			<enabled>false</enabled>
+          		</snapshots>
+        	</repository>
+	</repositories>
+
+	
+	<dependencies>
+		<!-- powermockito dependencies -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-javaagent</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4-rule-agent</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- xjc dependencies -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-xjc</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>org.eclipse.persistence.moxy</artifactId>
+			<version>2.6.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.18</version>
+		</dependency>
+		<!-- Common logging framework -->
+		<dependency>
+			<groupId>org.openecomp.cl</groupId>
+			<artifactId>common-logging</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<!-- ASDC Client Library -->
+		<dependency>
+			<groupId>org.openecomp.sdc</groupId>
+		        <artifactId>sdc-distribution-client</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20131018</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.eclipse.jetty</groupId>
+		    <artifactId>jetty-security</artifactId>
+		    <version>9.3.8.RC0</version>
+		</dependency>
+		
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>2.12.1</version>
+        </dependency>
+        
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>copy-agent</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.powermock</groupId>
+									<artifactId>powermock-module-javaagent</artifactId>
+									<version>1.6.2</version>
+									<outputDirectory>${project.build.directory}/agents</outputDirectory>
+									<destFileName>powermock-javaagent.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
+				<configuration>
+					<argLine>-javaagent:${project.build.directory}/agents/powermock-javaagent.jar
+						-noverify</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<id>xjc</id>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<clearOutputDir>false</clearOutputDir>
+					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+					<sources>
+						<source>${project.basedir}/src/main/resources/schema</source>
+					</sources>
+					<addGeneratedAnnotation>true</addGeneratedAnnotation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<executions>
+					<execution>
+						<id>copy-docker-file</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target</outputDirectory>
+							<overwrite>true</overwrite>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/docker</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.4.11</version>
+				<configuration>
+					<dockerHost>${docker.url}</dockerHost>
+					<registry>${docker.registry}</registry>
+					<authConfig>
+                        <username>${docker.login}</username>
+                        <password>${docker.password}</password>
+                    </authConfig>
+					<imageName>${docker.registry}/ecomp/${project.artifactId}</imageName>
+					<dockerDirectory>${docker.location}</dockerDirectory>
+					<registryUrl>https://${docker.registry}</registryUrl>
+					<imageTags>
+						<imageTag>${docker.imagetag}</imageTag>
+						<imageTag>latest</imageTag>
+					</imageTags>
+					<forceTags>true</forceTags>
+				</configuration>
+			</plugin>
+			<!-- blackduck maven plugin -->
+			<plugin>
+				<groupId>com.blackducksoftware.integration</groupId>
+				<artifactId>hub-maven-plugin</artifactId>
+				<version>1.0.4</version>
+				<inherited>false</inherited>
+				<configuration>
+					<target>${project.basedir/target}</target>
+				</configuration>
+				<executions>
+					<execution>
+						<id>create-bdio-file</id>
+						<phase>package</phase>
+						<goals>
+							<goal>createHubOutput</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Checkstyle plugin - used to report on compliance with -->
+			<!-- the Google style guide. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-checkstyle-plugin</artifactId>
+							<version>2.17</version>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>checkstyle</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+                        
+            <!-- license plugin -->
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>license-maven-plugin</artifactId>
+              <version>1.10</version>
+              <configuration>
+                <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                <excludes>
+                  <exclude>**.json</exclude>
+                  <exclude>**.properties</exclude>
+                </excludes>
+                <processStartTag>============LICENSE_START=======================================================</processStartTag>
+                <processEndTag>============LICENSE_END=========================================================</processEndTag>
+                <sectionDelimiter>================================================================================</sectionDelimiter>
+                <licenseName>apache_v2</licenseName>
+                <inceptionYear>2017</inceptionYear>
+                <organizationName>AT&amp;T Intellectual Property. All rights reserved.</organizationName>
+                <projectName>MODEL LOADER SERVICE</projectName>
+                <canUpdateCopyright>true</canUpdateCopyright>
+                <canUpdateDescription>true</canUpdateDescription>
+                <canUpdateLicense>true</canUpdateLicense>
+                <emptyLineAfterHeader>true</emptyLineAfterHeader>
+                <roots>
+                  <root>.</root>
+                </roots>
+                <excludes>
+                  <exclude>**/*.json</exclude>
+                </excludes>
+                <extraExtensions>
+                  <route>xml</route>
+                  <props>properties</props>
+                  <xsd>xml</xsd>
+                  <txt>java</txt>
+                </extraExtensions>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>first</id>
+                  <goals>
+                    <goal>update-file-header</goal>
+                  </goals>
+                  <phase>process-sources</phase>
+                </execution>
+              </executions>
+            </plugin>
+		</plugins>
+	</build>
+	
+</project>

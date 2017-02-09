@@ -1,0 +1,10 @@
+{
+  "model": 
+  {
+    "model-name-version-id":"model-vid",
+    "model-type":"widget",
+    "model-version":"v1.0",
+    "model-id":"model-id",
+    "model-name":"generic-vnf"
+  }
+}
