@@ -18,15 +18,14 @@
   ============LICENSE_END=========================================================
   -->
 
-<model xmlns="http://org.openecomp.aai.inventory/v7">
+<model xmlns="http://org.openecomp.aai.inventory/v8">
 	<model-id>e4a9901b-6c94-4e07-b8d8-b877d3df554c</model-id>
 	<model-type>service</model-type>
-	<model-name>wan-connector</model-name>
+	<model-name>test-model</model-name>
 	<model-version>v1.0</model-version>
 	<model-name-version-id>93d9d45d-7eec-4371-9083-675e4c353de3
 	</model-name-version-id>
-	<model-description>Connects a customer vpn to the border elements of an
-		AT&amp;T product</model-description>
+	<model-description>desc</model-description>
 	<metadata>
 		<metadatum>
 			<metaname>a</metaname>

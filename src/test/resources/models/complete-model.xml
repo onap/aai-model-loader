@@ -18,7 +18,7 @@
   ============LICENSE_END=========================================================
   -->
 
-<models xmlns="http://org.openecomp.aai.inventory/v7">
+<models xmlns="http://org.openecomp.aai.inventory/v8">
 	<model>
 		<model-name-version-id>997fc7-fca1-451f-b953-9a1e6197b4d6
 		</model-name-version-id>
@@ -30,7 +30,7 @@
 		<relationship-list>
 			<relationship>
 				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/ccb3a5a4-1722-4213-8785-2b6b5527d453/
+				<related-link>https://localhost:8443/aai/v8/service-design-and-creation/model-elements/model-element/ccb3a5a4-1722-4213-8785-2b6b5527d453/
 				</related-link>
 				<relationship-data>
 					<relationship-key>model-element.model-element-uuid
@@ -63,7 +63,7 @@
 		<relationship-list>
 			<relationship>
 				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/fc3a2260-d0ee-4c8e-b7e9-74791d7c5721/
+				<related-link>https://localhost:8443/aai/v8/service-design-and-creation/model-elements/model-element/fc3a2260-d0ee-4c8e-b7e9-74791d7c5721/
 				</related-link>
 				<relationship-data>
 					<relationship-key>model-element.model-element-uuid
@@ -96,256 +96,7 @@
 			</relationship>
 		</relationship-list>
 	</model>
-	<model>
-		<model-name-version-id>d09dd9da-0148-46cd-a947-591afc844d24
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>connector</model-name>
-		<model-id>63ac2806-4d47-467f-bf9d-5a8a83a13cac</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175188</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/df2e4cc0-18ca-4046-9c1b-2abec86a58d6/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>df2e4cc0-18ca-4046-9c1b-2abec86a58d6
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>93d9d45d-7eec-4371-9083-675e4c353de3
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>93a6166f-b3d5-4f06-b4ba-aed48d009ad9
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>generic-vnf</model-name>
-		<model-id>acc6edd8-a8d4-4b93-afaa-0994068be14c</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175177</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/88a0e5fd-0254-41dc-a9d5-7a7db446f2f3/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>88a0e5fd-0254-41dc-a9d5-7a7db446f2f3
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>8da97b81-e0e9-4157-a4cd-af3ba52871d6
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/baefe75b-30f2-43d2-bd73-553f65ea1405/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>baefe75b-30f2-43d2-bd73-553f65ea1405
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>a6d9de88-4046-4b78-a59e-5691243d292a
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>759dbd4a-2473-46f3-a932-48d987c9b4a1
-		</model-name-version-id>
-		<model-type>resource</model-type>
-		<model-name>ipe</model-name>
-		<model-id>323ac9c1-b345-44a2-9d07-dd7653137705</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175188</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/746b864c-333b-4da9-806e-c70f883f8c9d/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>746b864c-333b-4da9-806e-c70f883f8c9d
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>element-choice-set.element-choice-set-uuid
-					</relationship-key>
-					<relationship-value>1c69d7dc-ddf1-4cf3-86dd-929aa886429c
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>constrained-element-set.constrained-element-set-uuid
-					</relationship-key>
-					<relationship-value>999</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>df2e4cc0-18ca-4046-9c1b-2abec86a58d6
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>93d9d45d-7eec-4371-9083-675e4c353de3
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>93d9d45d-7eec-4371-9083-675e4c353de3
-		</model-name-version-id>
-		<model-type>service</model-type>
-		<model-name>wan-connector</model-name>
-		<model-id>e4a9901b-6c94-4e07-b8d8-b877d3df554c</model-id>
-		<model-version>v1.0</model-version>
-		<model-description>Connects a customer vpn to the border elements of
-			an AT&amp;T product</model-description>
-		<resource-version>1463175188</resource-version>
-		<relationship-list />
-	</model>
-	<model>
-		<model-name-version-id>35be1acf-1298-48c6-a128-66850083b8bd
-		</model-name-version-id>
-		<model-type>resource</model-type>
-		<model-name>pBgf</model-name>
-		<model-id>897fb848-3b38-4d0d-a6a7-2543070fc450</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175188</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/d985355f-a162-493b-8cb9-0b5b948bb7b0/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>d985355f-a162-493b-8cb9-0b5b948bb7b0
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>element-choice-set.element-choice-set-uuid
-					</relationship-key>
-					<relationship-value>646ee687-1475-419d-bd10-f3760d5430dc
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>constrained-element-set.constrained-element-set-uuid
-					</relationship-key>
-					<relationship-value>999</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>df2e4cc0-18ca-4046-9c1b-2abec86a58d6
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>93d9d45d-7eec-4371-9083-675e4c353de3
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>a6d9de88-4046-4b78-a59e-5691243d292a
-		</model-name-version-id>
-		<model-type>resource</model-type>
-		<model-name>vSbg</model-name>
-		<model-id>326690fa-9747-4ebd-9d9f-a5ef02943e1a</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175188</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/b989a7b6-907a-431d-b54e-262d29c45b6f/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>b989a7b6-907a-431d-b54e-262d29c45b6f
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>element-choice-set.element-choice-set-uuid
-					</relationship-key>
-					<relationship-value>646ee687-1475-419d-bd10-f3760d5430dc
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>constrained-element-set.constrained-element-set-uuid
-					</relationship-key>
-					<relationship-value>999</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>df2e4cc0-18ca-4046-9c1b-2abec86a58d6
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>93d9d45d-7eec-4371-9083-675e4c353de3
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>ae16244f-4d29-4801-a559-e25f2db2a4c3
-		</model-name-version-id>
-		<model-type>resource</model-type>
-		<model-name>l2-bridge-for-wan-connector</model-name>
-		<model-id>9494e925-04a0-4f52-983b-36fa8f75d97e</model-id>
-		<model-version>v1.0</model-version>
-		<model-description>An l2-bridge used by a wan connector connects an
-			ipe to a product border element</model-description>
-		<resource-version>1463175188</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/061f2f1d-d76f-4b4a-810c-1f9a452a4db3/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>061f2f1d-d76f-4b4a-810c-1f9a452a4db3
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>df2e4cc0-18ca-4046-9c1b-2abec86a58d6
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>93d9d45d-7eec-4371-9083-675e4c353de3
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
+		<model>
 		<model-name-version-id>f2b24d95-c582-48d5-b2d6-c5b3a94ce812
 		</model-name-version-id>
 		<model-type>widget</model-type>
@@ -356,7 +107,7 @@
 		<relationship-list>
 			<relationship>
 				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/5eab2693-78ec-446a-afe4-14332e348246/
+				<related-link>https://localhost:8443/aai/v8/service-design-and-creation/model-elements/model-element/5eab2693-78ec-446a-afe4-14332e348246/
 				</related-link>
 				<relationship-data>
 					<relationship-key>model-element.model-element-uuid
@@ -372,7 +123,7 @@
 			</relationship>
 			<relationship>
 				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/f7659dac-6311-45b6-b483-60b39364a85a/
+				<related-link>https://localhost:8443/aai/v8/service-design-and-creation/model-elements/model-element/f7659dac-6311-45b6-b483-60b39364a85a/
 				</related-link>
 				<relationship-data>
 					<relationship-key>model-element.model-element-uuid
@@ -388,113 +139,5 @@
 			</relationship>
 		</relationship-list>
 	</model>
-	<model>
-		<model-name-version-id>53be71b0-c689-4841-9fe6-c7fab529d310
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>p-interface</model-name>
-		<model-id>759dbd4a-2473-46f3-a932-48d987c9b4a1</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175178</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/f118b348-1231-4895-ad26-0b227253cdf0/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>f118b348-1231-4895-ad26-0b227253cdf0
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>f7659dac-6311-45b6-b483-60b39364a85a
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>759dbd4a-2473-46f3-a932-48d987c9b4a1
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>706c7e05-8faf-4258-acca-8e4cf556961d
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>l-interface</model-name>
-		<model-id>92e579cc-eb63-490f-b9eb-16b7af2660c7</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175178</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/82f1cf8a-470b-4aaa-a1eb-27b83ba8f176/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>82f1cf8a-470b-4aaa-a1eb-27b83ba8f176
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>f7659dac-6311-45b6-b483-60b39364a85a
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>759dbd4a-2473-46f3-a932-48d987c9b4a1
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
-	<model>
-		<model-name-version-id>897df7ea-8938-42b0-bc57-46e913a4d93b
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>logical-link</model-name>
-		<model-id>c575bd11-6907-4b44-82d8-f55294fff63f</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175143</resource-version>
-		<relationship-list />
-	</model>
-	<model>
-		<model-name-version-id>f749dc48-4f58-4601-9d3e-605a06a0899e
-		</model-name-version-id>
-		<model-type>widget</model-type>
-		<model-name>vlan</model-name>
-		<model-id>76544264-9287-45c6-871b-6e7a456a9f32</model-id>
-		<model-version>v1.0</model-version>
-		<resource-version>1463175178</resource-version>
-		<relationship-list>
-			<relationship>
-				<related-to>model-element</related-to>
-				<related-link>https://localhost:8443/aai/v7/service-design-and-creation/model-elements/model-element/fd994cef-bc62-460f-bd21-cc8c07fbccc4/
-				</related-link>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>fd994cef-bc62-460f-bd21-cc8c07fbccc4
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model-element.model-element-uuid
-					</relationship-key>
-					<relationship-value>f7659dac-6311-45b6-b483-60b39364a85a
-					</relationship-value>
-				</relationship-data>
-				<relationship-data>
-					<relationship-key>model.model-name-version-id</relationship-key>
-					<relationship-value>759dbd4a-2473-46f3-a932-48d987c9b4a1
-					</relationship-value>
-				</relationship-data>
-			</relationship>
-		</relationship-list>
-	</model>
+	
 </models>

@@ -97,7 +97,7 @@ public class ModelArtifactParserTest {
         System.out.println(model.toString());
       }
 
-      assertTrue(modelList.size() == 14);
+      assertTrue(modelList.size() == 3);
 
       ModelArtifact modelVdc = (ModelArtifact) modelList.get(0);
       assertTrue(
@@ -106,7 +106,7 @@ public class ModelArtifactParserTest {
       assertTrue(modelVdc.getDependentModelIds().size() == 1);
       assertTrue(modelVdc.getDependentModelIds().contains("93d9d45d-7eec-4371-9083-675e4c353de3"));
 
-      ModelArtifact modelPserver = (ModelArtifact) modelList.get(9);
+      ModelArtifact modelPserver = (ModelArtifact) modelList.get(2);
       assertTrue(
           modelPserver.getNameVersionId().equalsIgnoreCase("f2b24d95-c582-48d5-b2d6-c5b3a94ce812"));
       assertTrue(modelPserver.getType().toString().equalsIgnoreCase("MODEL"));

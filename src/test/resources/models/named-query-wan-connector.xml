@@ -18,7 +18,7 @@
   ============LICENSE_END=========================================================
   -->
 
-<named-query xmlns="http://org.openecomp.aai.inventory/v7">
+<named-query xmlns="http://org.openecomp.aai.inventory/v8">
 	<named-query-uuid>94cac189-8d88-4d63-a194-f44214e080ff
 	</named-query-uuid>
 	<named-query-name>wan-connector</named-query-name>
