@@ -28,11 +28,6 @@
 	
 	<properties>
 		<docker.location>${basedir}/target</docker.location>
-		<docker.url>${dockerurl}</docker.url>
-		<docker.imagetag>${dockertag}</docker.imagetag>
-		<docker.login>${dockerlogin}</docker.login>
-		<docker.password>${dockerpassword}</docker.password>
-		<docker.registry>${dockerregistry}</docker.registry>
 		<dependency.scope>provided</dependency.scope>
 		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -269,16 +264,8 @@
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.11</version>
-				<configuration>
-					<dockerHost>${docker.url}</dockerHost>
-					<registry>${docker.registry}</registry>
-					<authConfig>
-                        <username>${docker.login}</username>
-                        <password>${docker.password}</password>
-                    </authConfig>
-					<imageName>${docker.registry}/ecomp/${project.artifactId}</imageName>
-					<dockerDirectory>${docker.location}</dockerDirectory>
-					<registryUrl>https://${docker.registry}</registryUrl>
+				<configuration>		
+					<imageName>${docker.registry}/ecomp/${project.artifactId}</imageName>					
 					<imageTags>
 						<imageTag>${docker.imagetag}</imageTag>
 						<imageTag>latest</imageTag>
