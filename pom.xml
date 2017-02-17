@@ -146,28 +146,29 @@
                   </pluginRepository>
           </pluginRepositories>
            <repositories>
-           	<repository>
-            	<id>central</id>
-                	<name>Maven 2 repository 2</name>
-                    <url>http://repo2.maven.org/maven2/</url>
-              </repository>
+                   <repository>
+                          <id>central</id>
+                          <name>Maven 2 repository 2</name>
+                          <url>http://repo2.maven.org/maven2/</url>
+                  </repository>
               <repository>
-              	<id>ecomp-releases</id>
-                	<name>ECOMP Release Repository</name>
-                   	<url>https://nexus.openecomp.org/content/repositories/releases/</url>
-              </repository>
-              <repository>
-              	<id>ecomp-snapshots</id>
-                	<name>ECOMP Snapshot Repository</name>
-                    <url>https://nexus.openecomp.org/content/repositories/snapshots/</url>
-                    <snapshots>
-            			<updatePolicy>always</updatePolicy>
-        			</snapshots>
-        			<releases>
-            			<updatePolicy>always</updatePolicy>
-        			</releases>
-               </repository>
-			 </repositories>
+                         <id>ecomp-releases</id>
+                          <name>ECOMP Release Repository</name>
+                         <url>https://nexus.openecomp.org/content/repositories/releases/</url>
+                  </repository>
+                  <repository>
+                         <id>ecomp-snapshots</id>
+                          <name>ECOMP Snapshot Repository</name>
+                         <url>https://nexus.openecomp.org/content/repositories/snapshots/</url>
+                          <snapshots>
+            <updatePolicy>always</updatePolicy>
+        </snapshots>
+        <releases>
+            <updatePolicy>always</updatePolicy>
+        </releases>
+                  </repository>
+
+          </repositories>
 	
 	
 	<build>
@@ -259,57 +260,20 @@
 					</execution>
 				</executions>
 			</plugin>
-	<plugin>
-		<groupId>io.fabric8</groupId>
-		<artifactId>docker-maven-plugin</artifactId>
-		<version>0.16.5</version>
-		<configuration>
-			<verbose>true</verbose>
-			<apiVersion>1.23</apiVersion>
-			<images>
-				<image>
-					<name>openecomp/aai-model-loader:1.0</name>
-					<alias>jacoco</alias>
-					<build>
-						<cleanup>try</cleanup>
-						<dockerFileDir>docker-files</dockerFileDir>
-						<dockerFile>docker-files/Dockerfile.jacoco</dockerFile>
-					</build>
-				</image>
-			</images>
-		</configuration>
-		<executions>
-			<execution>
-				<id>clean-images</id>
-				<phase>pre-clean</phase>
-				<goals>
-					<goal>remove</goal>
-				</goals>
-				<configuration>
-					<removeAll>true</removeAll>
-					<image>openecomp/aai-model-loader:%l</image>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.4.11</version>
+				<configuration>	
+					<serviceId>nexus3.openecomp.org:10003</serviceId>	
+					<imageName>${docker.registry}/ecomp/${project.artifactId}</imageName>					
+					<imageTags>
+						<imageTag>${docker.imagetag}</imageTag>
+						<imageTag>latest</imageTag>
+					</imageTags>
+					<forceTags>true</forceTags>
 				</configuration>
-			</execution>
-			<execution>
-				<id>generate-images</id>
-				<phase>generate-sources</phase>
-				<goals>
-					<goal>build</goal>
-				</goals>
-			</execution>
-			<execution>
-				<id>push-images</id>
-				<phase>deploy</phase>
-				<goals>
-					<goal>build</goal>
-					<goal>push</goal>
-				</goals>
-				<configuration>
-					<image>openecomp/aai-model-loader:%l</image>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
+			</plugin>
 		
 			<!-- Checkstyle plugin - used to report on compliance with -->
 			<!-- the Google style guide. -->
