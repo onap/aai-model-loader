@@ -352,7 +352,7 @@
 				<version>0.4.11</version>
 				<configuration>		
 					<serverId>nexus3.openecomp.org:10003</serverId>
-					<imageName>${docker.registry}/ecomp/${project.artifactId}</imageName>					
+					<imageName>${docker.push.registry}/ecomp/${project.artifactId}</imageName>					
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
 						<imageTag>${docker.imagetag}</imageTag>
