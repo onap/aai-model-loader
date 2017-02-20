@@ -199,7 +199,8 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.11</version>
 				<configuration>		
-					<serverId>nexus3.openecomp.org:10003</serverId>
+					<verbose>true</verbose>
+					<serverId>docker-hub</serverId>
 					<imageName>${docker.push.registry}/openecomp/${project.artifactId}</imageName>					
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
