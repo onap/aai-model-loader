@@ -1,0 +1,7 @@
+Verified+1: ecomp jobbuilder <ecomp-jobbuilder@jenkins.openecomp.org>
+Code-Review+2: Steve Smokowski <ss835w@att.com>
+Submitted-by: Steve Smokowski <ss835w@att.com>
+Submitted-at: Tue, 28 Feb 2017 21:34:09 +0000
+Reviewed-on: http://gerrit.openecomp.org/r/1535
+Project: aai/model-loader
+Branch: refs/heads/master
