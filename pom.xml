@@ -23,11 +23,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.openecomp.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>war</packaging>
 	
 	<properties>
 		<docker.location>${basedir}/target</docker.location>
+		<!-- Ecomp Version -->
+		<ecomp.version>1.0.0</ecomp.version>
 		<dependency.scope>provided</dependency.scope>
 		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -107,12 +109,12 @@
 		<dependency>
 			<groupId>org.openecomp.aai.logging-service</groupId>
 			<artifactId>common-logging</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${ecomp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openecomp.sdc</groupId>
 		    <artifactId>sdc-distribution-client</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+		    <version>${ecomp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -167,6 +169,11 @@
                           <name>ECOMP Snapshot Repository</name>
                          <url>https://nexus.openecomp.org/content/repositories/snapshots/</url>
                   </repository>
+                  <repository>
+                         <id>ecomp-staging</id>
+                          <name>ECOMP Staging Repository</name>
+                         <url>https://nexus.openecomp.org/content/repositories/staging/</url>
+                  </repository>
 
           </repositories>
 	
@@ -210,7 +217,6 @@
 					<imageName>${docker.push.registry}/openecomp/${project.artifactId}</imageName>					
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
-						<imageTag>${docker.imagetag}</imageTag>
 						<imageTag>latest</imageTag>
 					</imageTags>
 					<forceTags>true</forceTags>
