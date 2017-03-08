@@ -40,8 +40,21 @@
 	       <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
 	       <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
 	       <sonar.projectVersion>${project.version}</sonar.projectVersion>
+		<nexusproxy>https://nexus.openecomp.org</nexusproxy>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>ecomp-releases</id>
+			<name>ECOMP Release Repository</name>
+			<url>${nexusproxy}/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ecomp-snapshots</id>
+			<name>ECOMP Snapshot Repository</name>
+			<url>${nexusproxy}/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -383,6 +396,18 @@
 		   </execution>
 	      </executions>
 	    </plugin>
+	    <plugin>
+	    	<groupId>org.sonatype.plugins</groupId>
+	    	<artifactId>nexus-staging-maven-plugin</artifactId>
+	    	<version>1.6.7</version>
+	    	<extensions>true</extensions>
+	    	<configuration>
+	    		<nexusUrl>${nexusproxy}</nexusUrl>
+	    		<stagingProfileId>176c31dfe190a</stagingProfileId>
+	    		<serverId>ecomp-staging</serverId>
+	    	</configuration>
+	    </plugin>
+
 		</plugins>		
 	</build>
 	
