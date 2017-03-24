@@ -41,6 +41,9 @@
 	       <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
 	       <sonar.projectVersion>${project.version}</sonar.projectVersion>
 		<nexusproxy>https://nexus.openecomp.org</nexusproxy>
+		<docker.image.version>1.1.0</docker.image.version>
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
 	</properties>
 
 	<distributionManagement>
@@ -226,11 +229,13 @@
 				<version>0.4.11</version>
 				<configuration>		
 					<verbose>true</verbose>
-					<serverId>docker-hub</serverId>
+					<serverId>${docker.push.registry}</serverId>
 					<imageName>${docker.push.registry}/openecomp/${project.artifactId}</imageName>					
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
-						<imageTag>latest</imageTag>
+					     <imageTag>${docker.image.version}-SNAPSHOT-${maven.build.timestamp}</imageTag>
+          	                	     <imageTag>${docker.image.version}-STAGING-${maven.build.timestamp}</imageTag>
+          	                	     <imageTag>latest</imageTag>
 					</imageTags>
 					<forceTags>true</forceTags>
 				</configuration>
