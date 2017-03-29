@@ -40,7 +40,7 @@
 	       <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
 	       <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
 	       <sonar.projectVersion>${project.version}</sonar.projectVersion>
-		<nexusproxy>https://nexus.openecomp.org</nexusproxy>
+		<nexusproxy>https://nexus.onap.org</nexusproxy>
 	</properties>
 
 	<distributionManagement>
@@ -175,17 +175,17 @@
               <repository>
                          <id>ecomp-releases</id>
                           <name>ECOMP Release Repository</name>
-                         <url>https://nexus.openecomp.org/content/repositories/releases/</url>
+                          <url>${nexusproxy}/content/repositories/releases/</url>
                   </repository>
                   <repository>
                          <id>ecomp-snapshots</id>
                           <name>ECOMP Snapshot Repository</name>
-                         <url>https://nexus.openecomp.org/content/repositories/snapshots/</url>
+                          <url>${nexusproxy}/content/repositories/snapshots/</url>
                   </repository>
                   <repository>
                          <id>ecomp-staging</id>
                           <name>ECOMP Staging Repository</name>
-                         <url>https://nexus.openecomp.org/content/repositories/staging/</url>
+                          <url>${nexusproxy}/content/repositories/staging/</url>
                   </repository>
 
           </repositories>
