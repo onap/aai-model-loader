@@ -33,26 +33,29 @@
 		<dependency.scope>provided</dependency.scope>
 		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
 		<maven.compiler.source>1.8</maven.compiler.source>
-    	<maven.compiler.target>1.8</maven.compiler.target>
-	       <sonar.language>java</sonar.language>
-	       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-	       <sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
-	       <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
-	       <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
-	       <sonar.projectVersion>${project.version}</sonar.projectVersion>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<sonar.language>java</sonar.language>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
+		<sonar.projectVersion>${project.version}</sonar.projectVersion>
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
+		<releases.path>content/repositories/releases/</releases.path>
+		<snapshots.path>content/repositories/snapshots/</snapshots.path>
+		<staging.path>content/repositories/staging/</staging.path>
 	</properties>
 
 	<distributionManagement>
 		<repository>
 			<id>ecomp-releases</id>
 			<name>ECOMP Release Repository</name>
-			<url>${nexusproxy}/content/repositories/releases/</url>
+			<url>${nexusproxy}/${releases.path}</url>
 		</repository>
 		<snapshotRepository>
 			<id>ecomp-snapshots</id>
 			<name>ECOMP Snapshot Repository</name>
-			<url>${nexusproxy}/content/repositories/snapshots/</url>
+			<url>${nexusproxy}/${snapshots.path}</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<dependencies>
