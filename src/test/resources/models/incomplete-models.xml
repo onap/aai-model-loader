@@ -1,0 +1,50 @@
+<!--
+  ============LICENSE_START=======================================================
+  MODEL LOADER SERVICE
+  ================================================================================
+  Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+  ================================================================================
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  ============LICENSE_END=========================================================
+  -->
+
+<models xmlns="http://org.openecomp.aai.inventory/v9">
+<model>
+   <model-invariant-id>3d560d81-57d0-438b-a2a1-5334dba0651a</model-invariant-id>
+	<model-type>widget</model-type>
+	<model-vers>
+		<model-ver>
+			<model-version-id>9111f20f-e680-4001-b83f-19a2fc23bfc1</model-version-id>
+			<model-version>1.0</model-version>
+			<model-name>l3-network</model-name>
+		</model-ver>
+	</model-vers>
+</model>
+<model>
+    <model-type>resource</model-type>
+    <model-vers>
+        <model-ver>
+            <model-name>VL</model-name>
+            <model-version>1</model-version>
+            <model-description> Virtual link (VL) describes the basic topology of the connectivity as well as other required parameters (e.g. bandwidth and QoS class). </model-description>
+            <model-elements>
+                <model-element>
+                    <new-data-del-flag>F</new-data-del-flag>
+                    <cardinality>unbounded</cardinality>
+                    <model-elements/>
+                </model-element>
+            </model-elements>
+        </model-ver>
+    </model-vers>
+</model>
+</models>

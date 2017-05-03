@@ -1,23 +1,25 @@
-/*-
+/**
  * ============LICENSE_START=======================================================
- * MODEL LOADER SERVICE
+ * Model Loader
  * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017 AT&T Intellectual Property.
+ * Copyright © 2017 Amdocs
+ * All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
+ *
+ * ECOMP and OpenECOMP are trademarks
+ * and service marks of AT&T Intellectual Property.
  */
-
 package org.openecomp.modelloader.entity.catalog;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -36,9 +38,11 @@ import org.openecomp.modelloader.entity.ArtifactHandler;
 import org.openecomp.modelloader.restclient.AaiRestClient;
 import org.openecomp.modelloader.restclient.AaiRestClient.MimeType;
 import org.openecomp.modelloader.service.ModelLoaderMsgs;
+import org.springframework.web.util.UriUtils;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,9 +95,9 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             String imageId = "vnf image " + applicationVendor + " " + application + " "
                 + applicationVersion;
 
-            String getUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl()
-                + "?application-vendor=" + applicationVendor + "&application=" + application
-                + "&application-version=" + applicationVersion;
+			String queryURI = "application-vendor=" + applicationVendor + "&application=" + application + "&application-version=" + applicationVersion;
+			
+			String getUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "?" + UriUtils.encodePath(queryURI, "UTF-8");
 
             ClientResponse tryGet = restClient.getResource(getUrl, distributionId, MimeType.JSON);
             if (tryGet == null) {
@@ -160,6 +164,10 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             "Ingestion failed. " + e.getMessage() + ". Rolling back distribution.");
         failureCleanup(putImages, restClient, distributionId);
         return false;
+      } catch (UnsupportedEncodingException e) {
+    	  logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed. " + e.getMessage() + ". Rolling back distribution.");
+    	  failureCleanup(putImages, restClient, distributionId);
+    	  return false;
       }
     }
 

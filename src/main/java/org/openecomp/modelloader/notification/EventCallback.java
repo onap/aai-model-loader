@@ -1,23 +1,25 @@
-/*-
+/**
  * ============LICENSE_START=======================================================
- * MODEL LOADER SERVICE
+ * Model Loader
  * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017 AT&T Intellectual Property.
+ * Copyright © 2017 Amdocs
+ * All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
+ *
+ * ECOMP and OpenECOMP are trademarks
+ * and service marks of AT&T Intellectual Property.
  */
-
 package org.openecomp.modelloader.notification;
 
 import org.openecomp.sdc.api.IDistributionClient;
@@ -102,7 +104,8 @@ public class EventCallback implements INotificationCallback {
         break;
       }
 
-      logger.debug("Artifact: " + artifact.getArtifactName() + "  Payload:\n" + new String(downloadResult.getArtifactPayload()));
+      logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
+    	        "Downloaded artifact: " + artifact.getArtifactName() + "  Payload:\n" + new String(downloadResult.getArtifactPayload()));
       
       publishDownloadSuccess(data, artifact, downloadResult);
 
@@ -110,8 +113,14 @@ public class EventCallback implements INotificationCallback {
           .compareToIgnoreCase(ArtifactTypeEnum.MODEL_INVENTORY_PROFILE.toString()) == 0)
           || (artifact.getArtifactType()
               .compareToIgnoreCase(ArtifactTypeEnum.MODEL_QUERY_SPEC.toString()) == 0)) {
-        modelArtifacts.addAll(modelArtParser.parse(downloadResult.getArtifactPayload(),
-            downloadResult.getArtifactName()));
+        List<Artifact> parsedArtifacts = modelArtParser.parse(downloadResult.getArtifactPayload(), downloadResult.getArtifactName());
+        if (parsedArtifacts != null && !parsedArtifacts.isEmpty()) {
+          modelArtifacts.addAll(parsedArtifacts);
+        } else {
+          success = false;
+          publishDeployFailure(data, artifact);
+          break;
+        }
       } else if (artifact.getArtifactType()
           .compareToIgnoreCase(ArtifactTypeEnum.VNF_CATALOG.toString()) == 0) {
         catalogArtifacts
@@ -150,6 +159,8 @@ public class EventCallback implements INotificationCallback {
           }
         }
       }
+    } else {
+      statusString = "FAILURE";
     }
 
     auditLogger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
@@ -211,9 +222,6 @@ public class EventCallback implements INotificationCallback {
         buildStatusMessage(client, data, artifact, DistributionStatusEnum.DOWNLOAD_OK));
     metricsLogger.info(ModelLoaderMsgs.EVENT_PUBLISHED, null, override, "download success",
         artifact.getArtifactName(), sendDownloadStatus.getDistributionActionResult().toString());
-
-    logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-        "Downloaded artifact: " + artifact.getArtifactName());
 
     if (sendDownloadStatus.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
       logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,

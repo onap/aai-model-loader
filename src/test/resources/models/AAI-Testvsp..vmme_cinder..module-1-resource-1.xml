@@ -1,0 +1,52 @@
+<!--
+  ============LICENSE_START=======================================================
+  MODEL LOADER SERVICE
+  ================================================================================
+  Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+  ================================================================================
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  ============LICENSE_END=========================================================
+  -->
+
+<model xmlns="http://org.openecomp.aai.inventory/v9">
+    <model-invariant-id>5a2aac99-ffe8-415f-9242-420ed10da23e</model-invariant-id>
+    <model-type>resource</model-type>
+    <model-vers>
+        <model-ver>
+            <model-version-id>29d3fc43-4ff2-4e5c-acd0-7370f5b2715a</model-version-id>
+            <model-name>Testvsp..vmme_cinder..module-1</model-name>
+            <model-version>1</model-version>
+            <model-description></model-description>
+            <model-elements>
+                <model-element>
+                    <new-data-del-flag>F</new-data-del-flag>
+                    <cardinality>unbounded</cardinality>
+                    <model-elements/>
+                    <relationship-list>
+                        <relationship>
+                            <related-to>model-ver</related-to>
+                            <relationship-data>
+                                <relationship-key>model-ver.model-version-id</relationship-key>
+                                <relationship-value>c00563ae-812b-4e62-8330-7c4d0f47088a</relationship-value>
+                            </relationship-data>
+                            <relationship-data>
+                                <relationship-key>model.model-invariant-id</relationship-key>
+                                <relationship-value>ef86f9c5-2165-44f3-8fc3-96018b609ea5</relationship-value>
+                            </relationship-data>
+                        </relationship>
+                    </relationship-list>
+                </model-element>
+            </model-elements>
+        </model-ver>
+    </model-vers>
+</model>

@@ -1,23 +1,25 @@
-/*-
+/**
  * ============LICENSE_START=======================================================
- * MODEL LOADER SERVICE
+ * Model Loader
  * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017 AT&T Intellectual Property.
+ * Copyright © 2017 Amdocs
+ * All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
+ *
+ * ECOMP and OpenECOMP are trademarks
+ * and service marks of AT&T Intellectual Property.
  */
-
 package org.openecomp.modelloader.entity.model;
 
 import jline.internal.Log;
@@ -61,18 +63,18 @@ public class ModelSorter {
 
     @Override
     public String toString() {
-      return model.getNameVersionId();
+      return model.getModelInvariantId();
     }
 
     @Override
     public boolean equals(Object other) {
       ModelArtifact otherModel = ((Node) other).model;
-      return this.model.getNameVersionId().equals(otherModel.getNameVersionId());
+      return this.model.getModelInvariantId().equals(otherModel.getModelInvariantId());
     }
 
     @Override
     public int hashCode() {
-      return this.model.getNameVersionId().hashCode();
+      return this.model.getModelInvariantId().hashCode();
 
     }
   }
@@ -134,7 +136,7 @@ public class ModelSorter {
     HashMap<String, ModelArtifact> versionIdToModelMap = new HashMap<String, ModelArtifact>();
     for (Artifact art : models) {
       ModelArtifact ma = (ModelArtifact) art;
-      versionIdToModelMap.put(ma.getNameVersionId(), ma);
+      versionIdToModelMap.put(ma.getModelModelVerCombinedKey(), ma);
     }
 
     HashMap<String, Node> nodes = new HashMap<String, Node>();
@@ -143,11 +145,11 @@ public class ModelSorter {
       ModelArtifact model = (ModelArtifact) art;
 
       // node might have been created by another model referencing it
-      Node node = nodes.get(model.getNameVersionId());
+      Node node = nodes.get(model.getModelModelVerCombinedKey());
 
       if (null == node) {
         node = new Node(model);
-        nodes.put(model.getNameVersionId(), node);
+        nodes.put(model.getModelModelVerCombinedKey(), node);
       }
 
       for (String referencedModelId : model.getDependentModelIds()) {

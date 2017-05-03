@@ -1,36 +1,36 @@
-/*-
+/**
  * ============LICENSE_START=======================================================
- * MODEL LOADER SERVICE
+ * Model Loader
  * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017 AT&T Intellectual Property.
+ * Copyright © 2017 Amdocs
+ * All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
+ *
+ * ECOMP and OpenECOMP are trademarks
+ * and service marks of AT&T Intellectual Property.
  */
-
 package org.openecomp.modelloader.config;
 
 import org.eclipse.jetty.util.security.Password;
 import org.openecomp.sdc.api.consumer.IConfiguration;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 public class ModelLoaderConfig implements IConfiguration {
-
+	
   // Configuration file structure
   public static final String PREFIX_MODEL_LOADER_CONFIG = "ml";
   public static final String PREFIX_DISTRIBUTION_CLIENT = 
@@ -86,17 +86,9 @@ public class ModelLoaderConfig implements IConfiguration {
    * @param modelLoaderProperties properties needed to be configured for the model loader
    * @param certLocation location of the certificate
    */
-  public ModelLoaderConfig(Properties modelLoaderProperties) {
+  public ModelLoaderConfig(Properties modelLoaderProperties, String certLocation) {
     this.modelLoaderProperties = modelLoaderProperties;
-    
-    String aaiKeystoreFile = modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
-    if(aaiKeystoreFile != null){
-	    URL keystoreURL = this.getClass().getClassLoader().getResource(aaiKeystoreFile);
-	    if(keystoreURL != null){
-	    	File fKeystoreLocation = new File(keystoreURL.getPath());
-	    	this.certLocation = fKeystoreLocation.getParent();
-	    }
-    }
+    this.certLocation = certLocation;
 
     // Get list of artifacts
     artifactTypes = new ArrayList<String>();
@@ -232,4 +224,9 @@ public class ModelLoaderConfig implements IConfiguration {
 
     return false;
   }
+
+  public boolean isFilterInEmptyResources() {
+	  return false;
+  }
+
 }

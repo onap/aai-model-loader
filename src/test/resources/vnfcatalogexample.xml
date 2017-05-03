@@ -20,7 +20,7 @@
 
 <vnf-catalog>
 	<part-number-list>
-		<att-part-number>FortiGate-VM00</att-part-number>
+		<part-number>FortiGate-VM00</part-number>
 		<vnf-type>FW</vnf-type>
 		<vendor-info>
 			<vendor-name>FORTINET</vendor-name>
@@ -83,7 +83,7 @@
 		</license-list>
 	</part-number-list>
 	<part-number-list>
-		<att-part-number>FortiGate-VM01</att-part-number>
+		<part-number>FortiGate-VM01</part-number>
 		<vnf-type>FW</vnf-type>
 		<vendor-info>
 			<vendor-name>FORTINET</vendor-name>

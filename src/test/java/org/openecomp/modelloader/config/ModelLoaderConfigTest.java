@@ -1,23 +1,25 @@
-/*-
+/**
  * ============LICENSE_START=======================================================
- * MODEL LOADER SERVICE
+ * Model Loader
  * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017 AT&T Intellectual Property.
+ * Copyright © 2017 Amdocs
+ * All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
+ *
+ * ECOMP and OpenECOMP are trademarks
+ * and service marks of AT&T Intellectual Property.
  */
-
 package org.openecomp.modelloader.config;
 
 import static org.junit.Assert.assertEquals;
@@ -41,7 +43,7 @@ public class ModelLoaderConfigTest {
     Properties props = new Properties();
     props.setProperty("ml.distribution.ARTIFACT_TYPES",
         "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
-    ModelLoaderConfig config = new ModelLoaderConfig(props);
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
 
     List<String> types = config.getRelevantArtifactTypes();
 
@@ -67,7 +69,7 @@ public class ModelLoaderConfigTest {
     System.out.println("Encrypt " + testPass + " ==> " + encryptedTestPass);
 
     props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_PASSWORD, encryptedTestPass);
-    ModelLoaderConfig config = new ModelLoaderConfig(props);
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
 
     assertEquals(testPass, config.getPassword());
   }
@@ -81,7 +83,7 @@ public class ModelLoaderConfigTest {
     System.out.println("Encrypt " + testPass + " ==> " + encryptedTestPass);
 
     props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD, encryptedTestPass);
-    ModelLoaderConfig config = new ModelLoaderConfig(props);
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
 
     assertEquals(testPass, config.getKeyStorePassword());
   }
@@ -94,7 +96,7 @@ public class ModelLoaderConfigTest {
     String encryptedTestPassword = Password.obfuscate(testPassword);
 
     props.put(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, encryptedTestPassword);
-    ModelLoaderConfig config = new ModelLoaderConfig(props);
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
 
     assertEquals(testPassword, config.getAaiAuthenticationPassword());
   }
@@ -106,17 +108,18 @@ public class ModelLoaderConfigTest {
     props.load(
         new FileInputStream("src/test/resources/model-loader-empty-auth-password.properties"));
 
-    ModelLoaderConfig config = new ModelLoaderConfig(props);
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
     AaiRestClient aaiClient = new AaiRestClient(config);
 
     assertFalse("Empty AAI Password should result in no basic authentication",
         aaiClient.useBasicAuth());
 
     props.load(new FileInputStream("src/test/resources/model-loader-no-auth-password.properties"));
-    config = new ModelLoaderConfig(props);
+    config = new ModelLoaderConfig(props, null);
     aaiClient = new AaiRestClient(config);
 
     assertFalse("No AAI Password should result in no basic authentication",
         aaiClient.useBasicAuth());
   }
+  
 }
