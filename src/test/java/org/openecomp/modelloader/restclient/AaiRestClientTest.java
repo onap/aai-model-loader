@@ -98,9 +98,9 @@ public class AaiRestClientTest {
     String baseURL = config.getAaiBaseUrl().trim();
     String subURL = null;
     if (model.getType().equals(ArtifactType.MODEL)) {
-      subURL = config.getAaiModelUrl().trim();
+      subURL = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim();
     } else {
-      subURL = config.getAaiNamedQueryUrl().trim();
+      subURL = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
     }
 
     if ((!baseURL.endsWith("/")) && (!subURL.startsWith("/"))) {

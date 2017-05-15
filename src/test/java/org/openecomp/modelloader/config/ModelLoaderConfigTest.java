@@ -122,4 +122,14 @@ public class ModelLoaderConfigTest {
         aaiClient.useBasicAuth());
   }
   
+  @Test
+  public void testGetUrls() { 
+    Properties props = new Properties();
+    props.put(ModelLoaderConfig.PROP_AAI_MODEL_RESOURCE_URL, "/aai/v*/service-design-and-creation/models/model/");
+    props.put(ModelLoaderConfig.PROP_AAI_NAMED_QUERY_RESOURCE_URL, "/aai/v*/service-design-and-creation/named-queries/named-query/");
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+
+    assertEquals("/aai/v9/service-design-and-creation/models/model/", config.getAaiModelUrl("v9"));
+    assertEquals("/aai/v10/service-design-and-creation/named-queries/named-query/", config.getAaiNamedQueryUrl("v10"));
+  }
 }

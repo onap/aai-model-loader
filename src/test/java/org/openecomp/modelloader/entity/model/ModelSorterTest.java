@@ -131,7 +131,7 @@ public class ModelSorterTest {
 
     List<Artifact> sortedList = sorter.sort(modelList);
     assertNotNull(sortedList);
-    assertEquals(3, sortedList.size());
+    assertEquals(2, sortedList.size());
 
   }
 

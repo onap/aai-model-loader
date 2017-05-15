@@ -33,10 +33,10 @@ public class ModelArtifact extends Artifact {
 	String modelVerId;
 	String modelInvariantId;
 	String nameVersionId;
-	String modelModelVerCombinedKey;
 	String modelVerModelVersionId;
 	String modelModelInvariantId;
 	String modelNamespace;
+	String modelNamespaceVersion;
 	Set<String> referencedModelIds = new HashSet<String>(); 
 	Node modelVer;
 	boolean isV9Artifact = true;
@@ -79,6 +79,14 @@ public class ModelArtifact extends Artifact {
 	
 	public void setModelNamespace(String modelNamespace) {
 		this.modelNamespace = modelNamespace;
+		
+		// Get the version from the namespace (in format 'http://org.openecomp.aai.inventory/v9')
+		String[] parts = modelNamespace.split("/");
+		modelNamespaceVersion = parts[parts.length-1].trim();
+	}
+	
+	public String getModelNamespaceVersion() {
+	  return modelNamespaceVersion;
 	}
 
 	public Set<String> getDependentModelIds() {
@@ -125,10 +133,9 @@ public class ModelArtifact extends Artifact {
 	}
 	
 	public String getModelModelVerCombinedKey() {
+	  if ( (getModelInvariantId() == null) && (getModelVerId() == null) ) {
+	    return getNameVersionId();
+	  }
 		return getModelInvariantId() + "|" + getModelVerId();
-	}
-	
-	public void setModelModelVerCombinedKey(String modelModelVerCombinedKey) {
-		this.modelModelVerCombinedKey = getModelInvariantId() + "|" + getModelVerId();
 	}
 }

@@ -196,7 +196,6 @@ public class ModelArtifactParser {
 	      if ( (model.getModelNamespace() != null) && (!model.getModelNamespace().isEmpty()) ) {
 	        Element e = (Element) node;
 	        e.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns", model.getModelNamespace());
-	        System.out.println("Setting NS: " + e.getAttribute("xmlns"));
 	      }
 	    }
 

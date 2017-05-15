@@ -177,12 +177,12 @@ public class ModelLoaderConfig implements IConfiguration {
     return modelLoaderProperties.getProperty(PROP_AAI_BASE_URL);
   }
 
-  public String getAaiModelUrl() {
-    return modelLoaderProperties.getProperty(PROP_AAI_MODEL_RESOURCE_URL);
+  public String getAaiModelUrl(String version) {
+    return modelLoaderProperties.getProperty(PROP_AAI_MODEL_RESOURCE_URL).replace("v*", version);
   }
 
-  public String getAaiNamedQueryUrl() {
-    return modelLoaderProperties.getProperty(PROP_AAI_NAMED_QUERY_RESOURCE_URL);
+  public String getAaiNamedQueryUrl(String version) {
+    return modelLoaderProperties.getProperty(PROP_AAI_NAMED_QUERY_RESOURCE_URL).replace("v*", version);
   }
 
   public String getAaiVnfImageUrl() {

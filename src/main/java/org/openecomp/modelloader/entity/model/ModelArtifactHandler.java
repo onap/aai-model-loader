@@ -167,10 +167,10 @@ public class ModelArtifactHandler extends ArtifactHandler {
     String baseURL = config.getAaiBaseUrl().trim();
     String subURL = null;
     if (model.getType().equals(ArtifactType.MODEL)) {
-      subURL = config.getAaiModelUrl().trim();
+      subURL = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim();
     }
     else {
-      subURL = config.getAaiNamedQueryUrl().trim();
+      subURL = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
     }
 
     if ( (!baseURL.endsWith("/")) && (!subURL.startsWith("/")) ) {
@@ -193,10 +193,10 @@ public class ModelArtifactHandler extends ArtifactHandler {
     String baseURL = config.getAaiBaseUrl().trim();
     String subURL = null;
     if (model.getType().equals(ArtifactType.MODEL)) {
-      subURL = config.getAaiModelUrl().trim() + model.getModelInvariantId() + AAI_MODEL_VER;
+      subURL = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim() + model.getModelInvariantId() + AAI_MODEL_VER;
     }
     else {
-      subURL = config.getAaiNamedQueryUrl().trim();
+      subURL = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
     }
 
     if ( (!baseURL.endsWith("/")) && (!subURL.startsWith("/")) ) {

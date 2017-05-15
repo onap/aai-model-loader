@@ -63,19 +63,36 @@ public class ModelSorter {
 
     @Override
     public String toString() {
+      if (model.getModelInvariantId() == null) {
+        return model.getNameVersionId();
+      }
+      
       return model.getModelInvariantId();
     }
 
     @Override
     public boolean equals(Object other) {
       ModelArtifact otherModel = ((Node) other).model;
-      return this.model.getModelInvariantId().equals(otherModel.getModelInvariantId());
+      String modelId1 = this.model.getModelInvariantId();
+      if (modelId1 == null) {
+        modelId1 = this.model.getNameVersionId();
+      }
+      
+      String modelId2 = otherModel.getModelInvariantId();
+      if (modelId2 == null) {
+        modelId2 = otherModel.getNameVersionId();
+      }
+      
+      return modelId1.equals(modelId2);
     }
 
     @Override
     public int hashCode() {
+      if (this.model.getModelInvariantId() == null) {
+        return this.model.getNameVersionId().hashCode();
+      }
+      
       return this.model.getModelInvariantId().hashCode();
-
     }
   }
 
@@ -113,7 +130,7 @@ public class ModelSorter {
 
     Collection<Node> nodes = createNodes(originalList);
     Collection<Node> sortedNodes = sortNodes(nodes);
-
+    
     List<Artifact> sortedModelsList = new ArrayList<Artifact>(sortedNodes.size());
     for (Node node : sortedNodes) {
       sortedModelsList.add(node.model);
@@ -142,8 +159,9 @@ public class ModelSorter {
     HashMap<String, Node> nodes = new HashMap<String, Node>();
     // create a node for each model and its referenced models
     for (Artifact art : models) {
-      ModelArtifact model = (ModelArtifact) art;
 
+      ModelArtifact model = (ModelArtifact) art;
+      
       // node might have been created by another model referencing it
       Node node = nodes.get(model.getModelModelVerCombinedKey());
 
@@ -181,7 +199,6 @@ public class ModelSorter {
    * @return a sorted collection of the given nodes
    */
   private Collection<Node> sortNodes(Collection<Node> unsortedNodes) {
-
     // L <- Empty list that will contain the sorted elements
     ArrayList<Node> nodeList = new ArrayList<Node>();
 
@@ -231,5 +248,6 @@ public class ModelSorter {
 
     return nodeList;
   }
+
 
 }
