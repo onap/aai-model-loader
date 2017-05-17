@@ -21,4 +21,4 @@ COPY *.sh $BIN_HOME
 RUN chmod 755 $BIN_HOME/*
 RUN ln -s /logs $MICRO_HOME/logs
 
-CMD /opt/app/model-loader/bin/start.sh
+CMD ["/opt/app/model-loader/bin/start.sh"]

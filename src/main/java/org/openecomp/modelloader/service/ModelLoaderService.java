@@ -48,156 +48,157 @@ import javax.ws.rs.core.Response;
  * capabilities between AAI and an ASDC.
  */
 public class ModelLoaderService implements ModelLoaderInterface {
+	
+	protected static final String FILESEP = (System.getProperty("file.separator") == null) ? "/"
+            : System.getProperty("file.separator");
 
-  protected static final String FILESEP = (System.getProperty("file.separator") == null) ? "/"
-      : System.getProperty("file.separator");
+	protected static final String CONFIG_DIR = System.getProperty("CONFIG_HOME") + FILESEP;
+	protected static final String CONFIG_AUTH_LOCATION = CONFIG_DIR + "auth" + FILESEP;
+	protected static final String CONFIG_FILE = CONFIG_DIR + "model-loader.properties";
 
-  protected static final String CONFIG_DIR = System.getProperty("CONFIG_HOME") + FILESEP;
-  protected static final String CONFIG_AUTH_LOCATION = CONFIG_DIR + "auth" + FILESEP;
-  protected static final String CONFIG_FILE = CONFIG_DIR + "model-loader.properties";
+	private IDistributionClient client;
+	private ModelLoaderConfig config;
+	private Timer timer = null;
 
-  private IDistributionClient client;
-  private ModelLoaderConfig config;
-  private Timer timer = null;
+	static Logger logger = LoggerFactory.getInstance().getLogger(ModelLoaderService.class.getName());
 
-  static Logger logger = LoggerFactory.getInstance().getLogger(ModelLoaderService.class.getName());
+	/**
+	 * Responsible for loading configuration files and calling initialization.
+	 */
+	public ModelLoaderService() {
+		start();
+	}
 
-  /**
-   * Responsible for loading configuration files and calling initialization.
-   */
-  public ModelLoaderService() {
-    start();
-  }
+	protected void start() {
+		// Load model loader system configuration
+		logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
+		Properties configProperties = new Properties();
+		try {
+			configProperties.load(new FileInputStream(CONFIG_FILE));
+		} catch (IOException e) {
+			String errorMsg = "Failed to load configuration: " + e.getMessage();
+			logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+			shutdown();
+		}
 
-  protected void start() {
-    // Load model loader system configuration
-    logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
-    Properties configProperties = new Properties();
-    try {
-      configProperties.load(new FileInputStream(CONFIG_FILE));
-    } catch (IOException e) {
-      String errorMsg = "Failed to load configuration: " + e.getMessage();
-      logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-      shutdown();
-    }
+		config = new ModelLoaderConfig(configProperties, CONFIG_AUTH_LOCATION);
+		init();
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
+			public void run() {
+				preShutdownOperations();
+			}
+		}));
+	}
+	
+	/**
+	 * Responsible for stopping the connection to the distribution client before
+	 * the resource is destroyed.
+	 */
+	protected void preShutdownOperations() {
+		logger.info(ModelLoaderMsgs.STOPPING_CLIENT);
+		if (client != null) {
+			client.stop();
+		}
+	}
 
-    config = new ModelLoaderConfig(configProperties, CONFIG_AUTH_LOCATION);
-    init();
-  }
+	/**
+	 * Responsible for loading configuration files, initializing model
+	 * distribution clients, and starting them.
+	 */
+	protected void init() {
+		// Initialize distribution client
+		logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
+		client = DistributionClientFactory.createDistributionClient();
+		EventCallback callback = new EventCallback(client, config);
+		
+		IDistributionClientResult initResult = client.init(config, callback);
 
-  @Override
-  public void finalize() {
-    preShutdownOperations();
-  }
+		if (initResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
+			String errorMsg = "Failed to initialize distribution client: "
+					+ initResult.getDistributionMessageResult();
+			logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+			
+			// Kick off a timer to retry the SDC connection
+			timer = new Timer();
+			TimerTask task = new SdcConnectionJob(client, config, callback, timer);
+			timer.schedule(task, new Date(), 60000);
+		}
+		else {
+			// Start distribution client
+			logger.debug(ModelLoaderMsgs.INITIALIZING, "Starting distribution client...");
+			IDistributionClientResult startResult = client.start();
+			if (startResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
+				String errorMsg = "Failed to start distribution client: "
+						+ startResult.getDistributionMessageResult();
+				logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
 
-  /**
-   * Responsible for stopping the connection to the distribution client before
-   * the resource is destroyed.
-   */
-  protected void preShutdownOperations() {
-    logger.info(ModelLoaderMsgs.STOPPING_CLIENT);
-    if (client != null) {
-      client.stop();
-    }
-  }
+				// Kick off a timer to retry the SDC connection
+				timer = new Timer();
+				TimerTask task = new SdcConnectionJob(client, config, callback, timer);
+				timer.schedule(task, new Date(), 60000);
+			}
+			else {
+				logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
+			}
+		}
+	}
 
-  /**
-   * Responsible for loading configuration files, initializing model
-   * distribution clients, and starting them.
-   */
-  protected void init() {
-    // Initialize distribution client
-    logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
-    client = DistributionClientFactory.createDistributionClient();
-    EventCallback callback = new EventCallback(client, config);
+	/**
+	 * Shut down the process.
+	 */
+	private void shutdown() {
+		preShutdownOperations();
 
-    IDistributionClientResult initResult = client.init(config, callback);
+		// TODO: Find a better way to shut down the model loader.
+		try {
+			// Give logs time to write to file
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// Nothing we can do at this point
+		}
 
-    if (initResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
-      String errorMsg = "Failed to initialize distribution client: "
-          + initResult.getDistributionMessageResult();
-      logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+		Runtime.getRuntime().halt(1);
+	}
 
-      // Kick off a timer to retry the SDC connection
-      timer = new Timer();
-      TimerTask task = new SdcConnectionJob(client, config, callback, timer);
-      timer.schedule(task, new Date(), 60000);
-    }
-    else {
-      // Start distribution client
-      logger.debug(ModelLoaderMsgs.INITIALIZING, "Starting distribution client...");
-      IDistributionClientResult startResult = client.start();
-      if (startResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
-        String errorMsg = "Failed to start distribution client: "
-            + startResult.getDistributionMessageResult();
-        logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+	/** (non-Javadoc)
+	 * @see org.openecomp.modelloader.service.ModelLoaderInterface#loadModel(java.lang.String)
+	 */
+	@Override
+	public Response loadModel(String modelid) {
+		Response response = Response.ok("{\"model_loaded\":\"" + modelid + "\"}").build();
 
-        // Kick off a timer to retry the SDC connection
-        timer = new Timer();
-        TimerTask task = new SdcConnectionJob(client, config, callback, timer);
-        timer.schedule(task, new Date(), 60000);
-      }
-      else {
-        logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
-      }
-    }
-  }
+		return response;
+	}
 
-  /**
-   * Shut down the process.
-   */
-  private void shutdown() {
-    preShutdownOperations();
+	/** (non-Javadoc)
+	 * @see org.openecomp.modelloader.service.ModelLoaderInterface#saveModel(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Response saveModel(String modelid, String modelname) {
+		Response response = Response.ok("{\"model_saved\":\"" + modelid + "-" + modelname + "\"}")
+				.build();
 
-    // TODO: Find a better way to shut down the model loader.
-    try {
-      // Give logs time to write to file
-      Thread.sleep(2000);
-    } catch (InterruptedException e) {
-      // Nothing we can do at this point
-    }
+		return response;
+	}
 
-    Runtime.getRuntime().halt(1);
-  }
+	@Override
+	public Response ingestModel(String modelid, HttpServletRequest req, String payload)
+			throws IOException {
+		Response response;
 
-  /** (non-Javadoc)
-   * @see org.openecomp.modelloader.service.ModelLoaderInterface#loadModel(java.lang.String)
-   */
-  @Override
-  public Response loadModel(String modelid) {
-    Response response = Response.ok("{\"model_loaded\":\"" + modelid + "\"}").build();
+		if (config.getIngestSimulatorEnabled()) {
+			logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Received test artifact");
 
-    return response;
-  }
+			ModelArtifactHandler handler = new ModelArtifactHandler(config);
+			handler.loadModelTest(payload.getBytes());
 
-  /** (non-Javadoc)
-   * @see org.openecomp.modelloader.service.ModelLoaderInterface#saveModel(java.lang.String, java.lang.String)
-   */
-  @Override
-  public Response saveModel(String modelid, String modelname) {
-    Response response = Response.ok("{\"model_saved\":\"" + modelid + "-" + modelname + "\"}")
-        .build();
+			response = Response.ok().build();
+		} else {
+			logger.debug("Simulation interface disabled");
+			response = Response.serverError().build();
+		}
 
-    return response;
-  }
-
-  @Override
-  public Response ingestModel(String modelid, HttpServletRequest req, String payload)
-      throws IOException {
-    Response response;
-
-    if (config.getIngestSimulatorEnabled()) {
-      logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Received test artifact");
-
-      ModelArtifactHandler handler = new ModelArtifactHandler(config);
-      handler.loadModelTest(payload.getBytes());
-
-      response = Response.ok().build();
-    } else {
-      logger.debug("Simulation interface disabled");
-      response = Response.serverError().build();
-    }
-
-    return response;
-  }
+		return response;
+	}
 }
