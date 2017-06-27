@@ -27,7 +27,7 @@ import org.openecomp.modelloader.entity.ArtifactType;
 
 public class VnfCatalogArtifact extends Artifact {
   public VnfCatalogArtifact(String payload) {
+    super(ArtifactType.VNF_CATALOG);
     setPayload(payload);
-    setType(ArtifactType.VNF_CATALOG);
   }
 }

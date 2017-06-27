@@ -115,7 +115,7 @@ public class AaiRestClientTest {
       subURL = subURL + "/";
     }
 
-    String url = baseURL + subURL + model.getNameVersionId();
+    String url = baseURL + subURL + model.getUniqueIdentifier();
     return url;
   }
 }

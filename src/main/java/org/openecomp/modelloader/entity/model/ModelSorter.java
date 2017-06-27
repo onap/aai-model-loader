@@ -44,11 +44,11 @@ public class ModelSorter {
    * Wraps a Model object to form dependencies other Models using Edges.
    */
   static class Node {
-    private final ModelArtifact model;
+    private final AbstractModelArtifact model;
     private final HashSet<Edge> inEdges;
     private final HashSet<Edge> outEdges;
 
-    public Node(ModelArtifact model) {
+    public Node(AbstractModelArtifact model) {
       this.model = model;
       inEdges = new HashSet<Edge>();
       outEdges = new HashSet<Edge>();
@@ -63,36 +63,18 @@ public class ModelSorter {
 
     @Override
     public String toString() {
-      if (model.getModelInvariantId() == null) {
-        return model.getNameVersionId();
-      }
-      
-      return model.getModelInvariantId();
+      return model.getUniqueIdentifier();
     }
 
     @Override
     public boolean equals(Object other) {
-      ModelArtifact otherModel = ((Node) other).model;
-      String modelId1 = this.model.getModelInvariantId();
-      if (modelId1 == null) {
-        modelId1 = this.model.getNameVersionId();
-      }
-      
-      String modelId2 = otherModel.getModelInvariantId();
-      if (modelId2 == null) {
-        modelId2 = otherModel.getNameVersionId();
-      }
-      
-      return modelId1.equals(modelId2);
+      AbstractModelArtifact otherModel = ((Node) other).model;      
+      return this.model.getUniqueIdentifier().equals(otherModel.getUniqueIdentifier());
     }
 
     @Override
     public int hashCode() {
-      if (this.model.getModelInvariantId() == null) {
-        return this.model.getNameVersionId().hashCode();
-      }
-      
-      return this.model.getModelInvariantId().hashCode();
+      return this.model.getUniqueIdentifier().hashCode();
     }
   }
 
@@ -150,24 +132,24 @@ public class ModelSorter {
 
     // load list of models into a map, so we can later replace referenceIds with
     // real Models
-    HashMap<String, ModelArtifact> versionIdToModelMap = new HashMap<String, ModelArtifact>();
+    HashMap<String, AbstractModelArtifact> versionIdToModelMap = new HashMap<String, AbstractModelArtifact>();
     for (Artifact art : models) {
-      ModelArtifact ma = (ModelArtifact) art;
-      versionIdToModelMap.put(ma.getModelModelVerCombinedKey(), ma);
+      AbstractModelArtifact ma = (AbstractModelArtifact) art;
+      versionIdToModelMap.put(ma.getUniqueIdentifier(), ma);
     }
 
     HashMap<String, Node> nodes = new HashMap<String, Node>();
     // create a node for each model and its referenced models
     for (Artifact art : models) {
 
-      ModelArtifact model = (ModelArtifact) art;
+      AbstractModelArtifact model = (AbstractModelArtifact) art;
       
       // node might have been created by another model referencing it
-      Node node = nodes.get(model.getModelModelVerCombinedKey());
+      Node node = nodes.get(model.getUniqueIdentifier());
 
       if (null == node) {
         node = new Node(model);
-        nodes.put(model.getModelModelVerCombinedKey(), node);
+        nodes.put(model.getUniqueIdentifier(), node);
       }
 
       for (String referencedModelId : model.getDependentModelIds()) {
@@ -176,7 +158,7 @@ public class ModelSorter {
 
         if (null == referencedNode) {
           // create node
-          ModelArtifact referencedModel = versionIdToModelMap.get(referencedModelId);
+          AbstractModelArtifact referencedModel = versionIdToModelMap.get(referencedModelId);
           if (referencedModel == null) {
             Log.debug("ignoring " + referencedModelId);
             continue; // referenced model not supplied, no need to sort it

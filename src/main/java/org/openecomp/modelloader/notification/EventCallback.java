@@ -42,8 +42,9 @@ import org.openecomp.modelloader.config.ModelLoaderConfig;
 import org.openecomp.modelloader.entity.Artifact;
 import org.openecomp.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.openecomp.modelloader.entity.catalog.VnfCatalogArtifactHandler;
+import org.openecomp.modelloader.entity.model.IModelParser;
 import org.openecomp.modelloader.entity.model.ModelArtifactHandler;
-import org.openecomp.modelloader.entity.model.ModelArtifactParser;
+import org.openecomp.modelloader.entity.model.ModelParserFactory;
 import org.openecomp.modelloader.service.ModelLoaderMsgs;
 import org.slf4j.MDC;
 
@@ -82,7 +83,6 @@ public class EventCallback implements INotificationCallback {
     List<IArtifactInfo> artifacts = getArtifacts(data);
     List<Artifact> modelArtifacts = new ArrayList<Artifact>();
     List<Artifact> catalogArtifacts = new ArrayList<Artifact>();
-    ModelArtifactParser modelArtParser = new ModelArtifactParser();
 
     for (IArtifactInfo artifact : artifacts) {
       // Grab the current time so we can measure the download time for the
@@ -109,11 +109,10 @@ public class EventCallback implements INotificationCallback {
       
       publishDownloadSuccess(data, artifact, downloadResult);
 
-      if ((artifact.getArtifactType()
-          .compareToIgnoreCase(ArtifactTypeEnum.MODEL_INVENTORY_PROFILE.toString()) == 0)
-          || (artifact.getArtifactType()
-              .compareToIgnoreCase(ArtifactTypeEnum.MODEL_QUERY_SPEC.toString()) == 0)) {
-        List<Artifact> parsedArtifacts = modelArtParser.parse(downloadResult.getArtifactPayload(), downloadResult.getArtifactName());
+      if ((artifact.getArtifactType().compareToIgnoreCase(ArtifactTypeEnum.MODEL_INVENTORY_PROFILE.toString()) == 0)
+          || (artifact.getArtifactType().compareToIgnoreCase(ArtifactTypeEnum.MODEL_QUERY_SPEC.toString()) == 0)) {
+        IModelParser parser = ModelParserFactory.createModelParser(downloadResult.getArtifactPayload(), downloadResult.getArtifactName());
+        List<Artifact> parsedArtifacts = parser.parse(downloadResult.getArtifactPayload(), downloadResult.getArtifactName());
         if (parsedArtifacts != null && !parsedArtifacts.isEmpty()) {
           modelArtifacts.addAll(parsedArtifacts);
         } else {

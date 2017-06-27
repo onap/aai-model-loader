@@ -22,94 +22,44 @@
  */
 package org.openecomp.modelloader.entity.model;
 
-import org.openecomp.modelloader.entity.Artifact;
+import java.io.StringWriter;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.openecomp.cl.api.Logger;
+import org.openecomp.cl.eelf.LoggerFactory;
+import org.openecomp.modelloader.config.ModelLoaderConfig;
+import org.openecomp.modelloader.entity.ArtifactType;
+import org.openecomp.modelloader.restclient.AaiRestClient;
+import org.openecomp.modelloader.service.ModelLoaderMsgs;
 import org.w3c.dom.Node;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.sun.jersey.api.client.ClientResponse;
 
-public class ModelArtifact extends Artifact {
+public class ModelArtifact extends AbstractModelArtifact {
 
-	String modelVerId;
-	String modelInvariantId;
-	String nameVersionId;
-	String modelVerModelVersionId;
-	String modelModelInvariantId;
-	String modelNamespace;
-	String modelNamespaceVersion;
-	Set<String> referencedModelIds = new HashSet<String>(); 
-	Node modelVer;
-	boolean isV9Artifact = true;
-	
-	public boolean isV9Artifact() {
-		return isV9Artifact;
-	}
-	
-	public void setV9Artifact(boolean isV9Artifact) {
-		this.isV9Artifact = isV9Artifact;
-	}
+  private static final String AAI_MODEL_VER_SUB_URL = "/model-vers/model-ver";
+  
+  private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifact.class.getName());
+  
+  private String modelVerId;
+	private String modelInvariantId;
+	private Node modelVer;
+	private boolean firstVersionOfModel = false;
 
-	public String getModelVerModelVersionId() {
-		return modelVerModelVersionId;
-	}
-	
-	public void setModelVerModelVersionId(String modelVerModelVersionId) {
-		this.modelVerModelVersionId = modelVerModelVersionId;
-	}
-	
-	public String getModelModelInvariantId() {
-		return modelModelInvariantId;
-	}
-	
-	public void setModelModelInvariantId(String modelModelInvariantId) {
-		this.modelModelInvariantId = modelModelInvariantId;
-	}
-	
-	public String getNameVersionId() {
-		return nameVersionId;
-	}
-
-	public void setNameVersionId(String nameVersionId) {
-		this.nameVersionId = nameVersionId;
-	}
-	
-	public String getModelNamespace() {
-		return modelNamespace;
-	}
-	
-	public void setModelNamespace(String modelNamespace) {
-		this.modelNamespace = modelNamespace;
-		
-		// Get the version from the namespace (in format 'http://org.openecomp.aai.inventory/v9')
-		String[] parts = modelNamespace.split("/");
-		modelNamespaceVersion = parts[parts.length-1].trim();
-	}
-	
-	public String getModelNamespaceVersion() {
-	  return modelNamespaceVersion;
-	}
-
-	public Set<String> getDependentModelIds() {
-		return referencedModelIds;
-	}
-
-	public void addDependentModelId(String dependentModelId) {
-		this.referencedModelIds.add(dependentModelId);
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("ModelInvariantId=" + modelInvariantId + "(" + getType().toString() + ") ==> ");
-		for (String dep : referencedModelIds) {
-			sb.append(dep + "  ");
-		}
-
-		return sb.toString();
+	public ModelArtifact() {
+	  super(ArtifactType.MODEL);
 	}
 
 	public String getModelVerId() {
-		return modelVerId;
+	  return modelVerId;
 	}
 	
 	public void setModelVerId(String modelVerId) {
@@ -131,11 +81,130 @@ public class ModelArtifact extends Artifact {
 	public void setModelVer(Node modelVer) {
 		this.modelVer = modelVer;
 	}
-	
-	public String getModelModelVerCombinedKey() {
-	  if ( (getModelInvariantId() == null) && (getModelVerId() == null) ) {
-	    return getNameVersionId();
-	  }
-		return getModelInvariantId() + "|" + getModelVerId();
-	}
+
+  @Override
+  public String getUniqueIdentifier() {
+    return getModelInvariantId() + "|" + getModelVerId();
+  }
+
+  @Override
+  public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<AbstractModelArtifact> addedModels) {
+    ClientResponse getResponse  = aaiClient.getResource(getModelUrl(config), distId, AaiRestClient.MimeType.XML);
+    if ( (getResponse == null) || (getResponse.getStatus() != Response.Status.OK.getStatusCode()) ) {
+      // Only attempt the PUT if the model doesn't already exist
+      ClientResponse putResponse = aaiClient.putResource(getModelUrl(config), getPayload(), distId, AaiRestClient.MimeType.XML);
+      if ( (putResponse != null) && (putResponse.getStatus() == Response.Status.CREATED.getStatusCode()) ) {
+        addedModels.add(this);
+        
+        // Flag this as the first version of the model that has been added.
+        firstVersionOfModel = true;
+        
+        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+      }
+      else {
+        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString() + " " + getUniqueIdentifier() +
+            ". Rolling back distribution.");
+        return false;
+      }
+    }
+    else {
+      logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getModelInvariantId() + " already exists.  Skipping ingestion.");
+      getResponse  = aaiClient.getResource(getModelVerUrl(config), distId, AaiRestClient.MimeType.XML);
+      if ( (getResponse == null) || (getResponse.getStatus() != Response.Status.OK.getStatusCode()) ) {
+        // Only attempt the PUT if the model-ver doesn't already exist
+        ClientResponse putResponse = null;
+
+        try {
+          putResponse = aaiClient.putResource(getModelVerUrl(config), nodeToString(getModelVer()), distId, AaiRestClient.MimeType.XML);
+        } catch (TransformerException e) {
+          logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString() + " " + getUniqueIdentifier() 
+            + ": " + e.getMessage() + ". Rolling back distribution.");
+          return false;
+        }
+        if ( (putResponse != null) && (putResponse.getStatus() == Response.Status.CREATED.getStatusCode()) ) {
+          addedModels.add(this);
+          logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+        }
+        else {
+          logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString() + " " 
+              + getUniqueIdentifier() + ". Rolling back distribution.");
+          return false;
+        }
+      }
+      else {
+        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
+      }
+    }
+    
+    return true;
+  }
+  
+  @Override
+  public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+    String url = getModelVerUrl(config);
+    if (firstVersionOfModel) {
+      // If this was the first version of the model which was added, we want to remove the entire
+      // model rather than just the version.
+      url = getModelUrl(config);
+    }
+    
+    // Best effort to delete.  Nothing we can do in the event this fails.
+    aaiClient.getAndDeleteResource(url, distId);
+  }
+  
+  private String getModelUrl(ModelLoaderConfig config) {
+    String baseURL = config.getAaiBaseUrl().trim();
+    String subURL = null;
+    String instance = null;
+
+    subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim();
+    instance = getModelInvariantId();
+
+    if ( (!baseURL.endsWith("/")) && (!subURL.startsWith("/")) ) {
+      baseURL = baseURL + "/";
+    }
+
+    if ( baseURL.endsWith("/") && subURL.startsWith("/") ) {
+      baseURL = baseURL.substring(0, baseURL.length()-1);
+    }
+
+    if (!subURL.endsWith("/")) {
+      subURL = subURL + "/";
+    }
+
+    String url = baseURL + subURL + instance;
+    return url;
+  }
+
+  private String getModelVerUrl(ModelLoaderConfig config) {
+    String baseURL = config.getAaiBaseUrl().trim();
+    String subURL = null;
+    String instance = null;
+
+    subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim() + getModelInvariantId() + AAI_MODEL_VER_SUB_URL;
+    instance = getModelVerId();
+
+    if ( (!baseURL.endsWith("/")) && (!subURL.startsWith("/")) ) {
+      baseURL = baseURL + "/";
+    }
+
+    if ( baseURL.endsWith("/") && subURL.startsWith("/") ) {
+      baseURL = baseURL.substring(0, baseURL.length()-1);
+    }
+
+    if (!subURL.endsWith("/")) {
+      subURL = subURL + "/";
+    }
+
+    String url = baseURL + subURL + instance;
+    return url;
+  }
+  
+  private String nodeToString(Node node) throws TransformerException {
+    StringWriter sw = new StringWriter();
+    Transformer t = TransformerFactory.newInstance().newTransformer();
+    t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+    t.transform(new DOMSource(node), new StreamResult(sw));
+    return sw.toString();
+  }
 }

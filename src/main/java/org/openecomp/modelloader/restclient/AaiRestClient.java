@@ -294,6 +294,84 @@ public class AaiRestClient {
   }
 
   /**
+   * Send a POST request to the A&AI.
+   *
+   * @param url
+   *          - the url
+   * @param transId
+   *          - transaction ID
+   * @param payload
+   *          - the XML or JSON payload for the request
+   * @param mimeType
+   *          - the content type (XML or JSON)
+   * @return ClientResponse
+   */
+  public ClientResponse postResource(String url, String payload, String transId, MimeType mimeType) {
+    ClientResponse result = null;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    long startTimeInMs = 0;
+    MdcOverride override = new MdcOverride();
+
+    try {
+      Client client = setupClient();
+
+      baos = new ByteArrayOutputStream();
+      PrintStream ps = new PrintStream(baos);
+      if (logger.isDebugEnabled()) {
+        client.addFilter(new LoggingFilter(ps));
+      }
+
+      // Grab the current time so that we can use it for metrics purposes later.
+      startTimeInMs = System.currentTimeMillis();
+      override.addAttribute(MdcContext.MDC_START_TIME, dateFormatter.format(startTimeInMs));
+
+      if (useBasicAuth()) {
+        result = client.resource(url).header(HEADER_TRANS_ID, transId)
+            .header(HEADER_FROM_APP_ID, ML_APP_NAME)
+            .header(HEADER_AUTHORIZATION, getAuthenticationCredentials())
+            .type(mimeType.getHttpHeaderType()).post(ClientResponse.class, payload);
+      } else {
+        result = client.resource(url).header(HEADER_TRANS_ID, transId)
+            .header(HEADER_FROM_APP_ID, ML_APP_NAME).type(mimeType.getHttpHeaderType())
+            .post(ClientResponse.class, payload);
+      }
+    } catch (Exception ex) {
+      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "POST", url, ex.getLocalizedMessage());
+      return null;
+    } finally {
+      if (logger.isDebugEnabled()) {
+        logger.debug(baos.toString());
+      }
+    }
+
+    if ((result != null) && ((result.getStatus() == Response.Status.CREATED.getStatusCode())
+        || (result.getStatus() == Response.Status.OK.getStatusCode()))) {
+      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS, "POST", url,
+          Integer.toString(result.getStatus()));
+      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS,
+          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
+              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
+                  result.getResponseStatus().toString()),
+          override, "POST", url, Integer.toString(result.getStatus()));
+    } else {
+      // If response is not 200 OK, then additionally log the reason
+      String respMsg = result.getEntity(String.class);
+      if (respMsg == null) {
+        respMsg = result.getStatusInfo().getReasonPhrase();
+      }
+      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL, "POST", url,
+          Integer.toString(result.getStatus()), respMsg);
+      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL,
+          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
+              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
+                  result.getResponseStatus().toString()),
+          override, "POST", url, Integer.toString(result.getStatus()), respMsg);
+    }
+
+    return result;
+  }
+  
+  /**
    * Does a GET on a resource to retrieve the resource version, and then DELETE
    * that version.
    *

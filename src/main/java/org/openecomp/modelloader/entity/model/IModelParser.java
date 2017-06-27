@@ -20,11 +20,12 @@
  * ECOMP and OpenECOMP are trademarks
  * and service marks of AT&T Intellectual Property.
  */
-package org.openecomp.modelloader.entity;
+package org.openecomp.modelloader.entity.model;
 
-public enum ArtifactType {
-  MODEL,
-  MODEL_V8,
-  NAMED_QUERY, 
-  VNF_CATALOG;
+import java.util.List;
+
+import org.openecomp.modelloader.entity.Artifact;
+
+public interface IModelParser {
+  public List<Artifact> parse(byte[] artifactPayload, String artifactName);
 }

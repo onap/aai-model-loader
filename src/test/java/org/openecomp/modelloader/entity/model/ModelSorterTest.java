@@ -54,8 +54,9 @@ public class ModelSorterTest {
     List<Artifact> modelList = new ArrayList<Artifact>();
 
     ModelArtifact model = new ModelArtifact();
-    model.setNameVersionId("aaaaa");
-    model.addDependentModelId("xyz");
+    model.setModelInvariantId("aaa");
+    model.setModelVerId("111");
+    model.addDependentModelId("xyz|123");
     modelList.add(model);
 
     ModelSorter sorter = new ModelSorter();
@@ -82,17 +83,17 @@ public class ModelSorterTest {
 
     ModelArtifact aaaa = new ModelArtifact();
     aaaa.setModelInvariantId("aaaa");
-	aaaa.setModelVerId("mvaaaa");
-	aaaa.addDependentModelId("cccc|mvcccc");
+    aaaa.setModelVerId("mvaaaa");
+    aaaa.addDependentModelId("cccc|mvcccc");
 
     ModelArtifact bbbb = new ModelArtifact();
     bbbb.setModelInvariantId("bbbb");
-	bbbb.setModelVerId("mvbbbb");
-	bbbb.addDependentModelId("aaaa|mvaaaa");
+    bbbb.setModelVerId("mvbbbb");
+    bbbb.addDependentModelId("aaaa|mvaaaa");
 
     ModelArtifact cccc = new ModelArtifact();
     cccc.setModelInvariantId("cccc");
-	cccc.setModelVerId("mvcccc");
+    cccc.setModelVerId("mvcccc");
 
     modelList.add(aaaa);
     modelList.add(bbbb);
@@ -109,19 +110,89 @@ public class ModelSorterTest {
     assertEquals(aaaa, sortedList.get(1));
     assertEquals(bbbb, sortedList.get(2));
   }
+  
+  @Test
+  public void multipleModelsV8() {
 
+    List<Artifact> modelList = new ArrayList<Artifact>();
+
+    ModelV8Artifact aaaa = new ModelV8Artifact();
+    aaaa.setModelNameVersionId("aaaa");
+    aaaa.addDependentModelId("cccc");
+
+    ModelV8Artifact bbbb = new ModelV8Artifact();
+    bbbb.setModelNameVersionId("bbbb");
+    bbbb.addDependentModelId("aaaa");
+
+    ModelV8Artifact cccc = new ModelV8Artifact();
+    cccc.setModelNameVersionId("cccc");
+
+    modelList.add(aaaa);
+    modelList.add(bbbb);
+    modelList.add(cccc);
+
+    ModelSorter sorter = new ModelSorter();
+    sorter = new ModelSorter();
+
+    List<Artifact> sortedList = sorter.sort(modelList);
+    assertNotNull(sortedList);
+    assertEquals(3, sortedList.size());
+
+    assertEquals(cccc, sortedList.get(0));
+    assertEquals(aaaa, sortedList.get(1));
+    assertEquals(bbbb, sortedList.get(2));
+  }
+    
+  @Test
+  public void multipleModelsAndNamedQueries() {
+
+    List<Artifact> modelList = new ArrayList<Artifact>();
+
+    ModelArtifact aaaa = new ModelArtifact();
+    aaaa.setModelInvariantId("aaaa");
+    aaaa.setModelVerId("1111");
+    aaaa.addDependentModelId("cccc|2222");
+    
+    NamedQueryArtifact nq1 = new NamedQueryArtifact();
+    nq1.setNamedQueryUuid("nq1");
+    nq1.addDependentModelId("aaaa|1111");
+    
+    NamedQueryArtifact nq2 = new NamedQueryArtifact();
+    nq2.setNamedQueryUuid("nq2");
+    nq2.addDependentModelId("existing-model");
+    
+
+    modelList.add(nq1);
+    modelList.add(nq2);
+    modelList.add(aaaa);
+
+    ModelSorter sorter = new ModelSorter();
+    sorter = new ModelSorter();
+
+    List<Artifact> sortedList = sorter.sort(modelList);
+    assertNotNull(sortedList);
+    assertEquals(3, sortedList.size());
+
+    System.out.println(sortedList.get(0) + "-" + sortedList.get(1) + "-" + sortedList.get(2));
+    assertEquals(aaaa, sortedList.get(0));
+    assertEquals(nq2, sortedList.get(1));
+    assertEquals(nq1, sortedList.get(2));
+  }
+  
   @Test(expected = RuntimeException.class)
   public void circularDependency() {
 
     List<Artifact> modelList = new ArrayList<Artifact>();
 
     ModelArtifact aaaa = new ModelArtifact();
-    aaaa.setNameVersionId("aaaa");
-    aaaa.addDependentModelId("bbbb");
+    aaaa.setModelInvariantId("aaaa");
+    aaaa.setModelVerId("1111");
+    aaaa.addDependentModelId("bbbb|1111");
 
     ModelArtifact bbbb = new ModelArtifact();
-    bbbb.setNameVersionId("bbbb");
-    bbbb.addDependentModelId("aaaa");
+    bbbb.setModelInvariantId("bbbb");
+    bbbb.setModelVerId("1111");
+    bbbb.addDependentModelId("aaaa|1111");
 
     modelList.add(aaaa);
     modelList.add(bbbb);

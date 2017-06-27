@@ -16,32 +16,115 @@ The Model Loader:
 ## Compiling Model Loader
 
 Model Loader can be compiled by running `mvn clean install`
+A Model Loader docker image can be created by running `docker build -t openecomp/model-loader target`
 
 ## Running Model Loader 
 
-### Create a config file with the following key/values:
+### Deploying The Micro Service 
 
-```
-DISTR_CLIENT_ASDC_ADDRESS=<SDC_ADDRESS>
-DISTR_CLIENT_CONSUMER_GROUP=<UEB_CONSUMER_GROUP>  ;;  Uniquely identiy this group of model loaders.
-DISTR_CLIENT_CONSUMER_ID=<UEB_CONSUMER_GROUP_ID>  ;;  Uniquely identiythis model loader.
-DISTR_CLIENT_ENVIRONMENT_NAME=<ENVIRONMENT_NAME>  ;;  Environment name configured on the SDC
-DISTR_CLIENT_PASSWORD=<DISTR_PASSWORD>            ;;  Password to connect to SDC
-DISTR_CLIENT_USER=<USER_ID>                       ;;  User name to connect to SDC
-		     
-APP_SERVER_BASE_URL=https://<aai-address>:8443    ;; AAI Address (URL)
-APP_SERVER_AUTH_USER=<USER_ID>                    ;; User name to connect to AAI
-APP_SERVER_AUTH_PASSWORD=<PASSWORD>               ;; Password to connect to AAi
+Push the Docker image that you have built to your Docker repository and pull it down to the location that you will be running the search service from.
 
-```
+**Create the following directories on the host machine:**
 
-### Docker 
+    ./logs
+    ./opt/app/model-loader/appconfig
+    ./opt/app/model-loader/appconfig/auth
+    
+You will be mounting these as data volumes when you start the Docker container.  For examples of the files required in these directories, see the aai/test/config repository (https://gerrit.onap.org/r/#/admin/projects/aai/test-config)
 
-#### Build your own Model Loader docker image and create docker containers
-1. mvn clean package docker:build                 ;; Build a docker image of Model Loader
-2. sudo docker images                             ;; list docker images and check if the image you build is listed.
-3. sudo docker run --env-file <config-filename> <model-loader-image> /opt/jetty/jetty*/bin/startup.sh
+**Populate these directories as follows:**
+
+##### Contents of /opt/app/model-loader/appconfig
+
+The following file must be present in this directory on the host machine:
+    
+_model-loader.properties_  
+    # Always false.  TLS Auth currently not supported 
+    ml.distribution.ACTIVE_SERVER_TLS_AUTH=false
+    
+    # Address/port of the SDC
+    ml.distribution.ASDC_ADDRESS=<SDC-Hostname>:8443
+    
+    # DMaaP consumer group.  
+    ml.distribution.CONSUMER_GROUP=aai-ml-group
+    
+    # DMaaP consumer ID
+    ml.distribution.CONSUMER_ID=aai-ml
+    
+    # SDC Environment Name.  This must match the environment name configured on the SDC
+    ml.distribution.ENVIRONMENT_NAME=<Environment Name>
+    
+    # Currently not used
+    ml.distribution.KEYSTORE_PASSWORD=
+    
+    # Currently not used
+    ml.distribution.KEYSTORE_FILE=
+    
+    # Obfuscated password to connect to the SDC.  To obtain this value, use the following Jetty library to 
+    # obfuscate the cleartext password:  http://www.eclipse.org/jetty/documentation/9.4.x/configuring-security-secure-passwords.html
+    ml.distribution.PASSWORD=OBF:<password>
+    
+    # How often (in seconds) to poll the DMaaP cluster for new model events
+    ml.distribution.POLLING_INTERVAL=<integer>
+    
+    # Timeout value (in seconds) when polling DMaaP for new model events
+    ml.distribution.POLLING_TIMEOUT=<integer>
+    
+    # Username to use when connecting to the SDC
+    ml.distribution.USER=<username>
+    
+    # Artifact type we want to download from the SDC (the values below will typically suffice)
+    ml.distribution.ARTIFACT_TYPES=MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG
+
+    # URL of the A&AI
+    ml.aai.BASE_URL=https://<AAI-Hostname>:8443
+    
+    # A&AI endpoint to post models
+    ml.aai.MODEL_URL=/aai/v*/service-design-and-creation/models/model/
+    
+    # A&AI endpoint to post named queries
+    ml.aai.NAMED_QUERY_URL=/aai/v*/service-design-and-creation/named-queries/named-query/
+    
+    # A&AI endpoint to post vnf images
+    ml.aai.VNF_IMAGE_URL=/aai/v8/service-design-and-creation/vnf-images
+    
+    # Name of certificate to use in connecting to the A&AI
+    ml.aai.KEYSTORE_FILE=aai-os-cert.p12
+    
+    # Obfuscated keystore password to connect to the A&AI.  This is only required if using 2-way SSL (not basic auth).
+    # To obtain this value, use the following Jetty library to obfuscate the cleartext password:
+    # http://www.eclipse.org/jetty/documentation/9.4.x/configuring-security-secure-passwords.html
+    ml.aai.KEYSTORE_PASSWORD=OBF:<password>
+    
+    # Name of user to use when connecting to the A&AI.  This is only required if using basic auth (not 2-way SSL).
+    ml.aai.AUTH_USER=<username>
+    
+    # Obfuscated password to connect to the A&AI.  This is only required if using basic auth (not 2-way SSL).
+    # To obtain this value, use the following Jetty library to obfuscate the cleartext password:
+    # http://www.eclipse.org/jetty/documentation/9.4.x/configuring-security-secure-passwords.html
+    ml.aai.AUTH_PASSWORD=OBF:<password>
+    
 
 
-#### Retrieve logs from stopped container
-* docker cp <container-id>:/opt/jetty/jetty-distribution-9.3.9.v20160517/logs/AAI-ML/error.log /tmp/
+##### Contents of the /opt/app/model-loader/app-config/auth Directory
+
+The following files must be present in this directory on the host machine:
+
+_aai-os-cert.p12_
+
+The certificate used to connected to the A&AI
+
+**Start the service:**
+
+You can now start the Docker container for the _Search Data Service_, in the following manner:
+
+	docker run -d \
+		-e CONFIG_HOME=/opt/app/model-loader/config/ \
+	    -v /logs:/logs \
+	    -v /opt/app/model-loader/appconfig:/opt/app/model-loader/config \
+	    --name model-loader \
+	    {{your docker repo}}/model-loader
+    
+Where,
+
+    {{your docker repo}} = The Docker repository you have published your image to.

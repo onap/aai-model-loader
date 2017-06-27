@@ -27,12 +27,12 @@ public abstract class Artifact {
   private String payload;
   private ArtifactType type;
 
+  public Artifact(ArtifactType type) {
+    this.type = type;
+  }
+  
   public ArtifactType getType() {
     return type;
-  }
-
-  public void setType(ArtifactType type) {
-    this.type = type;
   }
 
   public String getPayload() {
