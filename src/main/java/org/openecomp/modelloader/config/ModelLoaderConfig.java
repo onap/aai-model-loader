@@ -62,6 +62,8 @@ public class ModelLoaderConfig implements IConfiguration {
   protected static final String PROP_ML_DISTRIBUTION_USER = PREFIX_DISTRIBUTION_CLIENT + "USER";
   protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT
       + "ARTIFACT_TYPES";
+  protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP =
+          PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
 
   protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
   protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + "KEYSTORE_FILE";
@@ -165,6 +167,17 @@ public class ModelLoaderConfig implements IConfiguration {
     return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_USER);
   }
 
+  @Override
+  public boolean isFilterInEmptyResources() {
+      return false;
+  }
+
+  @Override
+  public Boolean isUseHttpsWithDmaap() {
+      String useHTTPS = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
+      return useHTTPS == null ? false : Boolean.valueOf(useHTTPS);
+  }
+  
   public String getAaiKeyStorePath() {
     return certLocation + "/" + modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
   }
@@ -224,9 +237,5 @@ public class ModelLoaderConfig implements IConfiguration {
 
     return false;
   }
-
-  public boolean isFilterInEmptyResources() {
-	  return false;
-  }
-
+  
 }
