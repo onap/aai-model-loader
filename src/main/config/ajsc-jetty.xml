@@ -35,7 +35,7 @@
 				<Set name="startWithUnavailable">false</Set>
 			</New>
 		</Set>
-		<Set name="extraClasspath"><SystemProperty name="AJSC_HOME" />/extJars/httpclient-4.5.jar,<SystemProperty name="AJSC_HOME" />/extJars/httpcore-4.4.1.jar,<SystemProperty name="AJSC_HOME" />/extJars/json-20131018.jar</Set>
+		<Set name="extraClasspath"><SystemProperty name="AJSC_HOME" />/extJars/httpclient-4.4.1.jar,<SystemProperty name="AJSC_HOME" />/extJars/httpcore-4.4.1.jar,<SystemProperty name="AJSC_HOME" />/extJars/json-20131018.jar</Set>
 	</New>
 	
 	<Set name="handler">
