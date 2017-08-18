@@ -1,0 +1,9 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Daniel Silverthorn <daniel.silverthorn@amdocs.com>
+Code-Review+1: Steven Blimkie <Steven.Blimkie@amdocs.com>
+Code-Review+2: James Forsyth <jf2512@att.com>
+Submitted-by: James Forsyth <jf2512@att.com>
+Submitted-at: Fri, 18 Aug 2017 16:37:05 +0000
+Reviewed-on: http://gerrit.onap.org/r/8021
+Project: aai/model-loader
+Branch: refs/heads/master
