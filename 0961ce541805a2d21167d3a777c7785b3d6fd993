@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a437d4f_fd692a26",
+        "filename": "License.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1041
+      },
+      "writtenOn": "2017-08-21T17:51:47Z",
+      "side": 1,
+      "message": "Can the license be updated to\nhttps://gerrit.onap.org/r/gitweb?p\u003daai/sparky-be.git;a\u003dblob_plain;f\u003dLICENSE;hb\u003drefs/heads/master",
+      "revId": "0961ce541805a2d21167d3a777c7785b3d6fd993",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
