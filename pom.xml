@@ -31,6 +31,7 @@
 	<groupId>org.openecomp.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
+	<name>AAI - model-loader</name>
 	
 	<properties>
 		<docker.location>${basedir}/target</docker.location>
