@@ -23,7 +23,7 @@ beans{
 	xmlns jaxrs: "http://cxf.apache.org/jaxrs"
 	xmlns util: "http://www.springframework.org/schema/util"
 	
-	modelLoader(org.openecomp.modelloader.service.ModelLoaderService)
+	modelLoader(org.onap.aai.modelloader.service.ModelLoaderService)
 	
 	util.list(id: 'modelLoaderServices') {
 		ref(bean:'modelLoader')
