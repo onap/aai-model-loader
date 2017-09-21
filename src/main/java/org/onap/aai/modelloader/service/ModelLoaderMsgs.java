@@ -25,7 +25,7 @@ package org.onap.aai.modelloader.service;
 
 import com.att.eelf.i18n.EELFResourceManager;
 
-import org.openecomp.cl.eelf.LogMessageEnum;
+import org.onap.aai.cl.eelf.LogMessageEnum;
 
 public enum ModelLoaderMsgs implements LogMessageEnum {
 

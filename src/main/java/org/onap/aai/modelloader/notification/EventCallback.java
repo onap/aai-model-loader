@@ -42,10 +42,10 @@ import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.entity.model.ModelParserFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.openecomp.cl.api.Logger;
-import org.openecomp.cl.eelf.LoggerFactory;
-import org.openecomp.cl.mdc.MdcContext;
-import org.openecomp.cl.mdc.MdcOverride;
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
+import org.onap.aai.cl.mdc.MdcContext;
+import org.onap.aai.cl.mdc.MdcOverride;
 import org.slf4j.MDC;
 
 import java.text.SimpleDateFormat;

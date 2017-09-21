@@ -37,8 +37,8 @@ import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.restclient.AaiRestClient.MimeType;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.openecomp.cl.api.Logger;
-import org.openecomp.cl.eelf.LoggerFactory;
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
 import org.springframework.web.util.UriUtils;
 
 import java.io.StringReader;
