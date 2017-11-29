@@ -17,22 +17,21 @@
      limitations under the License.
      ============LICENSE_END=========================================================
    -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
 		<artifactId>ajsc-archetype-parent</artifactId>
 		<groupId>com.att.ajsc</groupId>
 		<version>2.0.0</version>
 	</parent>
-	
+
 	<groupId>org.onap.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
 	<name>aai-model-loader</name>
-	
+
 	<properties>
 		<docker.location>${basedir}/target</docker.location>
 		<module.ajsc.namespace.name>model-loader</module.ajsc.namespace.name>
@@ -60,14 +59,14 @@
 		<dependency.scope>provided</dependency.scope>
 		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
 		<maven.compiler.source>1.8</maven.compiler.source>
-                <maven.compiler.target>1.8</maven.compiler.target>
-	       <sonar.language>java</sonar.language>
-	       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-	       <sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
-	       <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
-	       <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
-	       <sonar.projectVersion>${project.version}</sonar.projectVersion>
-               <nexusproxy>https://nexus.onap.org</nexusproxy>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<sonar.language>java</sonar.language>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
+		<sonar.projectVersion>${project.version}</sonar.projectVersion>
+		<nexusproxy>https://nexus.onap.org</nexusproxy>
 	</properties>
 
 	<distributionManagement>
@@ -82,6 +81,7 @@
 			<url>${nexusproxy}/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -149,18 +149,17 @@
 		<dependency>
 			<groupId>org.onap.aai.logging-service</groupId>
 			<artifactId>common-logging</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>1.1.7</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openecomp.sdc.sdc-distribution-client</groupId>
-		    <artifactId>sdc-distribution-client</artifactId>
-		    <version>1.1.50-SNAPSHOT</version>
+			<artifactId>sdc-distribution-client</artifactId>
+			<version>1.1.32</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -172,62 +171,59 @@
 			<artifactId>json</artifactId>
 			<version>20131018</version>
 		</dependency>
-		
 		<dependency>
-		    <groupId>org.eclipse.jetty</groupId>
-		    <artifactId>jetty-security</artifactId>
-		    <version>9.3.8.RC0</version>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-security</artifactId>
+			<version>9.3.8.RC0</version>
 		</dependency>
-		
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>4.0.0.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>2.12.1</version>
-        </dependency>
-        
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>4.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>2.12.1</version>
+		</dependency>
 	</dependencies>
-	
-	<!-- Plugins and repositories -->
-          <pluginRepositories>
-                <pluginRepository>
-                           <id>central</id>
-                          <url>http://repo1.maven.org/maven2</url>
-                   </pluginRepository>
-                  <pluginRepository>
-                          <id>EvoSuite</id>
-                        <name>EvoSuite Repository</name>
-                         <url>http://www.evosuite.org/m2</url>
-                  </pluginRepository>
-          </pluginRepositories>
-           <repositories>
-                   <repository>
-                          <id>central</id>
-                          <name>Maven 2 repository 2</name>
-                          <url>http://repo2.maven.org/maven2/</url>
-                  </repository>
-              <repository>
-                         <id>ecomp-releases</id>
-                          <name>ECOMP Release Repository</name>
-			  <url>${nexusproxy}/content/repositories/releases/</url>
-                  </repository>
-                  <repository>
-                         <id>ecomp-snapshots</id>
-                          <name>ECOMP Snapshot Repository</name>
-			  <url>${nexusproxy}/content/repositories/snapshots/</url>
-                  </repository>
-                  <repository>
-                         <id>ecomp-staging</id>
-                          <name>ECOMP Staging Repository</name>
-			  <url>${nexusproxy}/content/repositories/staging/</url>
-                  </repository>
 
-          </repositories>
+	<!-- Plugins and repositories -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>central</id>
+			<url>http://repo1.maven.org/maven2</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>EvoSuite</id>
+			<name>EvoSuite Repository</name>
+			<url>http://www.evosuite.org/m2</url>
+		</pluginRepository>
+	</pluginRepositories>
 	
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven 2 repository 2</name>
+			<url>http://repo2.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>ecomp-releases</id>
+			<name>ECOMP Release Repository</name>
+			<url>${nexusproxy}/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>ecomp-snapshots</id>
+			<name>ECOMP Snapshot Repository</name>
+			<url>${nexusproxy}/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>ecomp-staging</id>
+			<name>ECOMP Staging Repository</name>
+			<url>${nexusproxy}/content/repositories/staging/</url>
+		</repository>
+	</repositories>
+
 	<profiles>
 		<profile>
 			<id>runAjsc</id>
@@ -340,7 +336,7 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -377,10 +373,10 @@
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.11</version>
-				<configuration>		
+				<configuration>
 					<verbose>true</verbose>
 					<serverId>docker-hub</serverId>
-					<imageName>${docker.push.registry}/onap/${project.artifactId}</imageName>					
+					<imageName>${docker.push.registry}/onap/${project.artifactId}</imageName>
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
 						<imageTag>latest</imageTag>
@@ -418,7 +414,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
 				<configuration>
-				   <argLine>-noverify ${argLine}</argLine>
+					<argLine>-noverify ${argLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -447,7 +443,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 			</plugin>
-		
+
 			<!-- Checkstyle plugin - used to report on compliance with -->
 			<!-- the Google style guide. -->
 			<plugin>
@@ -471,9 +467,9 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
-                        
-            <!-- license plugin -->
-            <plugin>
+
+			<!-- license plugin -->
+			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>3.0</version>
@@ -494,52 +490,51 @@
 				</executions>
 			</plugin>
 
-             <plugin>
-             	<groupId>org.apache.maven.plugins</groupId>
-             	<artifactId>maven-deploy-plugin</artifactId>             	
-             	<configuration>
-             	<skip>true</skip>
-             	</configuration>
-             </plugin>
-	     <plugin>
-	      <groupId>org.codehaus.mojo</groupId>
-	      <artifactId>sonar-maven-plugin</artifactId>
-	      <version>3.2</version>
-	    </plugin>
-	    <plugin>
-	      <groupId>org.jacoco</groupId>
-	      <artifactId>jacoco-maven-plugin</artifactId>
-	      <version>0.7.7.201606060606</version>
-	      <configuration>
-		   <dumpOnExit>true</dumpOnExit>
-	      </configuration>
-	      <executions>
-		   <execution>
-		     <id>jacoco-initialize-unit-tests</id>
-		     <goals>
-			   <goal>prepare-agent</goal>
-		     </goals>
-		     <configuration>
-			   <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
-			   <!-- <append>true</append> -->
-		     </configuration>
-		   </execution>
-	      </executions>
-	    </plugin>
-	    <plugin>
-	    	<groupId>org.sonatype.plugins</groupId>
-	    	<artifactId>nexus-staging-maven-plugin</artifactId>
-	    	<version>1.6.7</version>
-	    	<extensions>true</extensions>
-	    	<configuration>
-	    		<nexusUrl>${nexusproxy}</nexusUrl>
-	    		<stagingProfileId>176c31dfe190a</stagingProfileId>
-	    		<serverId>ecomp-staging</serverId>
-	    	</configuration>
-	    </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.7.201606060606</version>
+				<configuration>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jacoco-initialize-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
+							<!-- <append>true</append> -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<nexusUrl>${nexusproxy}</nexusUrl>
+					<stagingProfileId>176c31dfe190a</stagingProfileId>
+					<serverId>ecomp-staging</serverId>
+				</configuration>
+			</plugin>
 
-		</plugins>		
+		</plugins>
 	</build>
-	
-	
+
 </project>
