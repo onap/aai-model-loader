@@ -25,6 +25,7 @@ package org.onap.aai.modelloader.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -133,4 +134,143 @@ public class ModelLoaderConfigTest {
     assertEquals("/aai/v9/service-design-and-creation/models/model/", config.getAaiModelUrl("v9"));
     assertEquals("/aai/v10/service-design-and-creation/named-queries/named-query/", config.getAaiNamedQueryUrl("v10"));
   }
+
+  @Test
+  public void testActivateServerTLSAuth(){
+    Properties props = new Properties();
+    props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH, "true");
+    ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+    boolean authValue = config.activateServerTLSAuth();
+    assertTrue(authValue);
+
+    props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH, "");
+    ModelLoaderConfig config1 = new ModelLoaderConfig(props, null);
+    boolean authValue1 = config.activateServerTLSAuth();
+    assertFalse(authValue1);
+  }
+
+    @Test
+    public void testGetAsdcAddress(){
+      Properties props = new Properties();
+      props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_ASDC_ADDRESS, "address-1");
+      ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+      String asdcAddr = config.getAsdcAddress();
+      assertEquals(asdcAddr, "address-1");
+    }
+
+    @Test
+    public void testGetConsumerGroup(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_CONSUMER_GROUP, "group-1");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        String ret = config.getConsumerGroup();
+        assertEquals(ret, "group-1");
+    }
+
+    @Test
+    public void testGetConsumerID(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_CONSUMER_ID, "id-1");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        String ret = config.getConsumerID();
+        assertEquals(ret, "id-1");
+    }
+
+    @Test
+    public void testGetEnvironmentName(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME, "local");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        String ret = config.getEnvironmentName();
+        assertEquals(ret, "local");
+    }
+
+    @Test
+    public void testGetKeyStorePath(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_FILE, "keystore-file");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, "local/");
+        String ret = config.getKeyStorePath();
+        assertEquals(ret, "local/keystore-file");
+    }
+
+    @Test
+    public void testGetPollingInterval(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_POLLING_INTERVAL, "60");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        int ret = config.getPollingInterval();
+        assertTrue(ret == 60);
+    }
+
+    @Test
+    public void testGetPollingTimeout(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_POLLING_TIMEOUT, "30");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        int ret = config.getPollingTimeout();
+        assertTrue(ret == 30);
+    }
+
+    @Test
+    public void testGetUser(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_USER, "user-1");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        String ret = config.getUser();
+        assertEquals(ret, "user-1");
+    }
+
+    @Test
+    public void testIsFilterInEmptyResources(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_POLLING_TIMEOUT, "30");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        Boolean ret = config.isFilterInEmptyResources();
+        assertFalse(ret);
+    }
+
+    @Test
+    public void testIsUseHttpsWithDmaap(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP, "true");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        Boolean ret = config.isUseHttpsWithDmaap();
+        assertTrue(ret);
+    }
+
+    @Test
+    public void testGetAaiKeyStorePath(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_AAI_KEYSTORE_FILE, "keystore-file");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, "local");
+        String ret = config.getAaiKeyStorePath();
+        assertEquals(ret, "local/keystore-file");
+    }
+
+    @Test
+    public void testGetAaiKeyStorePassword(){
+        Properties props = new Properties();
+        String testPass = "youshallnotpass";
+        String encryptedTestPass = Password.obfuscate(testPass);
+
+        props.put(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, encryptedTestPass);
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+
+        assertEquals(testPass, config.getAaiKeyStorePassword());
+    }
+
+    @Test
+    public void testGetIngestSimulatorEnabled(){
+        Properties props = new Properties();
+        props.put(ModelLoaderConfig.PROP_DEBUG_INGEST_SIMULATOR, "enabled");
+        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
+        boolean ret = config.getIngestSimulatorEnabled();
+        assertTrue(ret);
+
+        props.put(ModelLoaderConfig.PROP_DEBUG_INGEST_SIMULATOR, "disabled");
+        ModelLoaderConfig config1 = new ModelLoaderConfig(props, null);
+        boolean ret1 = config.getIngestSimulatorEnabled();
+        assertFalse(ret1);
+    }
 }
