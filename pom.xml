@@ -31,7 +31,7 @@
 	<groupId>org.onap.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
-	<name>aai-model-loader</name>
+	<name>aai-model-loader - amsterdam</name>
 	
 	<properties>
 		<docker.location>${basedir}/target</docker.location>
