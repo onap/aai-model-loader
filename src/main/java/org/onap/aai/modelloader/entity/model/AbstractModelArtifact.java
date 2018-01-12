@@ -36,7 +36,7 @@ public abstract class AbstractModelArtifact extends Artifact {
 		 
   private String modelNamespace;
   private String modelNamespaceVersion;
-	private Set<String> referencedModelIds = new HashSet<String>(); 
+	private Set<String> referencedModelIds = new HashSet<>(); 
 
 	public AbstractModelArtifact(ArtifactType type) {
 	  super(type);
@@ -71,7 +71,7 @@ public abstract class AbstractModelArtifact extends Artifact {
   public abstract boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<AbstractModelArtifact> addedModels);
   
   public abstract void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId);
-  
+    @Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\nType=" + getType().toString() +"\nId=" + getUniqueIdentifier() +"\nVersion=" + getModelNamespaceVersion() + "\nDependant models: ");
