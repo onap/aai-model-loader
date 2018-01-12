@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_efe7e53e",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 481
+      },
+      "writtenOn": "2018-01-12T19:00:19Z",
+      "side": 1,
+      "message": "Lets change this to \naai-model-loader-amsterdam\n\nThis is how other projects are setting it.. \n\nThansk a ton!",
+      "range": {
+        "startLine": 34,
+        "startChar": 7,
+        "endLine": 34,
+        "endChar": 35
+      },
+      "revId": "23c21f71fd423020ffadae0d4e7792bf40dccf91",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
