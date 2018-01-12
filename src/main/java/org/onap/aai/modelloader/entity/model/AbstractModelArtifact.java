@@ -36,7 +36,7 @@ public abstract class AbstractModelArtifact extends Artifact {
 		 
   private String modelNamespace;
   private String modelNamespaceVersion;
-	private Set<String> referencedModelIds = new HashSet<String>(); 
+	private Set<String> referencedModelIds = new HashSet<>(); 
 
 	public AbstractModelArtifact(ArtifactType type) {
 	  super(type);
