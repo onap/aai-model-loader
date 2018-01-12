@@ -57,7 +57,7 @@ public class ModelArtifactHandler extends ArtifactHandler {
     
     // Push the ordered list of model artifacts to A&AI.  If one fails, we need to roll back
     // the changes.
-    List<AbstractModelArtifact> completedModels = new ArrayList<AbstractModelArtifact>();
+    List<AbstractModelArtifact> completedModels = new ArrayList<>();
     AaiRestClient aaiClient = new AaiRestClient(config);
 
     for (Artifact art : sortedModelArtifacts) {
