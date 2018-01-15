@@ -51,7 +51,7 @@ public class ModelV8ArtifactParser implements IModelParser {
 
 	
 	private  static Logger logger = LoggerFactory.getInstance().getLogger(ModelV8ArtifactParser.class.getName());
-	
+	@Override
 	public List<Artifact> parse(byte[] artifactPayload, String artifactName) {
 	  String payload = new String(artifactPayload);
 	  List<Artifact> modelList = new ArrayList<Artifact>();
@@ -127,10 +127,10 @@ public class ModelV8ArtifactParser implements IModelParser {
       }
     }
     
-    if ( (key != null) && (key.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY )) ) {
-      if (value != null) {
+    if ( (key != null) && (key.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY )) && (value != null) ) {
+     
         model.addDependentModelId(value);
-      }
+      
     }
 	}
 }
