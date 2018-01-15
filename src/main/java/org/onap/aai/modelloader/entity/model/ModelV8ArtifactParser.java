@@ -127,10 +127,10 @@ public class ModelV8ArtifactParser implements IModelParser {
       }
     }
     
-    if ( (key != null) && (key.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY )) ) {
-      if (value != null) {
+    if ( (key != null) && (key.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY )) && (value != null) ) {
+     
         model.addDependentModelId(value);
-      }
+      
     }
 	}
 }
