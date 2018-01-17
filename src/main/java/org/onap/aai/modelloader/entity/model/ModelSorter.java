@@ -1,4 +1,4 @@
-/**
+ 	/**
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
@@ -133,7 +133,7 @@ public class ModelSorter {
 
     // load list of models into a map, so we can later replace referenceIds with
     // real Models
-    HashMap<String, AbstractModelArtifact> versionIdToModelMap = new HashMap<String, AbstractModelArtifact>();
+    HashMap<String, AbstractModelArtifact> versionIdToModelMap = new HashMap<>();
     for (Artifact art : models) {
       AbstractModelArtifact ma = (AbstractModelArtifact) art;
       versionIdToModelMap.put(ma.getUniqueIdentifier(), ma);
