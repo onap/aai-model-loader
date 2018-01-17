@@ -54,7 +54,7 @@ public class ModelV8ArtifactParser implements IModelParser {
 	
 	public List<Artifact> parse(byte[] artifactPayload, String artifactName) {
 	  String payload = new String(artifactPayload);
-	  List<Artifact> modelList = new ArrayList<Artifact>();
+	  List<Artifact> modelList = new ArrayList<>();
 
 	  try {
 	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
