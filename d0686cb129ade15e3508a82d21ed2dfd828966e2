@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Steven Blimkie <Steven.Blimkie@amdocs.com>
+Submitted-by: Steven Blimkie <Steven.Blimkie@amdocs.com>
+Submitted-at: Wed, 17 Jan 2018 14:32:30 +0000
+Reviewed-on: https://gerrit.onap.org/r/28139
+Project: aai/model-loader
+Branch: refs/heads/master
