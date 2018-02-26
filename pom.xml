@@ -103,15 +103,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-javaagent</artifactId>
-			<version>1.6.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4-rule-agent</artifactId>
 			<version>1.6.2</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>powermock-module-javaagent</artifactId>
+					<groupId>org.powermock</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- xjc dependencies -->
 		<dependency>
