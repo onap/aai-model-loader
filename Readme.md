@@ -34,7 +34,7 @@ You will be mounting these as data volumes when you start the Docker container. 
 
 **Populate these directories as follows:**
 
-##### Contents of /opt/app/model-loader/appconfig
+#### Contents of /opt/app/model-loader/appconfig
 
 The following file must be present in this directory on the host machine:
     
@@ -75,6 +75,9 @@ _model-loader.properties_
     
     # Artifact type we want to download from the SDC (the values below will typically suffice)
     ml.distribution.ARTIFACT_TYPES=MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG
+    
+    # List of message bus addresses on which to listen for distribution events
+    ml.distribution.MSG_BUS_ADDRESSES=<host1>,<host2>
 
     # URL of the A&AI
     ml.aai.BASE_URL=https://<AAI-Hostname>:8443

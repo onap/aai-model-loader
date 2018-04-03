@@ -20,171 +20,159 @@
  */
 package org.onap.aai.modelloader.entity.catalog;
 
-import com.sun.jersey.api.client.ClientResponse;
-
-import generated.VnfCatalog;
-import generated.VnfCatalog.PartNumberList;
-
-import inventory.aai.openecomp.org.v8.VnfImage;
-
-import org.eclipse.persistence.jaxb.MarshallerProperties;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.apache.commons.text.StringEscapeUtils;
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.modelloader.restclient.AaiRestClient.MimeType;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.onap.aai.cl.api.Logger;
-import org.onap.aai.cl.eelf.LoggerFactory;
+import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.web.util.UriUtils;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-
+/**
+ * VNF Catalog specific handling
+ */
 public class VnfCatalogArtifactHandler extends ArtifactHandler {
 
-  private static Logger logger = LoggerFactory.getInstance()
-      .getLogger(VnfCatalogArtifactHandler.class.getName());
+    private static Logger logger = LoggerFactory.getInstance().getLogger(VnfCatalogArtifactHandler.class.getName());
 
-  public VnfCatalogArtifactHandler(ModelLoaderConfig config) {
-    super(config);
-  }
+    public static final String ATTR_UUID = "uuid";
 
-  @Override
-  public boolean pushArtifacts(List<Artifact> artifacts, String distributionId) {
-    for (Artifact art : artifacts) {
-      VnfCatalogArtifact vnfCatalog = (VnfCatalogArtifact) art;
-      String artifactPayload = vnfCatalog.getPayload();
+    public VnfCatalogArtifactHandler(ModelLoaderConfig config) {
+        super(config);
+    }
 
-      AaiRestClient restClient = new AaiRestClient(this.config);
-      List<VnfImage> putImages = new ArrayList<VnfImage>();
-
-      try {
-        JAXBContext inputContext = JAXBContext.newInstance(VnfCatalog.class);
-        Unmarshaller unmarshaller = inputContext.createUnmarshaller();
-        StringReader reader = new StringReader(artifactPayload);
-        VnfCatalog cat = (VnfCatalog) unmarshaller.unmarshal(reader);
-
-        int numParts = cat.getPartNumberList().size();
-
-        for (int i = 0; i < numParts; i++) {
-
-          PartNumberList pnl = cat.getPartNumberList().get(i);
-
-          String application = pnl.getVendorInfo().getVendorModel();
-          String applicationVendor = pnl.getVendorInfo().getVendorName();
-
-          int numVersions = pnl.getSoftwareVersionList().size();
-
-          for (int j = 0; j < numVersions; j++) {
-            String applicationVersion = pnl.getSoftwareVersionList().get(j).getSoftwareVersion();
-
-            String imageId = "vnf image " + applicationVendor + " " + application + " "
-                + applicationVersion;
-
-			String queryURI = "application-vendor=" + applicationVendor + "&application=" + application + "&application-version=" + applicationVersion;
-			
-			String getUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "?" + UriUtils.encodePath(queryURI, "UTF-8");
-
-            ClientResponse tryGet = restClient.getResource(getUrl, distributionId, MimeType.JSON);
-            if (tryGet == null) {
-              logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-                  "Ingestion failed on " + imageId + ". Rolling back distribution.");
-              failureCleanup(putImages, restClient, distributionId);
-              return false;
-            }
-            if (tryGet.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
-              // this vnf-image not already in the db, need to add
-              // only do this on 404 bc other error responses could mean there
-              // are problems that
-              // you might not want to try to PUT against
-
-              VnfImage image = new VnfImage();
-              image.setApplication(application);
-              image.setApplicationVendor(applicationVendor);
-              image.setApplicationVersion(applicationVersion);
-              String uuid = UUID.randomUUID().toString();
-              image.setUuid(uuid); // need to create uuid
-
-              System.setProperty("javax.xml.bind.context.factory",
-                  "org.eclipse.persistence.jaxb.JAXBContextFactory");
-              JAXBContext jaxbContext = JAXBContext.newInstance(VnfImage.class);
-              Marshaller marshaller = jaxbContext.createMarshaller();
-              marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
-              marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
-              marshaller.setProperty(MarshallerProperties.JSON_WRAPPER_AS_ARRAY_NAME, true);
-              marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
-              StringWriter writer = new StringWriter();
-              marshaller.marshal(image, writer);
-              String payload = writer.toString();
-
-              String putUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/"
-                  + uuid;
-
-              ClientResponse putResp = restClient.putResource(putUrl, payload, distributionId,
-                  MimeType.JSON);
-              if (putResp == null
-                  || putResp.getStatus() != Response.Status.CREATED.getStatusCode()) {
-                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-                    "Ingestion failed on vnf-image " + imageId + ". Rolling back distribution.");
-                failureCleanup(putImages, restClient, distributionId);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openecomp.modelloader.entity.ArtifactHandler#pushArtifacts(java.util.List, java.lang.String)
+     */
+    @Override
+    public boolean pushArtifacts(List<Artifact> artifacts, String distributionId, List<Artifact> completedArtifacts,
+            AaiRestClient aaiClient) {
+        for (Artifact artifact : artifacts) {
+            try {
+                distributeVnfcData(aaiClient, distributionId, artifact, completedArtifacts);
+            } catch (VnfImageException e) {
+                if (e.getResultCode().isPresent()) {
+                    logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
+                            "Ingestion failed on vnf-image " + e.getImageId() + " with status "
+                                    + e.getResultCode().orElse(0) + ". Rolling back distribution.");
+                } else {
+                    logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
+                            "Ingestion failed on " + e.getImageId() + ". Rolling back distribution.");
+                }
                 return false;
-              }
-              putImages.add(image);
-              logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, imageId + " successfully ingested.");
-            } else if (tryGet.getStatus() == Response.Status.OK.getStatusCode()) {
-              logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-                  imageId + " already exists.  Skipping ingestion.");
-            } else {
-              // if other than 404 or 200, something went wrong
-              logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-                  "Ingestion failed on vnf-image " + imageId + " with status " + tryGet.getStatus()
-                      + ". Rolling back distribution.");
-              failureCleanup(putImages, restClient, distributionId);
-              return false;
             }
-          }
         }
 
-      } catch (JAXBException e) {
-        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-            "Ingestion failed. " + e.getMessage() + ". Rolling back distribution.");
-        failureCleanup(putImages, restClient, distributionId);
-        return false;
-      } catch (UnsupportedEncodingException e) {
-    	  logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed. " + e.getMessage() + ". Rolling back distribution.");
-    	  failureCleanup(putImages, restClient, distributionId);
-    	  return false;
-      }
+        return true;
     }
 
-    return true;
-  }
+    private void distributeVnfcData(AaiRestClient restClient, String distributionId, Artifact vnfcArtifact,
+            List<Artifact> completedArtifacts) throws VnfImageException {
 
-  /*
-   * if something fails in the middle of ingesting the catalog we want to
-   * rollback any changes to the db
-   */
-  private void failureCleanup(List<VnfImage> putImages, AaiRestClient restClient, String transId) {
-    for (VnfImage image : putImages) {
-      String url = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/"
-          + image.getUuid();
-      restClient.getAndDeleteResource(url, transId); // try to delete the image,
-                                                     // if something goes wrong
-                                                     // we can't really do
-                                                     // anything here
+        List<Map<String, String>> vnfcData = unmarshallVnfcData(vnfcArtifact);
+
+        for (Map<String, String> dataItem : vnfcData) {
+            // If an empty dataItem is supplied, do nothing.
+            if (dataItem.isEmpty()) {
+                logger.warn(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Empty image data supplied, skipping ingestion.");
+                return;
+            }
+
+            String urlParams;
+            StringBuilder imageId = new StringBuilder("vnf image");
+
+            try {
+                urlParams = buildUrlImgIdStrings(imageId, dataItem);
+            } catch (UnsupportedEncodingException e) {
+                throw new VnfImageException(e);
+            }
+
+            OperationResult tryGet =
+                    restClient.getResource(config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "?" + urlParams,
+                            distributionId, MediaType.APPLICATION_JSON_TYPE);
+
+            if (tryGet == null) {
+                throw new VnfImageException(imageId.toString());
+            }
+
+            int resultCode = tryGet.getResultCode();
+            if (resultCode == Response.Status.NOT_FOUND.getStatusCode()) {
+                // This vnf-image is missing, so add it
+                boolean success = putVnfImage(restClient, dataItem, distributionId);
+                if (!success) {
+                    throw new VnfImageException(imageId.toString());
+                }
+                completedArtifacts.add(vnfcArtifact);
+                logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, imageId + " successfully ingested.");
+            } else if (resultCode == Response.Status.OK.getStatusCode()) {
+                logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, imageId + " already exists. Skipping ingestion.");
+            } else {
+                // if other than 404 or 200, something went wrong
+                throw new VnfImageException(imageId.toString(), resultCode);
+            }
+        }
     }
-  }
+
+    private String buildUrlImgIdStrings(StringBuilder imageId, Map<String, String> dataItem)
+            throws UnsupportedEncodingException {
+        StringBuilder urlParams = new StringBuilder();
+        for (Entry<String, String> entry : dataItem.entrySet()) {
+            urlParams.append(entry.getKey()).append("=").append(UriUtils.encode(entry.getValue(), "UTF-8")).append("&");
+            imageId.append(" ").append(entry.getValue());
+        }
+        return urlParams.deleteCharAt(urlParams.length() - 1).toString();
+    }
+
+    private boolean putVnfImage(AaiRestClient restClient, Map<String, String> dataItem, String distributionId) {
+        // Generate a new UUID for the image data item
+        String uuid = UUID.randomUUID().toString();
+        dataItem.put(ATTR_UUID, uuid);
+
+        String payload = createVnfImagePayload(dataItem);
+        String putUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + uuid;
+        OperationResult putResp =
+                restClient.putResource(putUrl, payload, distributionId, MediaType.APPLICATION_JSON_TYPE);
+        return putResp != null && putResp.getResultCode() == Response.Status.CREATED.getStatusCode();
+    }
+
+    private String createVnfImagePayload(Map<String, String> dataItem) {
+        dataItem.put(ATTR_UUID, UUID.randomUUID().toString());
+        return new Gson().toJson(dataItem);
+    }
+
+    private List<Map<String, String>> unmarshallVnfcData(Artifact vnfcArtifact) {
+        // Unmarshall Babel JSON payload into a List of Maps of JSON attribute name/values.
+        return new Gson().fromJson(StringEscapeUtils.unescapeJson(vnfcArtifact.getPayload()),
+                new TypeToken<List<Map<String, String>>>() {}.getType());
+    }
+
+    /*
+     * If something fails in the middle of ingesting the catalog we want to roll back any changes to the DB
+     */
+    @Override
+    public void rollback(List<Artifact> completedArtifacts, String distributionId, AaiRestClient aaiClient) {
+        for (Artifact completedArtifact : completedArtifacts) {
+            List<Map<String, String>> completedImageData = unmarshallVnfcData(completedArtifact);
+            for (Map<String, String> data : completedImageData) {
+                String url = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + data.get(ATTR_UUID);
+                // Try to delete the image. If something goes wrong we can't really do anything here
+                aaiClient.getAndDeleteResource(url, distributionId);
+            }
+        }
+    }
 
 }

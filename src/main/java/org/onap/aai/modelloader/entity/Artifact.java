@@ -22,23 +22,23 @@ package org.onap.aai.modelloader.entity;
 
 public abstract class Artifact {
 
-  private String payload;
-  private ArtifactType type;
+    private String payload;
+    private ArtifactType type;
 
-  public Artifact(ArtifactType type) {
-    this.type = type;
-  }
-  
-  public ArtifactType getType() {
-    return type;
-  }
+    public Artifact(ArtifactType type) {
+        this.type = type;
+    }
 
-  public String getPayload() {
-    return payload;
-  }
+    public ArtifactType getType() {
+        return type;
+    }
 
-  public void setPayload(String payload) {
-    this.payload = payload;
-  }
+    public String getPayload() {
+        return payload;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
 
 }

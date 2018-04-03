@@ -29,55 +29,59 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 
-public abstract class AbstractModelArtifact extends Artifact {
-		 
-  private String modelNamespace;
-  private String modelNamespaceVersion;
-	private Set<String> referencedModelIds = new HashSet<>(); 
+public abstract class AbstractModelArtifact extends Artifact implements IModelArtifact {
 
-	public AbstractModelArtifact(ArtifactType type) {
-	  super(type);
-	}
-	
-	public Set<String> getDependentModelIds() {
-		return referencedModelIds;
-	}
-	
-	public void addDependentModelId(String dependentModelId) {
-		this.referencedModelIds.add(dependentModelId);
-	}
-	
-  public String getModelNamespace() {
-    return modelNamespace;
-  }
-  
-  public void setModelNamespace(String modelNamespace) {
-    this.modelNamespace = modelNamespace;
-    
-    // Get the version from the namespace (in format 'http://org.openecomp.aai.inventory/v9')
-    String[] parts = modelNamespace.split("/");
-    modelNamespaceVersion = parts[parts.length-1].trim();
-  }
-  
-  public String getModelNamespaceVersion() {
-    return modelNamespaceVersion;
-  }
-  
-  public abstract String getUniqueIdentifier();
-  
-  public abstract boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<AbstractModelArtifact> addedModels);
-  
-  public abstract void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId);
+    private String modelNamespace;
+    private String modelNamespaceVersion;
+    private Set<String> referencedModelIds = new HashSet<>();
+
+    public AbstractModelArtifact(ArtifactType type) {
+        super(type);
+    }
+
+    public Set<String> getDependentModelIds() {
+        return referencedModelIds;
+    }
+
     @Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("\nType=" + getType().toString() +"\nId=" + getUniqueIdentifier() +"\nVersion=" + getModelNamespaceVersion() + "\nDependant models: ");
-		for (String dep : referencedModelIds) {
-			sb.append(dep + "  ");
-		}
-		
-		return sb.toString();
-	}
-	
-	
+    public void addDependentModelId(String dependentModelId) {
+        this.referencedModelIds.add(dependentModelId);
+    }
+
+    public String getModelNamespace() {
+        return modelNamespace;
+    }
+
+    @Override
+    public void setModelNamespace(String modelNamespace) {
+        this.modelNamespace = modelNamespace;
+
+        // Get the version from the namespace (in format 'http://org.openecomp.aai.inventory/v9')
+        String[] parts = modelNamespace.split("/");
+        modelNamespaceVersion = parts[parts.length - 1].trim();
+    }
+
+    public String getModelNamespaceVersion() {
+        return modelNamespaceVersion;
+    }
+
+    public abstract String getUniqueIdentifier();
+
+    public abstract boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+            List<Artifact> completedArtifacts);
+
+    public abstract void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId);
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nType=" + getType().toString() + "\nId=" + getUniqueIdentifier() + "\nVersion="
+                + getModelNamespaceVersion() + "\nDependant models: ");
+        for (String dep : referencedModelIds) {
+            sb.append(dep + "  ");
+        }
+
+        return sb.toString();
+    }
+
 }

@@ -20,58 +20,54 @@
  */
 package org.onap.aai.modelloader.service;
 
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.notification.EventCallback;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.notification.EventCallback;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.results.IDistributionClientResult;
 import org.openecomp.sdc.utils.DistributionActionResultEnum;
 
 public class SdcConnectionJob extends TimerTask {
-  static Logger logger = LoggerFactory.getInstance().getLogger(SdcConnectionJob.class.getName());
+    static Logger logger = LoggerFactory.getInstance().getLogger(SdcConnectionJob.class.getName());
 
-  private IDistributionClient client;
-  private ModelLoaderConfig config;
-  private EventCallback callback; 
-  private Timer timer;
+    private IDistributionClient client;
+    private ModelLoaderConfig config;
+    private EventCallback callback;
+    private Timer timer;
 
-  public SdcConnectionJob(IDistributionClient client, 
-      ModelLoaderConfig config, 
-      EventCallback callback, 
-      Timer timer) {
-    this.client = client;
-    this.timer = timer;
-    this.callback = callback;
-    this.config = config;
-  }
-
-  @Override
-  public void run() {
-
-    IDistributionClientResult initResult = client.init(config, callback);
-
-    if (initResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
-      String errorMsg = "Failed to initialize distribution client: "
-          + initResult.getDistributionMessageResult();
-      logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-      return;
+    public SdcConnectionJob(IDistributionClient client, ModelLoaderConfig config, EventCallback callback, Timer timer) {
+        this.client = client;
+        this.timer = timer;
+        this.callback = callback;
+        this.config = config;
     }
 
-    IDistributionClientResult startResult = client.start();
-    if (startResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
-      String errorMsg = "Failed to start distribution client: "
-          + startResult.getDistributionMessageResult();
-      logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-      return;
-    }
+    @Override
+    public void run() {
+        if (!config.getASDCConnectionDisabled()) {
 
-    // Success.  Cancel the timer job
-    timer.cancel();
-    logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
-  }
+            IDistributionClientResult initResult = client.init(config, callback);
+
+            if (initResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
+                String errorMsg =
+                        "Failed to initialize distribution client: " + initResult.getDistributionMessageResult();
+                logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+                return;
+            }
+
+            IDistributionClientResult startResult = client.start();
+            if (startResult.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
+                String errorMsg = "Failed to start distribution client: " + startResult.getDistributionMessageResult();
+                logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+                return;
+            }
+
+            // Success. Cancel the timer job
+            timer.cancel();
+            logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
+        }
+    }
 }

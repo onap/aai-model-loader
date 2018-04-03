@@ -21,8 +21,6 @@
 package org.onap.aai.modelloader.service;
 
 import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,24 +28,22 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 public interface ModelLoaderInterface {
 
-  @GET
-  @Path("/loadModel/{modelid}")
-  public Response loadModel(@PathParam("modelid") String modelid);
+    @GET
+    @Path("/loadModel/{modelid}")
+    public Response loadModel(@PathParam("modelid") String modelid);
 
-  @PUT
-  @Path("/saveModel/{modelid}/{modelname}")
-  public Response saveModel(@PathParam("modelid") String modelid,
-      @PathParam("modelname") String modelname);
+    @PUT
+    @Path("/saveModel/{modelid}/{modelname}")
+    public Response saveModel(@PathParam("modelid") String modelid, @PathParam("modelname") String modelname);
 
-  @POST
-  @Consumes("application/xml")
-  @Produces("application/xml")
-  @Path("/ingestModel/{modelid}")
-  public Response ingestModel(@PathParam("modelid") String modelid, @Context HttpServletRequest req,
-      String payload) throws IOException;
+    @POST
+    @Consumes("text/plain")
+    @Produces("application/xml")
+    @Path("/ingestModel/{modelName}/{modelVersion}")
+    public Response ingestModel(@PathParam("modelName") String modelid, @PathParam("modelVersion") String modelVersion,
+            String payload) throws IOException;
 }

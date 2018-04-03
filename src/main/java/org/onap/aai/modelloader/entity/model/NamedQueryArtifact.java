@@ -21,7 +21,7 @@
 package org.onap.aai.modelloader.entity.model;
 
 import java.util.List;
-
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -31,81 +31,80 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.restclient.client.OperationResult;
 
 public class NamedQueryArtifact extends AbstractModelArtifact {
-		
-  private Logger logger = LoggerFactory.getInstance().getLogger(NamedQueryArtifact.class.getName());
-  
-	private String namedQueryUuid; 
-	
-	public NamedQueryArtifact() {
-	  super(ArtifactType.NAMED_QUERY);
-	}
-	
-	public String getNamedQueryUuid() {
-		return namedQueryUuid;
-	}
-	
-	public void setNamedQueryUuid(String namedQueryUuid) {
-		this.namedQueryUuid = namedQueryUuid;
-	}
-	
-  @Override
-  public String getUniqueIdentifier() {
-    return getNamedQueryUuid();
-  }	
 
-  @Override
-  public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<AbstractModelArtifact> addedModels) {
-    ClientResponse getResponse  = aaiClient.getResource(getNamedQueryUrl(config), distId, AaiRestClient.MimeType.XML);
-    if ( (getResponse == null) || (getResponse.getStatus() != Response.Status.OK.getStatusCode()) ) {
-      // Only attempt the PUT if the model doesn't already exist
-      ClientResponse putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId, AaiRestClient.MimeType.XML);
-      if ( (putResponse != null) && (putResponse.getStatus() == Response.Status.CREATED.getStatusCode()) ) {
-        addedModels.add(this);
-        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
-      }
-      else {
-        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString() + " " + getUniqueIdentifier() +
-            ". Rolling back distribution.");
-        return false;
-      }
-    }
-    else {
-      logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
-    }
-    
-    return true;
-  }
+    private Logger logger = LoggerFactory.getInstance().getLogger(NamedQueryArtifact.class.getName());
 
-  @Override
-  public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
-    // Best effort to delete.  Nothing we can do in the event this fails.
-    aaiClient.getAndDeleteResource(getNamedQueryUrl(config), distId);
-  }
+    private String namedQueryUuid;
 
-  private String getNamedQueryUrl(ModelLoaderConfig config) {
-    String baseURL = config.getAaiBaseUrl().trim();
-    String subURL = null;
-    String instance = null;
-
-    subURL = config.getAaiNamedQueryUrl(getModelNamespaceVersion()).trim();
-    instance = this.getNamedQueryUuid();
-
-    if ( (!baseURL.endsWith("/")) && (!subURL.startsWith("/")) ) {
-      baseURL = baseURL + "/";
+    public NamedQueryArtifact() {
+        super(ArtifactType.NAMED_QUERY);
     }
 
-    if ( baseURL.endsWith("/") && subURL.startsWith("/") ) {
-      baseURL = baseURL.substring(0, baseURL.length()-1);
+    public String getNamedQueryUuid() {
+        return namedQueryUuid;
     }
 
-    if (!subURL.endsWith("/")) {
-      subURL = subURL + "/";
+    public void setNamedQueryUuid(String namedQueryUuid) {
+        this.namedQueryUuid = namedQueryUuid;
     }
 
-    String url = baseURL + subURL + instance;
-    return url;
-  }
+    @Override
+    public String getUniqueIdentifier() {
+        return getNamedQueryUuid();
+    }
+
+    @Override
+    public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<Artifact> completedArtifacts) {
+        OperationResult getResponse =
+                aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML_TYPE);
+        if ((getResponse == null) || (getResponse.getResultCode() != Response.Status.OK.getStatusCode())) {
+            // Only attempt the PUT if the model doesn't already exist
+            OperationResult putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId,
+                    MediaType.APPLICATION_XML_TYPE);
+            if ((putResponse != null) && (putResponse.getResultCode() == Response.Status.CREATED.getStatusCode())) {
+                completedArtifacts.add(this);
+                logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
+                        getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+            } else {
+                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString()
+                        + " " + getUniqueIdentifier() + ". Rolling back distribution.");
+                return false;
+            }
+        } else {
+            logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
+                    getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
+        }
+
+        return true;
+    }
+
+    @Override
+    public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+        // Best effort to delete. Nothing we can do in the event this fails.
+        aaiClient.getAndDeleteResource(getNamedQueryUrl(config), distId);
+    }
+
+    private String getNamedQueryUrl(ModelLoaderConfig config) {
+        String baseURL = config.getAaiBaseUrl().trim();
+        String subURL = config.getAaiNamedQueryUrl(getModelNamespaceVersion()).trim();
+        String instance = this.getNamedQueryUuid();
+
+        if ((!baseURL.endsWith("/")) && (!subURL.startsWith("/"))) {
+            baseURL = baseURL + "/";
+        }
+
+        if (baseURL.endsWith("/") && subURL.startsWith("/")) {
+            baseURL = baseURL.substring(0, baseURL.length() - 1);
+        }
+
+        if (!subURL.endsWith("/")) {
+            subURL = subURL + "/";
+        }
+
+        return baseURL + subURL + instance;
+    }
 }

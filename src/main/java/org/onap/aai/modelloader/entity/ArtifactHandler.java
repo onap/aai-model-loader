@@ -23,15 +23,19 @@ package org.onap.aai.modelloader.entity;
 import java.util.List;
 
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.restclient.AaiRestClient;
 
 public abstract class ArtifactHandler {
 
-  protected ModelLoaderConfig config;
+    protected ModelLoaderConfig config;
 
-  public ArtifactHandler(ModelLoaderConfig config) {
-    this.config = config;
-  }
+    public ArtifactHandler(ModelLoaderConfig config) {
+        this.config = config;
+    }
 
-  public abstract boolean pushArtifacts(List<Artifact> artifacts, String distributionId);
+    public abstract boolean pushArtifacts(List<Artifact> artifacts, String distributionId, List<Artifact> completedArtifacts,
+            AaiRestClient restClient);
 
+    public abstract void rollback(List<Artifact> completedArtifacts, String distributionId,
+            AaiRestClient aaiClient);
 }

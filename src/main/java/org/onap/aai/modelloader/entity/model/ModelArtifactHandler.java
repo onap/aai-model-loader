@@ -20,6 +20,8 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
+import java.util.List;
+
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
@@ -28,56 +30,42 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 public class ModelArtifactHandler extends ArtifactHandler {
 
-  private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactHandler.class.getName());
-  
-  public ModelArtifactHandler(ModelLoaderConfig config) {
-    super(config);
-  }
+    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactHandler.class.getName());
 
-  @Override
-  public boolean pushArtifacts(List<Artifact> artifacts, String distributionID) {
-    ModelSorter modelSorter = new ModelSorter();
-    List<Artifact> sortedModelArtifacts; 
-    try {
-      sortedModelArtifacts = modelSorter.sort(artifacts);
+    public ModelArtifactHandler(ModelLoaderConfig config) {
+        super(config);
     }
-    catch (RuntimeException ex) {
-      logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Unable to resolve models: " + ex.getMessage());
-      return false;
-    }
-    
-    // Push the ordered list of model artifacts to A&AI.  If one fails, we need to roll back
-    // the changes.
-    List<AbstractModelArtifact> completedModels = new ArrayList<>();
-    AaiRestClient aaiClient = new AaiRestClient(config);
 
-    for (Artifact art : sortedModelArtifacts) {
-      AbstractModelArtifact model = (AbstractModelArtifact)art;
-      if (model.push(aaiClient, config, distributionID, completedModels) != true) {
-        for (AbstractModelArtifact modelToDelete : completedModels) {
-          modelToDelete.rollbackModel(aaiClient, config, distributionID);
+    @Override
+    public boolean pushArtifacts(List<Artifact> artifacts, String distributionID, List<Artifact> completedArtifacts,
+            AaiRestClient aaiClient) {
+        ModelSorter modelSorter = new ModelSorter();
+        List<Artifact> sortedModelArtifacts;
+        try {
+            sortedModelArtifacts = modelSorter.sort(artifacts);
+        } catch (RuntimeException ex) {
+            logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Unable to resolve models: " + ex.getMessage());
+            return false;
         }
 
-        return false;
-      }
+        // Push the ordered list of model artifacts to A&AI. If one fails, we need to roll back the changes.
+        for (Artifact art : sortedModelArtifacts) {
+            AbstractModelArtifact model = (AbstractModelArtifact) art;
+            if (!model.push(aaiClient, config, distributionID, completedArtifacts)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    return true;
-  }
-
-  // This method is used for the test REST interface to load models without an ASDC
-  public void loadModelTest(byte[] payload) {
-    List<Artifact> modelArtifacts = new ArrayList<Artifact>();
-    ModelArtifactParser parser = new ModelArtifactParser();
-    modelArtifacts.addAll(parser.parse(payload, "Test-Artifact"));
-    ModelSorter modelSorter = new ModelSorter();
-    List<Artifact> sortedModelArtifacts = modelSorter.sort(modelArtifacts);
-    pushArtifacts(sortedModelArtifacts, "Test-Distribution");
-  }
+    @Override
+    public void rollback(List<Artifact> completedArtifacts, String distributionId, AaiRestClient aaiClient) {
+        for (Artifact artifactToDelete : completedArtifacts) {
+            AbstractModelArtifact model = (AbstractModelArtifact) artifactToDelete;
+            model.rollbackModel(aaiClient, config, distributionId);
+        }
+    }
 }

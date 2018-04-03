@@ -20,57 +20,65 @@
  */
 package org.onap.aai.modelloader.config;
 
-import org.eclipse.jetty.util.security.Password;
-import org.openecomp.sdc.api.consumer.IConfiguration;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.eclipse.jetty.util.security.Password;
+import org.openecomp.sdc.api.consumer.IConfiguration;
 
+/**
+ * Properties for the Model Loader
+ *
+ */
 public class ModelLoaderConfig implements IConfiguration {
-	
+
   // Configuration file structure
   public static final String PREFIX_MODEL_LOADER_CONFIG = "ml";
-  public static final String PREFIX_DISTRIBUTION_CLIENT = 
-      PREFIX_MODEL_LOADER_CONFIG + ".distribution.";
+  public static final String PREFIX_DISTRIBUTION_CLIENT = PREFIX_MODEL_LOADER_CONFIG + ".distribution.";
   public static final String PREFIX_AAI = PREFIX_MODEL_LOADER_CONFIG + ".aai.";
+  public static final String PREFIX_BABEL = PREFIX_MODEL_LOADER_CONFIG + ".babel.";
   public static final String PREFIX_DEBUG = PREFIX_MODEL_LOADER_CONFIG + ".debug.";
 
+  private static final String SUFFIX_KEYSTORE_FILE = "KEYSTORE_FILE";
+  private static final String SUFFIX_KEYSTORE_PASS = "KEYSTORE_PASSWORD";
+
   // Configuration file properties
-  protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH = 
+  protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH =
       PREFIX_DISTRIBUTION_CLIENT + "ACTIVE_SERVER_TLS_AUTH";
-  protected static final String PROP_ML_DISTRIBUTION_ASDC_ADDRESS = PREFIX_DISTRIBUTION_CLIENT
-      + "ASDC_ADDRESS";
-  protected static final String PROP_ML_DISTRIBUTION_CONSUMER_GROUP = PREFIX_DISTRIBUTION_CLIENT
-      + "CONSUMER_GROUP";
-  protected static final String PROP_ML_DISTRIBUTION_CONSUMER_ID = PREFIX_DISTRIBUTION_CLIENT
-      + "CONSUMER_ID";
-  protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME = PREFIX_DISTRIBUTION_CLIENT
-      + "ENVIRONMENT_NAME";
-  protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD = PREFIX_DISTRIBUTION_CLIENT
-      + "KEYSTORE_PASSWORD";
-  protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE = PREFIX_DISTRIBUTION_CLIENT
-      + "KEYSTORE_FILE";
-  protected static final String PROP_ML_DISTRIBUTION_PASSWORD = PREFIX_DISTRIBUTION_CLIENT
-      + "PASSWORD";
-  protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL = PREFIX_DISTRIBUTION_CLIENT
-      + "POLLING_INTERVAL";
-  protected static final String PROP_ML_DISTRIBUTION_POLLING_TIMEOUT = PREFIX_DISTRIBUTION_CLIENT
-      + "POLLING_TIMEOUT";
+  protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED = PREFIX_DISTRIBUTION_CLIENT + "ASDC_CONNECTION_DISABLE";
+  protected static final String PROP_ML_DISTRIBUTION_ASDC_ADDRESS = PREFIX_DISTRIBUTION_CLIENT + "ASDC_ADDRESS";
+  protected static final String PROP_ML_DISTRIBUTION_CONSUMER_GROUP = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_GROUP";
+  protected static final String PROP_ML_DISTRIBUTION_CONSUMER_ID = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_ID";
+  protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME =
+      PREFIX_DISTRIBUTION_CLIENT + "ENVIRONMENT_NAME";
+  protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD =
+      PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_PASS;
+  protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE =
+      PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_FILE;
+  protected static final String PROP_ML_DISTRIBUTION_PASSWORD = PREFIX_DISTRIBUTION_CLIENT + "PASSWORD";
+  protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL =
+      PREFIX_DISTRIBUTION_CLIENT + "POLLING_INTERVAL";
+  protected static final String PROP_ML_DISTRIBUTION_POLLING_TIMEOUT = PREFIX_DISTRIBUTION_CLIENT + "POLLING_TIMEOUT";
   protected static final String PROP_ML_DISTRIBUTION_USER = PREFIX_DISTRIBUTION_CLIENT + "USER";
-  protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT
-      + "ARTIFACT_TYPES";
+  protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT + "ARTIFACT_TYPES";
+  protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES = PREFIX_DISTRIBUTION_CLIENT + "MSG_BUS_ADDRESSES";
   protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP =
-          PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
+      PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
 
   protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
-  protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + "KEYSTORE_FILE";
-  protected static final String PROP_AAI_KEYSTORE_PASSWORD = PREFIX_AAI + "KEYSTORE_PASSWORD";
+  protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
+  protected static final String PROP_AAI_KEYSTORE_PASSWORD = PREFIX_AAI + SUFFIX_KEYSTORE_PASS;
   protected static final String PROP_AAI_MODEL_RESOURCE_URL = PREFIX_AAI + "MODEL_URL";
   protected static final String PROP_AAI_NAMED_QUERY_RESOURCE_URL = PREFIX_AAI + "NAMED_QUERY_URL";
   protected static final String PROP_AAI_VNF_IMAGE_RESOURCE_URL = PREFIX_AAI + "VNF_IMAGE_URL";
   protected static final String PROP_AAI_AUTHENTICATION_USER = PREFIX_AAI + "AUTH_USER";
   protected static final String PROP_AAI_AUTHENTICATION_PASSWORD = PREFIX_AAI + "AUTH_PASSWORD";
+
+  protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
+  protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
+  protected static final String PROP_BABEL_KEYSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_KEYSTORE_PASS;
+  protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
 
   protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
 
@@ -79,6 +87,11 @@ public class ModelLoaderConfig implements IConfiguration {
   private String certLocation = ".";
 
   private List<String> artifactTypes = null;
+
+  private List<String> msgBusAddrs = null;
+
+  private String modelVersion = null;
+  
 
   /**
    * This is the class constructor.
@@ -91,12 +104,20 @@ public class ModelLoaderConfig implements IConfiguration {
     this.certLocation = certLocation;
 
     // Get list of artifacts
-    artifactTypes = new ArrayList<String>();
+    artifactTypes = new ArrayList<>();
     if (modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES) != null) {
-      String[] artTypeList = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES)
-          .split(",");
+      String[] artTypeList = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES).split(",");
       for (String artType : artTypeList) {
         artifactTypes.add(artType);
+      }
+    }
+
+    // Get list of message bus addresses
+    msgBusAddrs = new ArrayList<>();
+    if (modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES) != null) {
+      String[] msgBusList = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES).split(",");
+      for (String addr : msgBusList) {
+        msgBusAddrs.add(addr);
       }
     }
   }
@@ -129,8 +150,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
   @Override
   public String getKeyStorePassword() {
-    return Password
-        .deobfuscate(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
+    return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
   }
 
   @Override
@@ -145,14 +165,12 @@ public class ModelLoaderConfig implements IConfiguration {
 
   @Override
   public int getPollingInterval() {
-    return Integer
-        .parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_INTERVAL));
+    return Integer.parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_INTERVAL));
   }
 
   @Override
   public int getPollingTimeout() {
-    return Integer
-        .parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_TIMEOUT));
+    return Integer.parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_TIMEOUT));
   }
 
   @Override
@@ -167,53 +185,81 @@ public class ModelLoaderConfig implements IConfiguration {
 
   @Override
   public boolean isFilterInEmptyResources() {
-      return false;
+    return false;
   }
 
   @Override
   public Boolean isUseHttpsWithDmaap() {
-      String useHTTPS = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
-      return useHTTPS == null ? false : Boolean.valueOf(useHTTPS);
+    String useHTTPS = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
+    return useHTTPS == null ? false : Boolean.valueOf(useHTTPS);
   }
-  
+
+  @Override
+  public List<String> getMsgBusAddress() {
+    return msgBusAddrs;
+  }
+
   public String getAaiKeyStorePath() {
-    return certLocation + "/" + modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
+    return certLocation + File.separator + modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
+  }
+
+  public String getBabelKeyStorePath() {
+    return certLocation + File.separator + modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_FILE);
   }
 
   public String getAaiKeyStorePassword() {
     return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_PASSWORD));
   }
 
+  public String getBabelKeyStorePassword() {
+    return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_PASSWORD));
+  }
+
   public String getAaiBaseUrl() {
     return modelLoaderProperties.getProperty(PROP_AAI_BASE_URL);
   }
 
+  public String getBabelBaseUrl() {
+    return modelLoaderProperties.getProperty(PROP_BABEL_BASE_URL);
+  }
+
+  public String getBabelGenerateArtifactsUrl() {
+    return modelLoaderProperties.getProperty(PROP_BABEL_GENERATE_RESOURCE_URL);
+  }
+
   public String getAaiModelUrl(String version) {
-    return modelLoaderProperties.getProperty(PROP_AAI_MODEL_RESOURCE_URL).replace("v*", version);
+    setModelVersion(version);
+    return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_MODEL_RESOURCE_URL, version);
   }
 
   public String getAaiNamedQueryUrl(String version) {
-    return modelLoaderProperties.getProperty(PROP_AAI_NAMED_QUERY_RESOURCE_URL).replace("v*", version);
+    return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_NAMED_QUERY_RESOURCE_URL, version);
   }
 
   public String getAaiVnfImageUrl() {
-    return modelLoaderProperties.getProperty(PROP_AAI_VNF_IMAGE_RESOURCE_URL);
+    return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_VNF_IMAGE_RESOURCE_URL, getModelVersion());
   }
 
   public String getAaiAuthenticationUser() {
     return modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_USER);
   }
 
+  public String getModelVersion() {
+    return modelVersion;
+  }
+
+  public void setModelVersion(String modelVersion) {
+    this.modelVersion = modelVersion;
+  }
+
   /**
-   * @return password for AAI authentication that has been reverse-engineered
-   *         from its obfuscated form.
+   * @return password for AAI authentication that has been reverse-engineered from its obfuscated form.
    */
   public String getAaiAuthenticationPassword() {
-    String password = Password
-        .deobfuscate(modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_PASSWORD));
+    String password = Password.deobfuscate(modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_PASSWORD));
 
-    if ((password != null) && (password.equals(""))) {
-      return null;
+    if (password != null && password.isEmpty()) {
+      password = null;
     }
 
     return password;
@@ -224,16 +270,30 @@ public class ModelLoaderConfig implements IConfiguration {
    */
   public boolean getIngestSimulatorEnabled() {
     String propValue = modelLoaderProperties.getProperty(PROP_DEBUG_INGEST_SIMULATOR);
+    return propValue != null && "enabled".equalsIgnoreCase(propValue);
+  }
 
-    if (propValue == null) {
-      return false;
-    }
-
-    if (propValue.compareToIgnoreCase("enabled") == 0) {
-      return true;
-    }
-
-    return false;
+  /**
+   * @return a String value of the defined property with the oxm version
+   */
+  private String updatePropertyOXMVersion(Properties modelLoaderProperties, String propertyName, String version) {
+    if (version != null)
+      return modelLoaderProperties.getProperty(propertyName).replace("v*", version);
+    else
+      return modelLoaderProperties.getProperty(propertyName);
   }
   
+  
+  
+  
+  /**
+   * @return a boolean value indicating whether model loader is connected to ASDC.
+   */
+  public boolean getASDCConnectionDisabled(){
+      String propValue = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED);
+      return propValue != null && "true".equalsIgnoreCase(propValue);
+      
+  }
+
+
 }

@@ -20,172 +20,183 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.IntStream;
+import javax.xml.XMLConstants;
+
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.w3c.dom.Document;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+public class ModelArtifactParser extends AbstractModelArtifactParser {
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+    public static final String MODEL_VER = "model-ver";
+    public static final String MODEL_VERSION_ID = "model-version-id";
+    public static final String MODEL_INVARIANT_ID = "model-invariant-id";
+    private static final String RELATIONSHIP = "relationship";
+    private static final String MODEL_ELEMENT_RELATIONSHIP_KEY = "model." + MODEL_INVARIANT_ID;
+    private static final String MODEL_VER_ELEMENT_RELATIONSHIP_KEY = MODEL_VER + "." + MODEL_VERSION_ID;
 
+    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactParser.class.getName());
 
-public class ModelArtifactParser implements IModelParser {
+    @Override
+    void parseNode(Node node, IModelArtifact model) {
+        if (node.getNodeName().equalsIgnoreCase(MODEL_INVARIANT_ID)
+                || node.getNodeName().equalsIgnoreCase(MODEL_VERSION_ID)) {
+            setVersionId(model, node);
+        } else if (node.getNodeName().equalsIgnoreCase(RELATIONSHIP)) {
+            parseRelationshipNode(node, model);
+        } else {
+            if (node.getNodeName().equalsIgnoreCase(MODEL_VER)) {
+                ((ModelArtifact) model).setModelVer(node);
+                if ((((ModelArtifact) model).getModelNamespace() != null)
+                        && (!((ModelArtifact) model).getModelNamespace().isEmpty())) {
+                    Element e = (Element) node;
+                    e.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns",
+                            ((ModelArtifact) model).getModelNamespace());
+                }
+            }
 
-	private static String MODEL_VER = "model-ver";
-	private static String MODEL_VERSION_ID = "model-version-id";
-	private static String MODEL_INVARIANT_ID = "model-invariant-id";
-	private static String RELATIONSHIP = "relationship";
-	private static String RELATIONSHIP_DATA = "relationship-data";
-	private static String RELATIONSHIP_KEY = "relationship-key";
-	private static String RELATIONSHIP_VALUE = "relationship-value";
-	private static String MODEL_ELEMENT_RELATIONSHIP_KEY = "model.model-invariant-id";
-	private static String MODEL_VER_ELEMENT_RELATIONSHIP_KEY = "model-ver.model-version-id";
-	
-	private  static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactParser.class.getName());
-	
-	public List<Artifact> parse(byte[] artifactPayload, String artifactName) {
-	  String payload = new String(artifactPayload);
-	  List<Artifact> modelList = new ArrayList<Artifact>();
+            parseChildNodes(node, model);
+        }
+    }
 
-	  try {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	    DocumentBuilder builder = factory.newDocumentBuilder();
-	    InputSource is = new InputSource(new StringReader(payload));
-	    Document doc = builder.parse(is);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void setVersionId(IModelArtifact model, Node node) {
+        if (MODEL_INVARIANT_ID.equals(node.getNodeName())) {
+            ((ModelArtifact) model).setModelInvariantId(node.getTextContent().trim());
+        } else if (MODEL_VERSION_ID.equals(node.getNodeName())) {
+            ((ModelArtifact) model).setModelVerId(node.getTextContent().trim());
+        }
+    }
 
-	    ModelArtifact model = parseModel(doc.getDocumentElement(), payload);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ModelId buildModelId(NodeList nodeList) {
+        return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item)
+                .filter(childNode -> childNode.getNodeName().equalsIgnoreCase(RELATIONSHIP_DATA))
+                .map(this::getRelationship) //
+                .collect(Collector.of(ModelId::new, ModelId::setRelationship, (m, p) -> m));
+    }
 
-	    if (model != null) {
-	      logger.info( ModelLoaderMsgs.DISTRIBUTION_EVENT, "Model parsed =====>>>> "
-	          + "Model-invariant-Id: "+ model.getModelInvariantId()
-	          + " Model-Version-Id: "+ model.getModelVerId());
-	      modelList.add(model);
-	    }
-	    else {
-	      logger.error(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR, "Unable to parse artifact " + artifactName);
-	      return null;
-	    }
-	  }
-	  catch (Exception ex) {
-	    logger.error(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR, "Unable to parse artifact " + artifactName + ": " + ex.getLocalizedMessage());
-	  }
+    /**
+     * Find a relationship key and value pair from the children of the supplied node.
+     *
+     * @param node containing children storing relationship keys and values
+     * @return a pair containing a relationship key and its value. Note: if multiple relationships are found, existing
+     *         values stored in the pair will be overwritten.
+     */
+    private Pair<String, String> getRelationship(Node node) {
+        Objects.requireNonNull(node);
+        NodeList relDataChildList = node.getChildNodes();
+        Objects.requireNonNull(relDataChildList);
 
-	  return modelList;
-	}
+        return IntStream.range(0, relDataChildList.getLength()).mapToObj(relDataChildList::item)
+                .filter(this::filterRelationshipNode)
+                .collect(Collector.of(Pair::new, applyRelationshipValue, (p, n) -> p));
+    }
 
-	private ModelArtifact parseModel(Node modelNode, String payload) {
-	  ModelArtifact model = new ModelArtifact();
-	  model.setPayload(payload);
+    /**
+     * This method is responsible for creating an instance of {@link ModelArtifactParser.ModelId}
+     *
+     * @return IModelId instance of {@link ModelArtifactParser.ModelId}
+     */
+    @Override
+    IModelId createModelIdInstance() {
+        return new ModelId();
+    }
 
-	  Element e = (Element)modelNode;
-	  model.setModelNamespace(e.getAttribute("xmlns"));
+    private class ModelId implements IModelId {
 
-	  parseNode(modelNode, model);
+        private String modelInvariantIdValue;
+        private String modelVersionIdValue;
 
-	  if ( (model.getModelInvariantId() == null) || (model.getModelVerId() == null) ){
-	    return null;
-	  }
+        @Override
+        public void setRelationship(Pair<String, String> p) {
+            if (p.getKey().equalsIgnoreCase(MODEL_VER_ELEMENT_RELATIONSHIP_KEY)) {
+                modelVersionIdValue = p.getValue();
+            } else if (p.getKey().equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY)) {
+                modelInvariantIdValue = p.getValue();
+            }
+        }
 
-	  return model;
-	}
+        @Override
+        public boolean defined() {
+            return modelInvariantIdValue != null && modelVersionIdValue != null;
+        }
 
-	private void parseNode(Node node, ModelArtifact model) {
-	  if (node.getNodeName().equalsIgnoreCase(MODEL_INVARIANT_ID)) {
-	    model.setModelInvariantId(node.getTextContent().trim());
-	  }
-	  else if (node.getNodeName().equalsIgnoreCase(MODEL_VERSION_ID)) {
-	    model.setModelVerId(node.getTextContent().trim());
-	  }
-	  else if (node.getNodeName().equalsIgnoreCase(RELATIONSHIP)) {
-	    String dependentModelKey = parseRelationshipNode(node, model);
-	    if (dependentModelKey != null) {
-	      model.addDependentModelId(dependentModelKey);
-	    }
-	  }
-	  else {
-	    if (node.getNodeName().equalsIgnoreCase(MODEL_VER)) {
-	      model.setModelVer(node);
-	      if ( (model.getModelNamespace() != null) && (!model.getModelNamespace().isEmpty()) ) {
-	        Element e = (Element) node;
-	        e.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns", model.getModelNamespace());
-	      }
-	    }
+        @Override
+        public String toString() {
+            return modelInvariantIdValue + "|" + modelVersionIdValue;
+        }
+    }
 
-	    NodeList nodeList = node.getChildNodes();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String buildArtifactParseExceptionMessage(String artifactName, String localisedMessage) {
+        return "Unable to parse legacy model artifact " + artifactName + ": " + localisedMessage;
+    }
 
-	    for (int i = 0; i < nodeList.getLength(); i++) {
-	      Node childNode = nodeList.item(i); 
-	      parseNode(childNode, model);
-	    }
-	  }
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    IModelArtifact createModelArtifactInstance() {
+        return new ModelArtifact();
+    }
 
-	private String parseRelationshipNode(Node node, ModelArtifact model) {
-	  String currentKey = null;
-	  String currentValue = null;
-	  String modelVersionIdValue = null;
-	  String modelInvariantIdValue = null;
+    @Override
+    boolean modelIsValid(IModelArtifact model) {
+        return ((ModelArtifact) model).getModelInvariantId() != null && ((ModelArtifact) model).getModelVerId() != null;
+    }
 
-	  NodeList nodeList = node.getChildNodes();
-	  for (int i = 0; i < nodeList.getLength(); i++) {
-	    Node childNode = nodeList.item(i);
-	    
-	    if (childNode.getNodeName().equalsIgnoreCase(RELATIONSHIP_DATA)) {
-	      NodeList relDataChildList = childNode.getChildNodes();
-	      
-	      for (int j = 0; j < relDataChildList.getLength(); j++) {
-	        Node relDataChildNode = relDataChildList.item(j);
-	        
-	        if (relDataChildNode.getNodeName().equalsIgnoreCase(RELATIONSHIP_KEY)) {
-	          currentKey = relDataChildNode.getTextContent().trim();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    boolean processParsedModel(List<Artifact> modelList, String artifactName, IModelArtifact model) {
+        boolean valid = false;
 
-	          if (currentValue != null) {
-	            if (currentKey.equalsIgnoreCase(MODEL_VER_ELEMENT_RELATIONSHIP_KEY)) {
-	              modelVersionIdValue = currentValue;
-	            }
-	            else if (currentKey.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY)) {
-	              modelInvariantIdValue = currentValue;
-	            }
-	            
-	            currentKey = null;
-	            currentValue = null;
-	          }
-	        }
-	        else if (relDataChildNode.getNodeName().equalsIgnoreCase(RELATIONSHIP_VALUE)) {
-	          currentValue = relDataChildNode.getTextContent().trim();
+        if (model != null) {
+            ModelArtifact modelImpl = (ModelArtifact) model;
+            logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Model parsed =====>>>> " + "Model-invariant-Id: "
+                    + modelImpl.getModelInvariantId() + " Model-Version-Id: " + modelImpl.getModelVerId());
+            modelList.add(modelImpl);
+            valid = true;
+        } else {
+            logger.error(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR, "Unable to parse artifact " + artifactName);
+        }
 
-	          if (currentKey != null) {
-              if (currentKey.equalsIgnoreCase(MODEL_VER_ELEMENT_RELATIONSHIP_KEY)) {
-                modelVersionIdValue = currentValue;
-              }
-              else if (currentKey.equalsIgnoreCase(MODEL_ELEMENT_RELATIONSHIP_KEY)) {
-                modelInvariantIdValue = currentValue;
-              }
-              
-              currentKey = null;
-              currentValue = null;
-	          }
-	        }
-	      }
-	    }
-	  }
-	  
-	  if ( (modelVersionIdValue != null) && (modelInvariantIdValue != null) ) {
-	    return modelInvariantIdValue + "|" + modelVersionIdValue;
-	  }
-	  
-	  return null;
+        return valid;
+    }
 
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getModelElementRelationshipKey() {
+        return null;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getVersionIdNodeName() {
+        return null;
+    }
 }

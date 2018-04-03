@@ -20,461 +20,192 @@
  */
 package org.onap.aai.modelloader.restclient;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.LoggingFilter;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
-
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.onap.aai.cl.api.LogFields;
-import org.onap.aai.cl.api.LogLine;
+import com.sun.jersey.core.util.MultivaluedMapImpl; // NOSONAR
+// import edu.emory.mathcs.backport.java.util.Collections;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.cl.mdc.MdcContext;
-import org.onap.aai.cl.mdc.MdcOverride;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.onap.aai.restclient.client.OperationResult;
+import org.onap.aai.restclient.client.RestClient;
+import org.onap.aai.restclient.enums.RestAuthenticationMode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.Response;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+/**
+ * Wrapper around the standard A&AI Rest Client interface. This currently uses Jersey client 1.x
+ *
+ */
 public class AaiRestClient {
-  public enum MimeType {
-    XML("application/xml"), JSON("application/json");
 
-    private String httpType;
+    public static final String HEADER_TRANS_ID = "X-TransactionId";
+    public static final String HEADER_FROM_APP_ID = "X-FromAppId";
+    public static final String ML_APP_NAME = "ModelLoader";
+    private static final String RESOURCE_VERSION_PARAM = "resource-version";
 
-    MimeType(String httpType) {
-      this.httpType = httpType;
+    private static Logger logger = LoggerFactory.getInstance().getLogger(AaiRestClient.class.getName());
+
+    private ModelLoaderConfig config = null;
+
+    public AaiRestClient(ModelLoaderConfig config) {
+        this.config = config;
     }
 
-    String getHttpHeaderType() {
-      return httpType;
-    }
-  }
 
-  private static String HEADER_TRANS_ID = "X-TransactionId";
-  private static String HEADER_FROM_APP_ID = "X-FromAppId";
-  private static String HEADER_AUTHORIZATION = "Authorization";
-  private static String ML_APP_NAME = "ModelLoader";
-  private static String RESOURCE_VERSION_PARAM = "resource-version";
-
-  private static SimpleDateFormat dateFormatter = new SimpleDateFormat(
-      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
-  private static Logger logger = LoggerFactory.getInstance()
-      .getLogger(AaiRestClient.class.getName());
-  private static Logger metricsLogger = LoggerFactory.getInstance()
-      .getMetricsLogger(AaiRestClient.class.getName());
-
-  private ModelLoaderConfig config = null;
-
-  public AaiRestClient(ModelLoaderConfig config) {
-    this.config = config;
-  }
-
-  /**
-   * Send a PUT request to the A&AI.
-   *
-   * @param url
-   *          - the url
-   * @param transId
-   *          - transaction ID
-   * @param payload
-   *          - the XML or JSON payload for the request
-   * @param mimeType
-   *          - the content type (XML or JSON)
-   * @return ClientResponse
-   */
-  public ClientResponse putResource(String url, String payload, String transId, MimeType mimeType) {
-    ClientResponse result = null;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    long startTimeInMs = 0;
-    MdcOverride override = new MdcOverride();
-
-    try {
-      Client client = setupClient();
-
-      baos = new ByteArrayOutputStream();
-      PrintStream ps = new PrintStream(baos);
-      if (logger.isDebugEnabled()) {
-        client.addFilter(new LoggingFilter(ps));
-      }
-
-      // Grab the current time so that we can use it for metrics purposes later.
-      startTimeInMs = System.currentTimeMillis();
-      override.addAttribute(MdcContext.MDC_START_TIME, dateFormatter.format(startTimeInMs));
-
-      if (useBasicAuth()) {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME)
-            .header(HEADER_AUTHORIZATION, getAuthenticationCredentials())
-            .type(mimeType.getHttpHeaderType()).put(ClientResponse.class, payload);
-      } else {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME).type(mimeType.getHttpHeaderType())
-            .put(ClientResponse.class, payload);
-      }
-    } catch (Exception ex) {
-      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "PUT", url, ex.getLocalizedMessage());
-      return null;
-    } finally {
-      if (logger.isDebugEnabled()) {
-        logger.debug(baos.toString());
-      }
+    /**
+     * Send a GET request to the A&AI for a resource.
+     *
+     * @param url
+     * @param transId
+     * @param mediaType
+     * @return
+     */
+    public OperationResult getResource(String url, String transId, MediaType mediaType) {
+        return setupClient().get(url, buildHeaders(transId), mediaType);
     }
 
-    if ((result != null) && ((result.getStatus() == Response.Status.CREATED.getStatusCode())
-        || (result.getStatus() == Response.Status.OK.getStatusCode()))) {
-      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS, "PUT", url,
-          Integer.toString(result.getStatus()));
-      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS,
-          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
-              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
-                  result.getResponseStatus().toString()),
-          override, "PUT", url, Integer.toString(result.getStatus()));
-    } else {
-      // If response is not 200 OK, then additionally log the reason
-      String respMsg = result.getEntity(String.class);
-      if (respMsg == null) {
-        respMsg = result.getStatusInfo().getReasonPhrase();
-      }
-      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL, "PUT", url,
-          Integer.toString(result.getStatus()), respMsg);
-      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL,
-          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
-              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
-                  result.getResponseStatus().toString()),
-          override, "PUT", url, Integer.toString(result.getStatus()), respMsg);
+    /**
+     * Send a PUT request to the A&AI.
+     *
+     * @param url - the url
+     * @param payload - the XML or JSON payload for the request
+     * @param transId - transaction ID
+     * @param mediaType - the content type (XML or JSON)
+     * @return operation result
+     */
+    public OperationResult putResource(String url, String payload, String transId, MediaType mediaType) {
+    	logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
+        return setupClient().put(url, payload, buildHeaders(transId), mediaType, mediaType);
     }
 
-    return result;
-  }
 
-  /**
-   * Send a DELETE request to the A&AI.
-   *
-   * @param url
-   *          - the url
-   * @param resourceVersion
-   *          - the resource-version of the model to delete
-   * @param transId
-   *          - transaction ID
-   * @return ClientResponse
-   */
-  public ClientResponse deleteResource(String url, String resourceVersion, String transId) {
-    ClientResponse result = null;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    long startTimeInMs = 0;
-    MdcOverride override = new MdcOverride();
-
-    try {
-      Client client = setupClient();
-
-      baos = new ByteArrayOutputStream();
-      PrintStream ps = new PrintStream(baos);
-      if (logger.isDebugEnabled()) {
-        client.addFilter(new LoggingFilter(ps));
-      }
-
-      // Grab the current time so that we can use it for metrics purposes later.
-      startTimeInMs = System.currentTimeMillis();
-      override.addAttribute(MdcContext.MDC_START_TIME, dateFormatter.format(startTimeInMs));
-
-      if (useBasicAuth()) {
-        result = client.resource(url).queryParam(RESOURCE_VERSION_PARAM, resourceVersion)
-            .header(HEADER_TRANS_ID, transId).header(HEADER_FROM_APP_ID, ML_APP_NAME)
-            .header(HEADER_AUTHORIZATION, getAuthenticationCredentials())
-            .delete(ClientResponse.class);
-      } else {
-        result = client.resource(url).queryParam(RESOURCE_VERSION_PARAM, resourceVersion)
-            .header(HEADER_TRANS_ID, transId).header(HEADER_FROM_APP_ID, ML_APP_NAME)
-            .delete(ClientResponse.class);
-      }
-    } catch (Exception ex) {
-      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "DELETE", url, ex.getLocalizedMessage());
-      return null;
-    } finally {
-      if (logger.isDebugEnabled()) {
-        logger.debug(baos.toString());
-      }
+    /**
+     * Send a POST request to the A&AI.
+     *
+     * @param url - the url
+     * @param transId - transaction ID
+     * @param payload - the XML or JSON payload for the request
+     * @param mimeType - the content type (XML or JSON)
+     * @return ClientResponse
+     */
+    public OperationResult postResource(String url, String payload, String transId, MediaType mediaType) {
+    	logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
+        return setupClient().post(url, payload, buildHeaders(transId), mediaType, mediaType);
     }
 
-    logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS, "DELETE", url,
-        Integer.toString(result.getStatus()));
-    metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS,
-        new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus()).setField(
-            LogLine.DefinedFields.RESPONSE_DESCRIPTION, result.getResponseStatus().toString()),
-        override, "DELETE", url, Integer.toString(result.getStatus()));
 
-    return result;
-  }
-
-  /**
-   * Send a GET request to the A&AI for a resource.
-   *
-   * @param url
-   *          - the url to use
-   * @param transId
-   *          - transaction ID
-   * @return ClientResponse
-   */
-  public ClientResponse getResource(String url, String transId, MimeType mimeType) {
-    ClientResponse result = null;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    long startTimeInMs = 0;
-    MdcOverride override = new MdcOverride();
-
-    try {
-      Client client = setupClient();
-
-      baos = new ByteArrayOutputStream();
-      PrintStream ps = new PrintStream(baos);
-      if (logger.isDebugEnabled()) {
-        client.addFilter(new LoggingFilter(ps));
-      }
-
-      // Grab the current time so that we can use it for metrics purposes later.
-      startTimeInMs = System.currentTimeMillis();
-      override.addAttribute(MdcContext.MDC_START_TIME, dateFormatter.format(startTimeInMs));
-
-      if (useBasicAuth()) {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME).accept(mimeType.getHttpHeaderType())
-            .header(HEADER_AUTHORIZATION, getAuthenticationCredentials()).get(ClientResponse.class);
-      } else {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME).accept(mimeType.getHttpHeaderType())
-            .get(ClientResponse.class);
-
-      }
-    } catch (Exception ex) {
-      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "GET", url, ex.getLocalizedMessage());
-      return null;
-    } finally {
-      if (logger.isDebugEnabled()) {
-        logger.debug(baos.toString());
-      }
+    /**
+     * Send a DELETE request to the A&AI.
+     *
+     * @param url - the url
+     * @param resourceVersion - the resource-version of the model to delete
+     * @param transId - transaction ID
+     * @return ClientResponse
+     */
+    public OperationResult deleteResource(String url, String resourceVersion, String transId) {
+        URI uri = UriBuilder.fromUri(url).queryParam(RESOURCE_VERSION_PARAM, resourceVersion).build();
+        return setupClient().delete(uri.toString(), buildHeaders(transId), null);
     }
 
-    logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS, "GET", url,
-        Integer.toString(result.getStatus()));
-    metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS,
-        new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus()).setField(
-            LogLine.DefinedFields.RESPONSE_DESCRIPTION, result.getResponseStatus().toString()),
-        override, "GET", url, Integer.toString(result.getStatus()));
+    /**
+     * Does a GET on a resource to retrieve the resource version, and then DELETE that version.
+     *
+     * @param url - the url
+     * @param transId - transaction ID
+     * @return ClientResponse
+     */
+    public OperationResult getAndDeleteResource(String url, String transId) {
+        // First, GET the model
+        OperationResult getResponse = getResource(url, transId, MediaType.APPLICATION_XML_TYPE);
+        if ((getResponse == null) || (getResponse.getResultCode() != Response.Status.OK.getStatusCode())) {
+            return getResponse;
+        }
 
-    return result;
-  }
+        // Delete the model using the resource version in the response
+        String resVersion = null;
+        try {
+            resVersion = getResourceVersion(getResponse);
+        } catch (Exception e) {
+            logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "GET", url, e.getLocalizedMessage());
+            return null;
+        }
 
-  /**
-   * Send a POST request to the A&AI.
-   *
-   * @param url
-   *          - the url
-   * @param transId
-   *          - transaction ID
-   * @param payload
-   *          - the XML or JSON payload for the request
-   * @param mimeType
-   *          - the content type (XML or JSON)
-   * @return ClientResponse
-   */
-  public ClientResponse postResource(String url, String payload, String transId, MimeType mimeType) {
-    ClientResponse result = null;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    long startTimeInMs = 0;
-    MdcOverride override = new MdcOverride();
-
-    try {
-      Client client = setupClient();
-
-      baos = new ByteArrayOutputStream();
-      PrintStream ps = new PrintStream(baos);
-      if (logger.isDebugEnabled()) {
-        client.addFilter(new LoggingFilter(ps));
-      }
-
-      // Grab the current time so that we can use it for metrics purposes later.
-      startTimeInMs = System.currentTimeMillis();
-      override.addAttribute(MdcContext.MDC_START_TIME, dateFormatter.format(startTimeInMs));
-
-      if (useBasicAuth()) {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME)
-            .header(HEADER_AUTHORIZATION, getAuthenticationCredentials())
-            .type(mimeType.getHttpHeaderType()).post(ClientResponse.class, payload);
-      } else {
-        result = client.resource(url).header(HEADER_TRANS_ID, transId)
-            .header(HEADER_FROM_APP_ID, ML_APP_NAME).type(mimeType.getHttpHeaderType())
-            .post(ClientResponse.class, payload);
-      }
-    } catch (Exception ex) {
-      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "POST", url, ex.getLocalizedMessage());
-      return null;
-    } finally {
-      if (logger.isDebugEnabled()) {
-        logger.debug(baos.toString());
-      }
+        return deleteResource(url, resVersion, transId);
     }
 
-    if ((result != null) && ((result.getStatus() == Response.Status.CREATED.getStatusCode())
-        || (result.getStatus() == Response.Status.OK.getStatusCode()))) {
-      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS, "POST", url,
-          Integer.toString(result.getStatus()));
-      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_SUCCESS,
-          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
-              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
-                  result.getResponseStatus().toString()),
-          override, "POST", url, Integer.toString(result.getStatus()));
-    } else {
-      // If response is not 200 OK, then additionally log the reason
-      String respMsg = result.getEntity(String.class);
-      if (respMsg == null) {
-        respMsg = result.getStatusInfo().getReasonPhrase();
-      }
-      logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL, "POST", url,
-          Integer.toString(result.getStatus()), respMsg);
-      metricsLogger.info(ModelLoaderMsgs.AAI_REST_REQUEST_UNSUCCESSFUL,
-          new LogFields().setField(LogLine.DefinedFields.RESPONSE_CODE, result.getStatus())
-              .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION,
-                  result.getResponseStatus().toString()),
-          override, "POST", url, Integer.toString(result.getStatus()), respMsg);
+
+    public boolean useBasicAuth() {
+        return (config.getAaiAuthenticationUser() != null) && (config.getAaiAuthenticationPassword() != null);
     }
 
-    return result;
-  }
-  
-  /**
-   * Does a GET on a resource to retrieve the resource version, and then DELETE
-   * that version.
-   *
-   * @param url
-   *          - the url
-   * @param transId
-   *          - transaction ID
-   * @return ClientResponse
-   */
-  public ClientResponse getAndDeleteResource(String url, String transId) {
-    // First, GET the model
-    ClientResponse getResponse = getResource(url, transId, MimeType.XML);
-    if ((getResponse == null) || (getResponse.getStatus() != Response.Status.OK.getStatusCode())) {
-      return getResponse;
+    private RestClient setupClient() {
+        RestClient restClient = new RestClient();
+
+        // @formatter:off
+        restClient.validateServerHostname(false)
+                .validateServerCertChain(false)
+                .clientCertFile(config.getAaiKeyStorePath())
+                .clientCertPassword(config.getAaiKeyStorePassword());
+        // @formatter:on
+
+        if (useBasicAuth()) {
+            restClient.authenticationMode(RestAuthenticationMode.SSL_BASIC);
+            restClient.basicAuthUsername(config.getAaiAuthenticationUser());
+            restClient.basicAuthPassword(config.getAaiAuthenticationPassword());
+        }
+
+        return restClient;
     }
 
-    // Delete the model using the resource version in the response
-    String resVersion = null;
-    try {
-      resVersion = getResourceVersion(getResponse);
-    } catch (Exception e) {
-      logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "GET", url, e.getLocalizedMessage());
-      return null;
+    /**
+     * Create the HTTP headers required for an A&AI operation (GET/POST/PUT/DELETE)
+     * 
+     * @param transId
+     * @return map of headers
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, List<String>> buildHeaders(String transId) {
+        MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
+        headers.put(HEADER_TRANS_ID, Collections.singletonList(transId));
+        headers.put(HEADER_FROM_APP_ID, Collections.singletonList(ML_APP_NAME));
+        return headers;
     }
 
-    return deleteResource(url, resVersion, transId);
-  }
+    private String getResourceVersion(OperationResult getResponse)
+            throws ParserConfigurationException, SAXException, IOException {
+        String respData = getResponse.getResult();
 
-  private Client setupClient() throws IOException, GeneralSecurityException {
-    ClientConfig clientConfig = new DefaultClientConfig();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(respData));
+        Document doc = builder.parse(is);
 
-    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-      @Override
-      public boolean verify(String string, SSLSession ssls) {
-        return true;
-      }
-    });
+        NodeList nodesList = doc.getDocumentElement().getChildNodes();
 
-    // Create a trust manager that does not validate certificate chains
-    TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-      @Override
-      public X509Certificate[] getAcceptedIssuers() {
-        return null;
-      }
-
-      @Override
-      public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-
-      @Override
-      public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-    } };
-
-    SSLContext ctx = SSLContext.getInstance("TLS");
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-    FileInputStream fin = new FileInputStream(config.getAaiKeyStorePath());
-    KeyStore ks = KeyStore.getInstance("PKCS12");
-    char[] pwd = config.getAaiKeyStorePassword().toCharArray();
-    ks.load(fin, pwd);
-    kmf.init(ks, pwd);
-
-    ctx.init(kmf.getKeyManagers(), trustAllCerts, null);
-    clientConfig.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES,
-        new HTTPSProperties(new HostnameVerifier() {
-          @Override
-          public boolean verify(String theString, SSLSession sslSession) {
-            return true;
-          }
-        }, ctx));
-
-    Client client = Client.create(clientConfig);
-
-    return client;
-  }
-
-  private String getResourceVersion(ClientResponse response)
-      throws ParserConfigurationException, SAXException, IOException {
-    String respData = response.getEntity(String.class);
-
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    InputSource is = new InputSource(new StringReader(respData));
-    Document doc = builder.parse(is);
-
-    NodeList nodeList = doc.getDocumentElement().getChildNodes();
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      Node currentNode = nodeList.item(i);
-      if (currentNode.getNodeName().equals(RESOURCE_VERSION_PARAM)) {
-        return currentNode.getTextContent();
-      }
+        // @formatter:off
+        return IntStream.range(0, nodesList.getLength()).mapToObj(nodesList::item)
+                .filter(childNode -> childNode.getNodeName().equals(RESOURCE_VERSION_PARAM))
+                .findFirst()
+                .map(Node::getTextContent)
+                .orElse(null);
+        // @formatter:on
     }
-
-    return null;
-  }
-
-  private String getAuthenticationCredentials() {
-
-    String usernameAndPassword = config.getAaiAuthenticationUser() + ":"
-        + config.getAaiAuthenticationPassword();
-    return "Basic " + java.util.Base64.getEncoder().encodeToString(usernameAndPassword.getBytes());
-  }
-
-  public boolean useBasicAuth() {
-    return (config.getAaiAuthenticationUser() != null)
-        && (config.getAaiAuthenticationPassword() != null);
-  }
 }

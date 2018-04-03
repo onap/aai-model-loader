@@ -27,53 +27,48 @@ import org.json.XML;
 
 public class JsonXmlConverter {
 
-  /**
-   * Determines whether or not the supplied text string represents a valid
-   * JSON structure or not.
-   * 
-   * @param text - The text to be evaluated.
-   * 
-   * @return - true if the string represents a valid JSON object,
-   *           false, otherwise.
-   */
-  public static boolean isValidJson(String text) {
-    try {
-      new JSONObject(text);
-    } catch (JSONException ex) {
-      try {
-        new JSONArray(text);
-      } catch (JSONException ex1) {
-        return false;
-      }
+    private JsonXmlConverter() {
+        throw new AssertionError("Instantiating utility class.");
     }
 
-    return true;
-  }
+    /**
+     * Determines whether or not the supplied text string represents a valid JSON structure or not.
+     * 
+     * @param text The text to be evaluated.
+     * @return - true if the string represents a valid JSON object, false, otherwise.
+     */
+    public static boolean isValidJson(String text) {
+        try {
+            new JSONObject(text);
+        } catch (JSONException ex) {
+            try {
+                new JSONArray(text);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
 
-  /**
-   * Takes a text string representing a valid JSON structure and converts it to
-   * an equivalent XML string.
-   * 
-   * @param jsonText - The JSON string to convert to XML.
-   * 
-   * @return - An XML string representation of the supplied JSON string.
-   */
-  public static String convertJsonToXml(String jsonText) {
-    JSONObject jsonObj = new JSONObject(jsonText);
-    String xmlText = XML.toString(jsonObj);
-    return xmlText;
-  }
+        return true;
+    }
 
-  /**
-   * Takes a text string representing a valid XML structure and converts it to
-   * an equivalent JSON string.
-   * 
-   * @param xmlText - The XML string to convert to JSON.
-   * 
-   * @return - A JSON string representation of the supplied XML string.
-   */
-  public static String convertXmlToJson(String xmlText) {
-    JSONObject jsonObj = XML.toJSONObject(xmlText);
-    return jsonObj.toString();
-  }
+    /**
+     * Takes a text string representing a valid JSON structure and converts it to an equivalent XML string.
+     * 
+     * @param jsonText The JSON string to convert to XML.
+     * @return an XML string representation of the supplied JSON string.
+     */
+    public static String convertJsonToXml(String jsonText) {
+        return XML.toString(new JSONObject(jsonText));
+    }
+
+    /**
+     * Takes a text string representing a valid XML structure and converts it to an equivalent JSON string.
+     * 
+     * @param xmlText The XML string to convert to JSON.
+     * @return a JSON string representation of the supplied XML string.
+     */
+    public static String convertXmlToJson(String xmlText) {
+        JSONObject jsonObj = XML.toJSONObject(xmlText);
+        return jsonObj.toString();
+    }
 }

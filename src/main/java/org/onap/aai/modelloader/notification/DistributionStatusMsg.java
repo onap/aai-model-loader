@@ -24,52 +24,50 @@ import org.openecomp.sdc.api.consumer.IDistributionStatusMessage;
 import org.openecomp.sdc.utils.DistributionStatusEnum;
 
 public class DistributionStatusMsg implements IDistributionStatusMessage {
-  private DistributionStatusEnum status;
-  private String distributionId;
-  private String consumerId;
-  private String artifactUrl;
 
-  /**
-   * Creates a new DistributionStatusMsg instance.
-   * 
-   * @param status         - The distribution status to be reported.
-   * @param distributionId - The identifier of the distribution who's status is being rported on.
-   * @param consumerId     - Identifier of the consumer associated with the distribution.
-   * @param artifactUrl    - Resource identifier for the artifact.
-   */
-  public DistributionStatusMsg(DistributionStatusEnum status, 
-                               String distributionId,
-                               String consumerId, 
-                               String artifactUrl) {
-    this.status = status;
-    this.distributionId = distributionId;
-    this.consumerId = consumerId;
-    this.artifactUrl = artifactUrl;
-  }
+    private DistributionStatusEnum status;
+    private String distributionId;
+    private String consumerId;
+    private String artifactUrl;
 
-  @Override
-  public long getTimestamp() {
-    long currentTimeMillis = System.currentTimeMillis();
-    return currentTimeMillis;
-  }
+    /**
+     * Creates a new DistributionStatusMsg instance.
+     *
+     * @param status - The distribution status to be reported.
+     * @param distributionId - The identifier of the distribution who's status is being rported on.
+     * @param consumerId - Identifier of the consumer associated with the distribution.
+     * @param artifactUrl - Resource identifier for the artifact.
+     */
+    public DistributionStatusMsg(DistributionStatusEnum status, String distributionId, String consumerId,
+            String artifactUrl) {
+        this.status = status;
+        this.distributionId = distributionId;
+        this.consumerId = consumerId;
+        this.artifactUrl = artifactUrl;
+    }
 
-  @Override
-  public DistributionStatusEnum getStatus() {
-    return status;
-  }
+    @Override
+    public long getTimestamp() {
+        return System.currentTimeMillis();
+    }
 
-  @Override
-  public String getDistributionID() {
-    return distributionId;
-  }
+    @Override
+    public DistributionStatusEnum getStatus() {
+        return status;
+    }
 
-  @Override
-  public String getConsumerID() {
-    return consumerId;
-  }
-  
-  @Override
-  public String getArtifactURL() {
-    return artifactUrl;
-  }
+    @Override
+    public String getDistributionID() {
+        return distributionId;
+    }
+
+    @Override
+    public String getConsumerID() {
+        return consumerId;
+    }
+
+    @Override
+    public String getArtifactURL() {
+        return artifactUrl;
+    }
 }

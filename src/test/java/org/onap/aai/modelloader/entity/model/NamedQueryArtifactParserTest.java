@@ -25,40 +25,37 @@ import static org.junit.Assert.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-
 import org.junit.Test;
 import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.modelloader.entity.model.NamedQueryArtifact;
-import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
 
 public class NamedQueryArtifactParserTest {
 
-	@Test
-	public void testParseNamedQuery() throws Exception {
-		final String MODEL_FILE = "src/test/resources/models/named-query-wan-connector.xml";
+    @Test
+    public void testParseNamedQuery() throws Exception {
+        final String MODEL_FILE = "src/test/resources/models/named-query-wan-connector.xml";
 
-		try {
-			byte[] xmlBytes = Files.readAllBytes(Paths.get(MODEL_FILE));
+        try {
+            String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE)));
 
-			NamedQueryArtifactParser parser = new NamedQueryArtifactParser();
-			List<Artifact> modelList = parser.parse(xmlBytes, "test-artifact");
+            NamedQueryArtifactParser parser = new NamedQueryArtifactParser();
+            List<Artifact> modelList = parser.parse(fileString, "test-artifact");
 
-			assertTrue(modelList.size() == 1);
+            assertTrue(modelList.size() == 1);
 
-			NamedQueryArtifact model = (NamedQueryArtifact) modelList.get(0);
-			System.out.println(model.toString());
+            NamedQueryArtifact model = (NamedQueryArtifact) modelList.get(0);
+            System.out.println(model.toString());
 
-			assertTrue(model.getNamedQueryUuid().equalsIgnoreCase("94cac189-8d88-4d63-a194-f44214e080ff"));
-			assertTrue(model.getType().toString().equalsIgnoreCase("NAMED_QUERY"));
-			assertTrue(model.getDependentModelIds().size() == 4);
-			assertTrue(model.getDependentModelIds().contains("d09dd9da-0148-46cd-a947-591afc844d24"));
-			assertTrue(model.getDependentModelIds().contains("997fc7-fca1-451f-b953-9a1e6197b4d6"));
-			assertTrue(model.getDependentModelIds().contains("897df7ea-8938-42b0-bc57-46e913a4d93b"));
-			assertTrue(model.getDependentModelIds().contains("f2b24d95-c582-48d5-b2d6-c5b3a94ce812"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertTrue(false);
-		}
-	}
+            assertTrue(model.getNamedQueryUuid().equalsIgnoreCase("94cac189-8d88-4d63-a194-f44214e080ff"));
+            assertTrue(model.getType().toString().equalsIgnoreCase("NAMED_QUERY"));
+            assertTrue(model.getDependentModelIds().size() == 4);
+            assertTrue(model.getDependentModelIds().contains("d09dd9da-0148-46cd-a947-591afc844d24"));
+            assertTrue(model.getDependentModelIds().contains("997fc7-fca1-451f-b953-9a1e6197b4d6"));
+            assertTrue(model.getDependentModelIds().contains("897df7ea-8938-42b0-bc57-46e913a4d93b"));
+            assertTrue(model.getDependentModelIds().contains("f2b24d95-c582-48d5-b2d6-c5b3a94ce812"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+    }
 
 }

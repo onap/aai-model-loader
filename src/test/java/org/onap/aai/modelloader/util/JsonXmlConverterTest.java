@@ -26,10 +26,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.junit.Test;
 import org.onap.aai.modelloader.util.JsonXmlConverter;
 import org.w3c.dom.Document;
@@ -38,43 +36,44 @@ import org.w3c.dom.NodeList;
 
 public class JsonXmlConverterTest {
 
-  @Test
-  public void testConversion() throws Exception {
-	final String XML_MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
-	final String JSON_MODEL_FILE = "src/test/resources/models/l3-network-widget.json";
+    @Test
+    public void testConversion() throws Exception {
+        final String XML_MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
+        final String JSON_MODEL_FILE = "src/test/resources/models/l3-network-widget.json";
 
-    try {
-      byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
-      String originalXML = new String(encoded);
+        try {
+            byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
+            String originalXML = new String(encoded);
 
-      assertFalse(JsonXmlConverter.isValidJson(originalXML));
+            assertFalse(JsonXmlConverter.isValidJson(originalXML));
 
-      encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
-      String originalJSON = new String(encoded);
+            encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
+            String originalJSON = new String(encoded);
 
-      assertTrue(JsonXmlConverter.isValidJson(originalJSON));
+            assertTrue(JsonXmlConverter.isValidJson(originalJSON));
 
-      String xmlFromJson = JsonXmlConverter.convertJsonToXml(originalJSON);
+            String xmlFromJson = JsonXmlConverter.convertJsonToXml(originalJSON);
 
-      // Spot check one of the attributes
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      Document doc = builder.parse(new ByteArrayInputStream(xmlFromJson.getBytes()));
-      NodeList nodeList = doc.getDocumentElement().getChildNodes();
+            // Spot check one of the attributes
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new ByteArrayInputStream(xmlFromJson.getBytes()));
+            NodeList nodeList = doc.getDocumentElement().getChildNodes();
 
-      String modelVid = "notFound";
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        Node currentNode = nodeList.item(i);
-        if (currentNode.getNodeName().equals("model-invariant-id")) {
-          modelVid = currentNode.getTextContent();
-          break;
+            String modelVid = "notFound";
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node currentNode = nodeList.item(i);
+                if (currentNode.getNodeName().equals("model-invariant-id")) {
+                    modelVid = currentNode.getTextContent();
+                    break;
+                }
+            }
+
+            assertTrue(modelVid.equals("3d560d81-57d0-438b-a2a1-5334dba0651a"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
         }
-      }
-
-      assertTrue(modelVid.equals("3d560d81-57d0-438b-a2a1-5334dba0651a"));
-    } catch (Exception e) {
-      e.printStackTrace();
-      assertTrue(false);
     }
-  }
 }

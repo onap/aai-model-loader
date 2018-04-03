@@ -21,8 +21,8 @@
 package org.onap.aai.modelloader.entity;
 
 public enum ArtifactType {
-  MODEL,
-  MODEL_V8,
-  NAMED_QUERY, 
-  VNF_CATALOG;
+    MODEL,
+    MODEL_V8,
+    NAMED_QUERY,
+    VNF_CATALOG;
 }

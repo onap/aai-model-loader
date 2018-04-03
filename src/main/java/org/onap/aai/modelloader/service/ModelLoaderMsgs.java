@@ -21,88 +21,100 @@
 package org.onap.aai.modelloader.service;
 
 import com.att.eelf.i18n.EELFResourceManager;
-
 import org.onap.aai.cl.eelf.LogMessageEnum;
 
 public enum ModelLoaderMsgs implements LogMessageEnum {
 
-  /**
-   * Arguments: None.
-   */
-  LOADING_CONFIGURATION,
+    /**
+     * Arguments: None.
+     */
+    LOADING_CONFIGURATION,
 
-  /**
-   * Arguments: None.
-   */
-  STOPPING_CLIENT,
+    /**
+     * Arguments: None.
+     */
+    STOPPING_CLIENT,
 
-  /**
-   * Arguments: {0} = message.
-   */
-  INITIALIZING,
+    /**
+     * Arguments: {0} = message.
+     */
+    INITIALIZING,
 
-  /**
-   * Arguments: {0} = reason.
-   */
-  ASDC_CONNECTION_ERROR,
+    /**
+     * Arguments: {0} = reason.
+     */
+    ASDC_CONNECTION_ERROR,
 
-  /**
-   * Arguments: {0} = message.
-   */
-  DISTRIBUTION_EVENT,
+    /**
+     * Arguments: {0} = message.
+     */
+    DISTRIBUTION_EVENT,
 
-  /**
-   * Arguments: {0} = error message.
-   */
-  DISTRIBUTION_EVENT_ERROR, 
-  
-  /**
-    * Arguments: {0} = request type.
-    *            {1} = endpoint. 
-    *            {2} = result code.
-    */
-  AAI_REST_REQUEST_SUCCESS,
+    /**
+     * Arguments: {0} = error message.
+     */
+    DISTRIBUTION_EVENT_ERROR,
 
-  /**
-   * Arguments: {0} = request type. 
-   *            {1} = endpoint. 
-   *            {2} = result code. 
-   *            {3} = result.
-   * message
-   */
-  AAI_REST_REQUEST_UNSUCCESSFUL,
+    /**
+     * Arguments: {0} = request type. {1} = endpoint. {2} = result code.
+     */
+    AAI_REST_REQUEST_SUCCESS,
 
-  /**
-   * Arguments: {0} = request type. 
-   *            {1} = endpoint.
-   *            {2} = error message.
-   */
-  AAI_REST_REQUEST_ERROR,
+    /**
+     * Arguments: {0} = request type. {1} = endpoint. {2} = result code. {3} = result. message
+     */
+    AAI_REST_REQUEST_UNSUCCESSFUL,
 
-  /**
-   * Arguments:
-   * {0} = artifact name
-   */
-  ARTIFACT_PARSE_ERROR,
-  
-  /**
-   * Arguments: {0} = artifact name. 
-   *            {1} = result.
-   */
-  DOWNLOAD_COMPLETE,
+    /**
+     * Arguments: {0} = request type. {1} = endpoint. {2} = error message.
+     */
+    AAI_REST_REQUEST_ERROR,
 
-  /**
-   * Arguments: {0} = event. 
-   *            {1} = artifact name. 
-   *            {2} = result.
-   */
-  EVENT_PUBLISHED;
+    /**
+     * Arguments: {0} = request type. {1} = endpoint. {2} = error message.
+     */
+    BABEL_REST_REQUEST_ERROR,
+    
+    /**
+     * Arguments: {0} = info request payload.
+     **/
+    AAI_REST_REQUEST_PAYLOAD,
 
-  /**
-   * Load message bundle (ModelLoaderMsgs.properties file)
-   */
-  static {
-    EELFResourceManager.loadMessageBundle("org/openecomp/modelloader/service/ModelLoaderMsgs");
-  }
+    /**
+     * Arguments: {0} = artifact name
+     */
+    ARTIFACT_PARSE_ERROR,
+
+    /**
+     * Arguments: {0} = info request payload.
+     **/
+    BABEL_REST_REQUEST_PAYLOAD,
+
+    /**
+     * Arguments: {0} = info Babel response payload.
+     **/
+    BABEL_RESPONSE_PAYLOAD,
+
+    /**
+     * Arguments: {0} = artifact name. {1} = payload.
+     */
+    DOWNLOAD_COMPLETE,
+
+    /**
+     * Arguments: {0} = event. {1} = artifact name. {2} = result.
+     */
+    EVENT_PUBLISHED,
+
+    /**
+     * Arguments: {0} = artifact name. {1} = artifact type.
+     */
+    UNSUPPORTED_ARTIFACT_TYPE;
+
+    /**
+     * Load message bundle (ModelLoaderMsgs.properties file)
+     */
+    static {
+        EELFResourceManager.loadMessageBundle("org/onap.aai/modelloader/service/ModelLoaderMsgs");
+    }
 
 }

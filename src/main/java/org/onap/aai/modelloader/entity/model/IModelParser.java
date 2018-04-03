@@ -26,5 +26,6 @@ import org.onap.aai.modelloader.entity.Artifact;
 
 @FunctionalInterface
 public interface IModelParser {
-  public List<Artifact> parse(byte[] artifactPayload, String artifactName);
+
+    List<Artifact> parse(String artifactPayload, String artifactName);
 }
