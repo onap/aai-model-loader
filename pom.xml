@@ -300,6 +300,29 @@
 			<url>http://www.evosuite.org/m2</url>
 		</pluginRepository>
 	</pluginRepositories>
+	
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven 2 repository 2</name>
+			<url>http://repo2.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>ecomp-releases</id>
+			<name>ECOMP Release Repository</name>
+			<url>${nexusproxy}/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>ecomp-snapshots</id>
+			<name>ECOMP Snapshot Repository</name>
+			<url>${nexusproxy}/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>ecomp-staging</id>
+			<name>ECOMP Staging Repository</name>
+			<url>${nexusproxy}/content/repositories/staging/</url>
+		</repository>
+	</repositories>
 
 	<profiles>
 		<profile>
@@ -453,7 +476,7 @@
 				<configuration>
 					<verbose>true</verbose>
 					<serverId>docker-hub</serverId>
-					<imageName>${docker.push.registry}/openecomp/${project.artifactId}</imageName>
+					<imageName>${docker.push.registry}/onap/${project.artifactId}</imageName>
 					<dockerDirectory>${docker.location}</dockerDirectory>
 					<imageTags>
 						<imageTag>latest</imageTag>
@@ -524,7 +547,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- license plugin
+			<!-- license plugin -->
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
@@ -545,7 +568,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			 -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
