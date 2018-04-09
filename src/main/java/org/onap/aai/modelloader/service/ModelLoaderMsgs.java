@@ -114,7 +114,7 @@ public enum ModelLoaderMsgs implements LogMessageEnum {
      * Load message bundle (ModelLoaderMsgs.properties file)
      */
     static {
-        EELFResourceManager.loadMessageBundle("org/onap.aai/modelloader/service/ModelLoaderMsgs");
+        EELFResourceManager.loadMessageBundle("org/onap/aai/modelloader/service/ModelLoaderMsgs");
     }
 
 }
