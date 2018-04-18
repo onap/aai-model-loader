@@ -23,6 +23,8 @@ package org.onap.aai.modelloader.notification;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithCatalogFile;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneOfEach;
 
@@ -33,8 +35,8 @@ import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -45,15 +47,12 @@ import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.openecomp.sdc.api.IDistributionClient;
+import org.openecomp.sdc.api.notification.IArtifactInfo;
 import org.openecomp.sdc.api.notification.INotificationData;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 /**
  * Tests {@link ArtifactDeploymentManager }
  */
-@RunWith(PowerMockRunner.class)
 public class ArtifactDeploymentManagerTest {
 
     private static final String CONFIG_FILE = "model-loader.properties";
@@ -73,16 +72,16 @@ public class ArtifactDeploymentManagerTest {
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
         ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
 
-        mockDistributionClient = PowerMockito.mock(IDistributionClient.class);
-        mockModelArtifactHandler = PowerMockito.mock(ModelArtifactHandler.class);
-        mockNotificationPublisher = PowerMockito.mock(NotificationPublisher.class);
-        mockVnfCatalogArtifactHandler = PowerMockito.mock(VnfCatalogArtifactHandler.class);
+        mockDistributionClient = mock(IDistributionClient.class);
+        mockModelArtifactHandler = mock(ModelArtifactHandler.class);
+        mockNotificationPublisher = mock(NotificationPublisher.class);
+        mockVnfCatalogArtifactHandler = mock(VnfCatalogArtifactHandler.class);
 
         manager = new ArtifactDeploymentManager(mockDistributionClient, config);
 
-        Whitebox.setInternalState(manager, mockModelArtifactHandler);
-        Whitebox.setInternalState(manager, mockNotificationPublisher);
-        Whitebox.setInternalState(manager, mockVnfCatalogArtifactHandler);
+        Whitebox.setInternalState(manager, "modelArtifactHandler", mockModelArtifactHandler);
+        Whitebox.setInternalState(manager, "notificationPublisher", mockNotificationPublisher);
+        Whitebox.setInternalState(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
     }
 
     @After
@@ -98,7 +97,7 @@ public class ArtifactDeploymentManagerTest {
 
     private List<BabelArtifact> setupTest(byte[] xml, INotificationData data) throws IOException {
         List<BabelArtifact> toscaArtifacts = new ArrayList<>();
-        org.openecomp.sdc.api.notification.IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
+        IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         BabelArtifact xmlArtifact =
                 new BabelArtifact(artifactInfo.getArtifactName(), BabelArtifact.ArtifactType.MODEL, new String(xml));
@@ -115,10 +114,10 @@ public class ArtifactDeploymentManagerTest {
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
-        PowerMockito.when(mockModelArtifactHandler.pushArtifacts(any(), any(), any(), any())).thenReturn(true);
-        PowerMockito.when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
-                any(), any())).thenReturn(false);
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
+        when(mockModelArtifactHandler.pushArtifacts(any(), any(), any(), any())).thenReturn(true);
+        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+                .thenReturn(false);
+        Mockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
                 data.getServiceArtifacts().get(0));
 
         assertFalse(SHOULD_HAVE_RETURNED_FALSE,
@@ -136,7 +135,6 @@ public class ArtifactDeploymentManagerTest {
                 data.getServiceArtifacts().get(0));
     }
 
-
     private void doFailedCombinedTests(boolean modelsOK, boolean catalogsOK)
             throws IOException, BabelArtifactParsingException, InvalidArchiveException {
         INotificationData data = getNotificationDataWithOneOfEach();
@@ -148,15 +146,14 @@ public class ArtifactDeploymentManagerTest {
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
-        PowerMockito.when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
-                any(), any())).thenReturn(catalogsOK);
-        PowerMockito.when(
-                mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+                .thenReturn(catalogsOK);
+        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(modelsOK);
 
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDeploySuccess(mockDistributionClient, data,
+        Mockito.doNothing().when(mockNotificationPublisher).publishDeploySuccess(mockDistributionClient, data,
                 data.getServiceArtifacts().get(0));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
+        Mockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
                 data.getServiceArtifacts().get(0));
 
         assertFalse(SHOULD_HAVE_RETURNED_FALSE,

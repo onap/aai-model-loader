@@ -26,7 +26,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.babel.service.data.BabelArtifact.ArtifactType;
 import org.onap.aai.cl.api.Logger;
@@ -40,6 +39,7 @@ import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.notification.IArtifactInfo;
@@ -66,10 +66,13 @@ public class ArtifactDownloadManager {
     private NotificationPublisher notificationPublisher;
     private BabelArtifactConverter babelArtifactConverter;
     private ModelLoaderConfig config;
+    private BabelServiceClientFactory clientFactory;
 
-    public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config) {
+    public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config,
+            BabelServiceClientFactory clientFactory) {
         this.client = client;
         this.config = config;
+        this.clientFactory = clientFactory;
     }
 
     /**
@@ -193,12 +196,12 @@ public class ArtifactDownloadManager {
         }
     }
 
-    private BabelServiceClient createBabelServiceClient(IArtifactInfo artifact, String serviceVersion)
+    BabelServiceClient createBabelServiceClient(IArtifactInfo artifact, String serviceVersion)
             throws ProcessToscaArtifactsException {
         BabelServiceClient babelClient;
         try {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel client");
-            babelClient = new BabelServiceClient(config);
+            babelClient = clientFactory.create(config);
         } catch (Exception e) {
             logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
                     "Error posting artifact " + artifact.getArtifactName() + " " + serviceVersion + " to Babel: "

@@ -21,7 +21,6 @@
 package org.onap.aai.modelloader.restclient;
 
 import com.sun.jersey.core.util.MultivaluedMapImpl; // NOSONAR
-// import edu.emory.mathcs.backport.java.util.Collections;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -91,7 +90,7 @@ public class AaiRestClient {
      * @return operation result
      */
     public OperationResult putResource(String url, String payload, String transId, MediaType mediaType) {
-    	logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
+        logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
         return setupClient().put(url, payload, buildHeaders(transId), mediaType, mediaType);
     }
 
@@ -106,7 +105,7 @@ public class AaiRestClient {
      * @return ClientResponse
      */
     public OperationResult postResource(String url, String payload, String transId, MediaType mediaType) {
-    	logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
+        logger.info(ModelLoaderMsgs.AAI_REST_REQUEST_PAYLOAD, payload);
         return setupClient().post(url, payload, buildHeaders(transId), mediaType, mediaType);
     }
 
@@ -180,7 +179,6 @@ public class AaiRestClient {
      * @param transId
      * @return map of headers
      */
-    @SuppressWarnings("unchecked")
     private Map<String, List<String>> buildHeaders(String transId) {
         MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
         headers.put(HEADER_TRANS_ID, Collections.singletonList(transId));

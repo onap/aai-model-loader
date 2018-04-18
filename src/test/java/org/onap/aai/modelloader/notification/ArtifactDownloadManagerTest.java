@@ -22,26 +22,36 @@ package org.onap.aai.modelloader.notification;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithInvalidType;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithModelQuerySpec;
+import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneOfEach;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneService;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClient.BabelServiceException;
+import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.notification.IArtifactInfo;
@@ -49,18 +59,10 @@ import org.openecomp.sdc.api.notification.INotificationData;
 import org.openecomp.sdc.api.results.IDistributionClientDownloadResult;
 import org.openecomp.sdc.impl.DistributionClientDownloadResultImpl;
 import org.openecomp.sdc.utils.DistributionActionResultEnum;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 /**
  * Tests {@link ArtifactDownloadManager}
  */
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"sun.security.ssl.*", "javax.net.ssl.*"})
-@PrepareForTest({ArtifactDownloadManager.class})
 public class ArtifactDownloadManagerTest {
 
     private static final String FALSE_SHOULD_HAVE_BEEN_RETURNED = "A value of 'false' should have been returned";
@@ -72,23 +74,24 @@ public class ArtifactDownloadManagerTest {
     private IDistributionClient mockDistributionClient;
     private NotificationPublisher mockNotificationPublisher;
     private BabelArtifactConverter mockBabelArtifactConverter;
+    private BabelServiceClientFactory mockClientFactory;
 
     @Before
     public void setup() throws Exception {
-        mockBabelClient = PowerMockito.mock(BabelServiceClient.class);
-        mockDistributionClient = PowerMockito.mock(IDistributionClient.class);
-        mockNotificationPublisher = PowerMockito.mock(NotificationPublisher.class);
-        mockBabelArtifactConverter = PowerMockito.mock(BabelArtifactConverter.class);
+        mockBabelClient = mock(BabelServiceClient.class);
+        mockDistributionClient = mock(IDistributionClient.class);
+        mockNotificationPublisher = mock(NotificationPublisher.class);
+        mockBabelArtifactConverter = mock(BabelArtifactConverter.class);
+        mockClientFactory = mock(BabelServiceClientFactory.class);
+        when(mockClientFactory.create(Mockito.any())).thenReturn(mockBabelClient);
 
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
-        downloadManager =
-                new ArtifactDownloadManager(mockDistributionClient, new ModelLoaderConfig(configProperties, "."));
+        downloadManager = new ArtifactDownloadManager(mockDistributionClient,
+                new ModelLoaderConfig(configProperties, "."), mockClientFactory);
 
-        PowerMockito.whenNew(BabelServiceClient.class).withAnyArguments().thenReturn(mockBabelClient);
-
-        Whitebox.setInternalState(downloadManager, mockNotificationPublisher);
-        Whitebox.setInternalState(downloadManager, mockBabelArtifactConverter);
+        Whitebox.setInternalState(downloadManager, "notificationPublisher", mockNotificationPublisher);
+        Whitebox.setInternalState(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
     }
 
     @After
@@ -114,10 +117,10 @@ public class ArtifactDownloadManagerTest {
     public void downloadArtifacts_artifactDownloadFails() {
         INotificationData data = getNotificationDataWithOneService();
         IArtifactInfo artifact = data.getServiceArtifacts().get(0);
-        PowerMockito.when(mockDistributionClient.download(artifact))
+        when(mockDistributionClient.download(artifact))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.FAIL, OOPS, null));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadFailure(mockDistributionClient, data,
-                artifact, OOPS);
+        doNothing().when(mockNotificationPublisher).publishDownloadFailure(mockDistributionClient, data, artifact,
+                OOPS);
 
         assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
                 downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), null, null));
@@ -137,15 +140,19 @@ public class ArtifactDownloadManagerTest {
         return downloadResult;
     }
 
+    @Test
+    public void downloadArtifacts_noSuchAlgorithmExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(NoSuchAlgorithmException.class);
+    }
+
     @SuppressWarnings("unchecked")
     private void doCreateBabelClientFailureTest(Class<? extends Throwable> exception) throws Exception {
-        PowerMockito.whenNew(BabelServiceClient.class).withAnyArguments().thenThrow(exception);
+        when(mockClientFactory.create(Mockito.any())).thenThrow(exception);
 
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
         setupValidDownloadCsarMocks(data, artifactInfo, new ArtifactTestUtils());
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                artifactInfo);
+        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
 
         assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
                 downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), null, null));
@@ -157,9 +164,34 @@ public class ArtifactDownloadManagerTest {
         Mockito.verifyZeroInteractions(mockBabelArtifactConverter);
     }
 
+    @Test
+    public void downloadArtifacts_keyStoreExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(KeyStoreException.class);
+    }
+
+    @Test
+    public void downloadArtifacts_certificateExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(CertificateException.class);
+    }
+
+    @Test
+    public void downloadArtifacts_iOExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(IOException.class);
+    }
+
+    @Test
+    public void downloadArtifacts_unrecoverableKeyExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(UnrecoverableKeyException.class);
+    }
+
+    @Test
+    public void downloadArtifacts_keyManagementExceptionFromCreatingBabelClient() throws Exception {
+        doCreateBabelClientFailureTest(KeyManagementException.class);
+    }
+
     /**
      * Test disabled as exception handling needs to be reworked
-     * 
+     *
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
@@ -167,14 +199,12 @@ public class ArtifactDownloadManagerTest {
     public void downloadArtifacts_invalidToscaCsarFile() throws IOException, BabelServiceException {
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifact = data.getServiceArtifacts().get(0);
-        PowerMockito.when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
+        when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
                 DistributionActionResultEnum.SUCCESS, null, "This is not a valid Tosca CSAR File".getBytes()));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
-                artifact);
-        PowerMockito.when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+        doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
+        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
                 Matchers.anyString())).thenThrow(BabelServiceException.class);
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                artifact);
+        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
         assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
                 downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), null, null));
@@ -196,10 +226,9 @@ public class ArtifactDownloadManagerTest {
 
         List<org.onap.aai.modelloader.entity.Artifact> modelArtifacts = new ArrayList<>();
 
-        PowerMockito.when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
+        when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
                 DistributionActionResultEnum.SUCCESS, null, "This is not a valid Model Query Spec".getBytes()));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
-                artifact);
+        doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
 
         assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
                 downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, null));
@@ -211,14 +240,35 @@ public class ArtifactDownloadManagerTest {
         Mockito.verifyZeroInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 
+    @Test
+    public void downloadArtifacts_validToscaCsarFile()
+            throws IOException, BabelServiceException, BabelArtifactParsingException {
+        INotificationData data = getNotificationDataWithToscaCsarFile();
+        IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
+
+        setupValidDownloadCsarMocks(data, artifactInfo, new ArtifactTestUtils());
+
+        List<org.onap.aai.modelloader.entity.Artifact> modelArtifacts = new ArrayList<>();
+        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
+        assertTrue(TRUE_SHOULD_HAVE_BEEN_RETURNED,
+                downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles));
+
+        assertTrue("There should not have been any catalog files", catalogFiles.size() == 0);
+
+        Mockito.verify(mockDistributionClient).download(artifactInfo);
+        Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifactInfo);
+        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
+        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(Matchers.any());
+    }
+
     private void setupValidDownloadCsarMocks(INotificationData data, IArtifactInfo artifactInfo,
             ArtifactTestUtils artifactTestUtils) throws IOException, BabelServiceException {
-        PowerMockito.when(mockDistributionClient.download(artifactInfo))
+        when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
-                artifactInfo);
-        PowerMockito.when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
                 Matchers.anyString())).thenReturn(createBabelArtifacts());
     }
 
@@ -253,14 +303,76 @@ public class ArtifactDownloadManagerTest {
 
     private void setupValidModelQuerySpecMocks(ArtifactTestUtils artifactTestUtils, INotificationData data,
             IArtifactInfo artifact) throws IOException {
-        PowerMockito.when(mockDistributionClient.download(artifact))
+        when(mockDistributionClient.download(artifact))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         artifactTestUtils.loadResource("models/named-query-wan-connector.xml")));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
-                artifact);
+        doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
     }
 
+    @Test
+    public void downloadArtifacts_validCsarAndModelFiles()
+            throws IOException, BabelServiceException, BabelArtifactParsingException {
+        ArtifactTestUtils artifactTestUtils = new ArtifactTestUtils();
+        INotificationData data = getNotificationDataWithOneOfEach();
+        List<IArtifactInfo> artifacts = new ArrayList<>();
 
+        IArtifactInfo serviceArtifact = data.getServiceArtifacts().get(0);
+        IArtifactInfo modelSpecArtifact = data.getResources().get(1).getArtifacts().get(0);
+
+        artifacts.add(serviceArtifact);
+        artifacts.add(modelSpecArtifact);
+
+        setupValidDownloadCsarMocks(data, serviceArtifact, artifactTestUtils);
+        setupValidModelQuerySpecMocks(artifactTestUtils, data, modelSpecArtifact);
+
+        List<org.onap.aai.modelloader.entity.Artifact> modelFiles = new ArrayList<>();
+        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
+        assertTrue(TRUE_SHOULD_HAVE_BEEN_RETURNED,
+                downloadManager.downloadArtifacts(data, artifacts, modelFiles, catalogFiles));
+
+        Mockito.verify(mockDistributionClient).download(serviceArtifact);
+        Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, serviceArtifact);
+        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
+        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(Matchers.any());
+
+        Mockito.verify(mockDistributionClient).download(modelSpecArtifact);
+        Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
+                modelSpecArtifact);
+
+        Mockito.verifyNoMoreInteractions(mockBabelClient, mockBabelArtifactConverter);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void activateCallback_toscaToModelConverterHasProcessToscaArtifactsException() throws Exception {
+        ArtifactTestUtils artifactTestUtils = new ArtifactTestUtils();
+        INotificationData data = getNotificationDataWithToscaCsarFile();
+        IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
+
+        when(mockDistributionClient.download(artifactInfo))
+                .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
+                        artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
+        when(mockBabelArtifactConverter.convertToModel(Mockito.anyList()))
+                .thenThrow(BabelArtifactParsingException.class);
+        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
+        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString())).thenReturn(createBabelArtifacts());
+
+        List<org.onap.aai.modelloader.entity.Artifact> modelArtifacts = new ArrayList<>();
+        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
+        assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
+                downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles));
+
+        assertTrue("There should not have been any catalog files", catalogFiles.size() == 0);
+
+        Mockito.verify(mockDistributionClient).download(artifactInfo);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
+        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
+    }
 
     @Test
     public void downloadArtifacts_invalidType()
@@ -270,10 +382,9 @@ public class ArtifactDownloadManagerTest {
 
         List<org.onap.aai.modelloader.entity.Artifact> catalogArtifacts = new ArrayList<>();
 
-        PowerMockito.when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
+        when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
                 DistributionActionResultEnum.SUCCESS, null, "This content does not matter.".getBytes()));
-        PowerMockito.doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
-                artifact);
+        doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
 
         assertFalse(FALSE_SHOULD_HAVE_BEEN_RETURNED,
                 downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), null, catalogArtifacts));

@@ -20,6 +20,7 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -27,12 +28,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
+import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.openecomp.sdc.api.notification.INotificationData;
-import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Tests {@link BabelArtifactConverter}
@@ -49,7 +51,6 @@ public class BabelArtifactConverterTest {
     public void convert_emptyToscaFiles() throws BabelArtifactParsingException {
         assertTrue("Nothing should have been returned",
                 new BabelArtifactConverter().convertToModel(new ArrayList<>()).isEmpty());
-        PowerMockito.verifyStatic(Mockito.times(1));
     }
 
     @Test(expected = BabelArtifactParsingException.class)

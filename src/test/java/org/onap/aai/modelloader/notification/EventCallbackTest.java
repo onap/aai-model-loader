@@ -20,27 +20,28 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.notification.INotificationData;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 /**
  * Tests {@link EventCallback}
  */
-@RunWith(PowerMockRunner.class)
 public class EventCallbackTest {
 
     private static final String CONFIG_FILE = "model-loader.properties";
@@ -59,14 +60,14 @@ public class EventCallbackTest {
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
         config = new ModelLoaderConfig(configProperties, null);
 
-        mockArtifactDeploymentManager = PowerMockito.mock(ArtifactDeploymentManager.class);
-        mockArtifactDownloadManager = PowerMockito.mock(ArtifactDownloadManager.class);
-        mockDistributionClient = PowerMockito.mock(IDistributionClient.class);
+        mockArtifactDeploymentManager = mock(ArtifactDeploymentManager.class);
+        mockArtifactDownloadManager = mock(ArtifactDownloadManager.class);
+        mockDistributionClient = mock(IDistributionClient.class);
 
         eventCallback = new EventCallback(mockDistributionClient, config);
 
-        Whitebox.setInternalState(eventCallback, mockArtifactDeploymentManager);
-        Whitebox.setInternalState(eventCallback, mockArtifactDownloadManager);
+        Whitebox.setInternalState(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
+        Whitebox.setInternalState(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
     }
 
     @After
@@ -84,14 +85,13 @@ public class EventCallbackTest {
     public void activateCallback_downloadFails() {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        PowerMockito.when(mockArtifactDownloadManager.downloadArtifacts(Mockito.any(INotificationData.class),
-                Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class)))
-                .thenReturn(false);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
+                any(List.class), any(List.class))).thenReturn(false);
 
         eventCallback.activateCallback(data);
 
-        Mockito.verify(mockArtifactDownloadManager).downloadArtifacts(Mockito.any(INotificationData.class),
-                Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class));
+        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
+                any(List.class), any(List.class));
         Mockito.verifyZeroInteractions(mockArtifactDeploymentManager);
     }
 
@@ -100,20 +100,17 @@ public class EventCallbackTest {
     public void activateCallback() throws BabelArtifactParsingException {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        PowerMockito.when(mockArtifactDownloadManager.downloadArtifacts(Mockito.any(INotificationData.class),
-                Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class)))
-                .thenReturn(true);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
+                any(List.class), any(List.class))).thenReturn(true);
 
-        PowerMockito
-                .when(mockArtifactDeploymentManager.deploy(Mockito.any(INotificationData.class),
-                        Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class)))
-                .thenReturn(true);
+        when(mockArtifactDeploymentManager.deploy(any(INotificationData.class), any(List.class), any(List.class),
+                any(List.class))).thenReturn(true);
 
         eventCallback.activateCallback(data);
 
-        Mockito.verify(mockArtifactDownloadManager).downloadArtifacts(Mockito.any(INotificationData.class),
-                Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class));
-        Mockito.verify(mockArtifactDeploymentManager).deploy(Mockito.any(INotificationData.class),
-                Mockito.any(List.class), Mockito.any(List.class), Mockito.any(List.class));
+        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
+                any(List.class), any(List.class));
+        verify(mockArtifactDeploymentManager).deploy(any(INotificationData.class), any(List.class), any(List.class),
+                any(List.class));
     }
 }

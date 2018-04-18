@@ -28,6 +28,7 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.extraction.ArtifactInfoExtractor;
+import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.consumer.INotificationCallback;
@@ -58,8 +59,8 @@ public class EventCallback implements INotificationCallback {
         List<Artifact> catalogArtifacts = new ArrayList<>();
         List<Artifact> modelArtifacts = new ArrayList<>();
 
-        boolean success = getArtifactDownloadManager()
-                .downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
+        boolean success =
+                getArtifactDownloadManager().downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
 
         if (success) {
             success = getArtifactDeploymentManager().deploy(data, artifacts, modelArtifacts, catalogArtifacts);
@@ -75,13 +76,12 @@ public class EventCallback implements INotificationCallback {
         if (artifactDeploymentManager == null) {
             artifactDeploymentManager = new ArtifactDeploymentManager(client, config);
         }
-
         return artifactDeploymentManager;
     }
 
     private ArtifactDownloadManager getArtifactDownloadManager() {
         if (artifactDownloadManager == null) {
-            artifactDownloadManager = new ArtifactDownloadManager(client, config);
+            artifactDownloadManager = new ArtifactDownloadManager(client, config, new BabelServiceClientFactory());
         }
 
         return artifactDownloadManager;

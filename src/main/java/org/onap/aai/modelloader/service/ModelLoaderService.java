@@ -39,6 +39,7 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.notification.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
 import org.onap.aai.modelloader.notification.EventCallback;
+import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
 import org.openecomp.sdc.api.IDistributionClient;
 import org.openecomp.sdc.api.notification.IArtifactInfo;
 import org.openecomp.sdc.api.notification.INotificationData;
@@ -196,8 +197,8 @@ public class ModelLoaderService implements ModelLoaderInterface {
 
                 logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Generating xml models from test artifact");
 
-                new ArtifactDownloadManager(client, config).processToscaArtifacts(modelArtifacts, catalogArtifacts,
-                        csarFile, artifactInfo, "test-transaction-id", modelVersion);
+                new ArtifactDownloadManager(client, config, new BabelServiceClientFactory()).processToscaArtifacts(
+                        modelArtifacts, catalogArtifacts, csarFile, artifactInfo, "test-transaction-id", modelVersion);
 
                 List<IArtifactInfo> artifacts = new ArrayList<>();
                 artifacts.add(artifactInfo);
