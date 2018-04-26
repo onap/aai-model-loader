@@ -18,28 +18,32 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.fixture;
+package org.onap.aai.modelloader.entity.catalog;
 
-import java.util.List;
-import org.onap.sdc.api.notification.IArtifactInfo;
-import org.onap.sdc.api.notification.IResourceInstance;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
 
 /**
- * This class builds an instance of IArtifactInfo for test purposes.
+ * Tests for NotificationDataImpl class
+ *
  */
-class ResourceInstanceBuilder {
+public class TestVnfImageException {
 
-    /**
-     * Builds an implementation of IResourceInstance for test purposes.
-     *
-     * @param artifacts collection of artifacts that make up the resource
-     * @return IResourceInstance implementation of IResourceInstance for test purposes
-     */
-    static IResourceInstance build(final List<IArtifactInfo> artifacts) {
-        IResourceInstance instance = new TestResourceInstanceImpl();
+    @Test
+    public void testConstructors() {
+        VnfImageException exception = new VnfImageException("id");
+        assertThat(exception.getImageId(), is(equalTo("id")));
 
-        ((TestResourceInstanceImpl) instance).setArtifacts(artifacts);
+        exception = new VnfImageException("id2", 1);
+        assertThat(exception.getImageId(), is(equalTo("id2")));
+        assertThat(exception.getResultCode().get(), is(equalTo(1)));
 
-        return instance;
+        Exception e = new Exception("message");
+        exception = new VnfImageException(e);
+        assertThat(exception.getImageId(), is(equalTo("message")));
     }
+
 }

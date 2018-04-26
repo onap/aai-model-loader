@@ -18,28 +18,20 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.fixture;
+package org.onap.aai.modelloader.service;
 
-import java.util.List;
-import org.onap.sdc.api.notification.IArtifactInfo;
-import org.onap.sdc.api.notification.IResourceInstance;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * This class builds an instance of IArtifactInfo for test purposes.
+ * Model Loader Spring Boot Application.
  */
-class ResourceInstanceBuilder {
 
-    /**
-     * Builds an implementation of IResourceInstance for test purposes.
-     *
-     * @param artifacts collection of artifacts that make up the resource
-     * @return IResourceInstance implementation of IResourceInstance for test purposes
-     */
-    static IResourceInstance build(final List<IArtifactInfo> artifacts) {
-        IResourceInstance instance = new TestResourceInstanceImpl();
+@SpringBootApplication
+public class ModelLoaderApplication {
 
-        ((TestResourceInstanceImpl) instance).setArtifacts(artifacts);
-
-        return instance;
+    public static void main(String[] args) {
+        SpringApplication.run(ModelLoaderApplication.class, args);
     }
+
 }

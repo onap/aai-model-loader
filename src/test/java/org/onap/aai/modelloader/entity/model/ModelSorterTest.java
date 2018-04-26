@@ -1,29 +1,33 @@
 /**
- * ============LICENSE_START==========================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
- * ===================================================================
+ * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
- * ===================================================================
+ * Copyright © 2017-2018 European Software Marketing Ltd.
+ * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ============LICENSE_END============================================
+ * ============LICENSE_END=========================================================
  */
 package org.onap.aai.modelloader.entity.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
@@ -32,140 +36,101 @@ import org.onap.aai.modelloader.entity.Artifact;
 public class ModelSorterTest {
 
     @Test
-    public void noModels() {
+    public void edgeEquality() throws BabelArtifactParsingException {
+        ModelArtifact model = buildTestModel();
+        ModelSorter.Node nodeA = new ModelSorter.Node(model);
+        ModelSorter.Node nodeB = new ModelSorter.Node(model);
+        ModelSorter.Node nodeC = new ModelSorter.Node(model);
 
-        List<Artifact> emptyList = Collections.emptyList();
+        ModelSorter.Edge edgeA = new ModelSorter.Edge(nodeA, nodeB);
+        ModelSorter.Edge edgeB = new ModelSorter.Edge(nodeA, nodeB);
+        ModelSorter.Edge edgeC = new ModelSorter.Edge(nodeB, nodeA);
+        ModelSorter.Edge edgeD = new ModelSorter.Edge(nodeA, nodeC);
 
-        ModelSorter sorter = new ModelSorter();
-        sorter = new ModelSorter();
+        assertThat(edgeA, is(equalTo(edgeA)));
+        assertThat(edgeA, is(not(equalTo(null))));
+        assertThat(edgeA, is(not(equalTo(model))));
 
-        List<Artifact> sortedList = sorter.sort(emptyList);
-        assertNotNull(sortedList);
-        assertEquals(0, sortedList.size());
-
+        assertThat(edgeA, is(equalTo(edgeB)));
+        assertThat(edgeA, is(not(equalTo(edgeC))));
+        assertThat(edgeA, is(not(equalTo(edgeD))));
     }
 
     @Test
-    public void singleModel() {
+    public void nodeEquality() throws BabelArtifactParsingException {
+        ModelArtifact model = buildTestModel();
+        ModelSorter.Node nodeA = new ModelSorter.Node(model);
+        ModelSorter.Node nodeB = new ModelSorter.Node(model);
 
-        List<Artifact> modelList = new ArrayList<Artifact>();
+        assertThat(nodeA, is(equalTo(nodeA)));
+        assertThat(nodeA, is(not(equalTo(null))));
+        assertThat(nodeA, is(not(equalTo(model))));
 
-        ModelArtifact model = new ModelArtifact();
-        model.setModelInvariantId("aaa");
-        model.setModelVerId("111");
-        model.addDependentModelId("xyz|123");
-        modelList.add(model);
-
-        ModelSorter sorter = new ModelSorter();
-        sorter = new ModelSorter();
-
-        List<Artifact> sortedList = sorter.sort(modelList);
-        assertNotNull(sortedList);
-        assertEquals(1, sortedList.size());
-
-    }
-
-    /**
-     * depends on depends on B ------> A -------> C
-     *
-     *
-     * Input list = a, b, c Sorted list = c, a, b
-     */
-    @Test
-    public void multipleModels() {
-
-        List<Artifact> modelList = new ArrayList<Artifact>();
-
-        ModelArtifact aaaa = new ModelArtifact();
-        aaaa.setModelInvariantId("aaaa");
-        aaaa.setModelVerId("mvaaaa");
-        aaaa.addDependentModelId("cccc|mvcccc");
-
-        ModelArtifact bbbb = new ModelArtifact();
-        bbbb.setModelInvariantId("bbbb");
-        bbbb.setModelVerId("mvbbbb");
-        bbbb.addDependentModelId("aaaa|mvaaaa");
-
-        ModelArtifact cccc = new ModelArtifact();
-        cccc.setModelInvariantId("cccc");
-        cccc.setModelVerId("mvcccc");
-
-        modelList.add(aaaa);
-        modelList.add(bbbb);
-        modelList.add(cccc);
-
-        ModelSorter sorter = new ModelSorter();
-        sorter = new ModelSorter();
-
-        List<Artifact> sortedList = sorter.sort(modelList);
-        assertNotNull(sortedList);
-        assertEquals(3, sortedList.size());
-
-        assertEquals(cccc, sortedList.get(0));
-        assertEquals(aaaa, sortedList.get(1));
-        assertEquals(bbbb, sortedList.get(2));
+        assertThat(nodeA, is(equalTo(nodeB)));
+        assertThat(nodeA.toString(), is(equalTo(nodeB.toString())));
+        assertThat(nodeA, is(not(equalTo(new ModelSorter.Node(new ModelArtifact())))));
     }
 
     @Test
-    public void multipleModelsAndNamedQueries() {
-
-        List<Artifact> modelList = new ArrayList<Artifact>();
-
-        ModelArtifact aaaa = new ModelArtifact();
-        aaaa.setModelInvariantId("aaaa");
-        aaaa.setModelVerId("1111");
-        aaaa.addDependentModelId("cccc|2222");
-
-        NamedQueryArtifact nq1 = new NamedQueryArtifact();
-        nq1.setNamedQueryUuid("nq1");
-        nq1.addDependentModelId("aaaa|1111");
-
-        NamedQueryArtifact nq2 = new NamedQueryArtifact();
-        nq2.setNamedQueryUuid("nq2");
-        nq2.addDependentModelId("existing-model");
-
-        modelList.add(nq1);
-        modelList.add(nq2);
-        modelList.add(aaaa);
-
-        ModelSorter sorter = new ModelSorter();
-        sorter = new ModelSorter();
-
-        List<Artifact> sortedList = sorter.sort(modelList);
-        assertNotNull(sortedList);
-        assertEquals(3, sortedList.size());
-
-        System.out.println(sortedList.get(0) + "-" + sortedList.get(1) + "-" + sortedList.get(2));
-        assertEquals(aaaa, sortedList.get(0));
-        assertEquals(nq2, sortedList.get(1));
-        assertEquals(nq1, sortedList.get(2));
+    public void noModels() throws BabelArtifactParsingException {
+        assertThat(new ModelSorter().sort(null), is(nullValue()));
+        assertThat(new ModelSorter().sort(Collections.emptyList()).size(), is(0));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void circularDependency() {
+    @Test
+    public void singleModel() throws BabelArtifactParsingException {
+        assertThat(new ModelSorter().sort(Arrays.asList(buildTestModel())).size(), is(1));
+    }
 
+    @Test
+    public void multipleModels() throws BabelArtifactParsingException {
+        Artifact a = buildTestModel("aaaa", "mvaaaa", "cccc|mvcccc");
+        Artifact b = buildTestModel("bbbb", "mvbbbb", "aaaa|mvaaaa");
+        Artifact c = buildTestModel("cccc", "mvcccc");
+        List<Artifact> expected = Arrays.asList(c, a, b);
+        assertThat(new ModelSorter().sort(Arrays.asList(a, b, c)), is(expected));
+    }
+
+    @Test
+    public void multipleModelsAndNamedQueries() throws BabelArtifactParsingException {
+        Artifact a = buildTestModel("aaaa", "1111", "cccc|2222");
+        Artifact nq1 = buildTestNamedQuery("nq1", "aaaa|1111");
+        Artifact nq2 = buildTestNamedQuery("nqw", "existing-model");
+        List<Artifact> expected = Arrays.asList(a, nq2, nq1);
+        assertThat(new ModelSorter().sort(Arrays.asList(nq1, nq2, a)), is(expected));
+    }
+
+    @Test(expected = BabelArtifactParsingException.class)
+    public void circularDependency() throws BabelArtifactParsingException {
         List<Artifact> modelList = new ArrayList<Artifact>();
+        modelList.add(buildTestModel("aaaa", "1111", "bbbb|1111"));
+        modelList.add(buildTestModel("bbbb", "1111", "aaaa|1111"));
+        new ModelSorter().sort(modelList);
+    }
 
-        ModelArtifact aaaa = new ModelArtifact();
-        aaaa.setModelInvariantId("aaaa");
-        aaaa.setModelVerId("1111");
-        aaaa.addDependentModelId("bbbb|1111");
+    private ModelArtifact buildTestModel() {
+        return buildTestModel("aaa", "111", "xyz|123");
+    }
 
-        ModelArtifact bbbb = new ModelArtifact();
-        bbbb.setModelInvariantId("bbbb");
-        bbbb.setModelVerId("1111");
-        bbbb.addDependentModelId("aaaa|1111");
+    private ModelArtifact buildTestModel(String id, String version) {
+        return buildTestModel(id, version, null);
+    }
 
-        modelList.add(aaaa);
-        modelList.add(bbbb);
+    private ModelArtifact buildTestModel(String id, String version, String dependentModel) {
+        ModelArtifact modelArtifact = new ModelArtifact();
+        modelArtifact.setModelInvariantId(id);
+        modelArtifact.setModelVerId(version);
+        if (dependentModel != null) {
+            modelArtifact.addDependentModelId(dependentModel);
+        }
+        return modelArtifact;
+    }
 
-        ModelSorter sorter = new ModelSorter();
-        sorter = new ModelSorter();
-
-        List<Artifact> sortedList = sorter.sort(modelList);
-        assertNotNull(sortedList);
-        assertEquals(2, sortedList.size());
-
+    private NamedQueryArtifact buildTestNamedQuery(String uuid, String modelId) {
+        NamedQueryArtifact nq = new NamedQueryArtifact();
+        nq.setNamedQueryUuid(uuid);
+        nq.addDependentModelId(modelId);
+        return nq;
     }
 
 }

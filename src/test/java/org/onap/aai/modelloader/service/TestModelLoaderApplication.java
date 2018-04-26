@@ -18,28 +18,24 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.fixture;
+package org.onap.aai.modelloader.service;
 
-import java.util.List;
-import org.onap.sdc.api.notification.IArtifactInfo;
-import org.onap.sdc.api.notification.IResourceInstance;
+import org.junit.Test;
 
 /**
- * This class builds an instance of IArtifactInfo for test purposes.
+ * Tests for ModelLoaderApplication class
+ *
  */
-class ResourceInstanceBuilder {
+public class TestModelLoaderApplication {
 
-    /**
-     * Builds an implementation of IResourceInstance for test purposes.
-     *
-     * @param artifacts collection of artifacts that make up the resource
-     * @return IResourceInstance implementation of IResourceInstance for test purposes
-     */
-    static IResourceInstance build(final List<IArtifactInfo> artifacts) {
-        IResourceInstance instance = new TestResourceInstanceImpl();
-
-        ((TestResourceInstanceImpl) instance).setArtifacts(artifacts);
-
-        return instance;
+    static {
+        System.setProperty("CONFIG_HOME", "src/test/resources");
     }
+
+    @Test
+    public void testServiceStarts() {
+        // The SDC Distribution Client is expected to fail to initialise.
+        ModelLoaderApplication.main(new String[0]);
+    }
+
 }

@@ -1,22 +1,22 @@
 /**
- * ============LICENSE_START==========================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
- * ===================================================================
+ * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
- * ===================================================================
+ * Copyright © 2017-2018 European Software Marketing Ltd.
+ * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ============LICENSE_END============================================
+ * ============LICENSE_END=========================================================
  */
 package org.onap.aai.modelloader.entity.model;
 
@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import jline.internal.Log;
-
 import org.onap.aai.modelloader.entity.Artifact;
 
 /**
@@ -115,15 +114,14 @@ public class ModelSorter {
      *
      * @param originalList the list that needs to be sorted
      * @return a list of sorted models
+     * @throws BabelArtifactParsingException
      */
-    public List<Artifact> sort(List<Artifact> originalList) {
-
-        if (originalList.size() <= 1) {
+    public List<Artifact> sort(List<Artifact> originalList) throws BabelArtifactParsingException {
+        if (originalList == null || originalList.size() <= 1) {
             return originalList;
         }
 
-        Collection<Node> nodes = createNodes(originalList);
-        Collection<Node> sortedNodes = sortNodes(nodes);
+        Collection<Node> sortedNodes = sortNodes(createNodes(originalList));
 
         List<Artifact> sortedModelsList = new ArrayList<>(sortedNodes.size());
         for (Node node : sortedNodes) {
@@ -188,8 +186,9 @@ public class ModelSorter {
      *
      * @param unsortedNodes the collection of nodes to be sorted
      * @return a sorted collection of the given nodes
+     * @throws BabelArtifactParsingException
      */
-    private Collection<Node> sortNodes(Collection<Node> unsortedNodes) {
+    private Collection<Node> sortNodes(Collection<Node> unsortedNodes) throws BabelArtifactParsingException {
         // L <- Empty list that will contain the sorted elements
         List<Node> nodeList = new ArrayList<>();
 
@@ -233,7 +232,8 @@ public class ModelSorter {
             }
         }
         if (cycle) {
-            throw new RuntimeException("Circular dependency present between models, topological sort not possible");
+            throw new BabelArtifactParsingException(
+                    "Circular dependency present between models, topological sort not possible");
         }
 
         return nodeList;

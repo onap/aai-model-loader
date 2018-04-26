@@ -1,30 +1,30 @@
 /**
- * ============LICENSE_START==========================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
- * ===================================================================
+ * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
- * ===================================================================
+ * Copyright © 2017-2018 European Software Marketing Ltd.
+ * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ============LICENSE_END============================================
+ * ============LICENSE_END=========================================================
  */
 package org.onap.aai.modelloader.fixture;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openecomp.sdc.api.notification.IArtifactInfo;
-import org.openecomp.sdc.api.notification.INotificationData;
-import org.openecomp.sdc.api.notification.IResourceInstance;
+import org.onap.sdc.api.notification.IArtifactInfo;
+import org.onap.sdc.api.notification.INotificationData;
+import org.onap.sdc.api.notification.IResourceInstance;
 
 /**
  * This class is responsible for building NotificationData for use in test classes.
@@ -84,7 +84,7 @@ public class NotificationDataFixtureBuilder {
     private static void buildWithInvalidType() {
         buildService(INVALID_TYPE, NOTIFICATION_DATA_WITH_INVALID_TYPE);
     }
-    
+
     private static void buildwithOneOfEach() {
         buildService(TOSCA_CSAR, NOTIFICATION_DATA_WITH_ONE_OF_EACH);
 
@@ -139,7 +139,7 @@ public class NotificationDataFixtureBuilder {
     public static INotificationData getNotificationDataWithInvalidType() {
         return NOTIFICATION_DATA_WITH_INVALID_TYPE;
     }
-    
+
     public static INotificationData getNotificationDataWithOneOfEach() {
         return NOTIFICATION_DATA_WITH_ONE_OF_EACH;
     }

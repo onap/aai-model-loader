@@ -1,103 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ============LICENSE_START==========================================
-  org.onap.aai
-  ===================================================================
-  Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
-  Copyright © 2017-2018 Amdocs
-  ===================================================================
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+    ============LICENSE_START=======================================================
+    org.onap.aai
+    ================================================================================
+    Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
+    Copyright © 2017-2018 European Software Marketing Ltd.
+    ================================================================================
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-         http://www.apache.org/licenses/LICENSE-2.0
+          http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  ============LICENSE_END============================================
-  -->
-
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    ============LICENSE_END=========================================================
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>ajsc-archetype-parent</artifactId>
-		<groupId>com.att.ajsc</groupId>
-		<version>2.0.0</version>
+		<groupId>org.onap.oparent</groupId>
+		<artifactId>oparent</artifactId>
+		<version>1.1.0</version>
+		<relativePath />
 	</parent>
 
 	<groupId>org.onap.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
 	<version>1.2.0-SNAPSHOT</version>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<properties>
-		<docker.location>${basedir}/target</docker.location>
-		<module.ajsc.namespace.name>model-loader</module.ajsc.namespace.name>
-		<module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
-		<ajscRuntimeVersion>2.0.0</ajscRuntimeVersion>
-		<absoluteDistFilesRoot>/appl/${project.artifactId}</absoluteDistFilesRoot>
-		<distFilesRoot>/appl/${project.artifactId}/${project.version}</distFilesRoot>
-		<runAjscHome>${basedir}/target/swm/package/nix/dist_files${distFilesRoot}</runAjscHome>
-
-        <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
-		<apache.lang3.version>3.6</apache.lang3.version>
-		<apache.commons-text.version>1.1</apache.commons-text.version>
-		<commons-compress.version>1.14</commons-compress.version>
-		<fasterxml.version>2.8.1</fasterxml.version>
-		<mockito.version>1.10.19</mockito.version>
-		<jsr311-api.version>1.1.1</jsr311-api.version>
-		<jersey-client.version>1.18</jersey-client.version>
-		<gson.version>2.7</gson.version>
-		<hamcrest-all.version>1.3</hamcrest-all.version>
-        <version.jacoco.maven.plugin>0.7.9</version.jacoco.maven.plugin>
-            
-		<!-- Port Selection. A value of 0 will allow for dynamic port selection. 
-			For local testing, you may choose to hardcode this value to something like 
-			8080 -->
-		<serverPort>9500</serverPort>
-		<sslport>0</sslport>
-
-
-		<!-- For SOA Cloud Installation -->
-		<installOwnerUser>aaiadmin</installOwnerUser>
-		<installOwnerGroup>aaiadmin</installOwnerGroup>
-		<ownerManagementGroup>org.openecomp.aai.dev</ownerManagementGroup>
-
-		<testRouteOffer>workstation</testRouteOffer>
-		<testEnv>DEV</testEnv>
-
-		<dependency.scope>provided</dependency.scope>
-		<checkstyle.config.location>google_checks.xml</checkstyle.config.location>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<sonar.language>java</sonar.language>
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
-		<sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
-		<sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
-		<sonar.projectVersion>${project.version}</sonar.projectVersion>
+		<start-class>org.onap.aai.modelloader.service.ModelLoaderApplication</start-class>
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
+		<docker.location>${basedir}/target</docker.location>
+		<spring-boot.version>1.5.12.RELEASE</spring-boot.version>
+		<apache.commons-text.version>1.1</apache.commons-text.version>
+		<hamcrest-all.version>1.3</hamcrest-all.version>
 		<babel.version>1.2.0-SNAPSHOT</babel.version>
 		<aai.rest.client.version>1.2.1</aai.rest.client.version>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>ecomp-releases</id>
-			<name>ECOMP Release Repository</name>
-			<url>${nexusproxy}/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>ecomp-snapshots</id>
-			<name>ECOMP Snapshot Repository</name>
-			<url>${nexusproxy}/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-	
+    <distributionManagement>
+        <repository>
+            <id>ecomp-releases</id>
+            <name>ECOMP Release Repository</name>
+            <url>${nexusproxy}/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ecomp-snapshots</id>
+            <name>ECOMP Snapshot Repository</name>
+            <url>${nexusproxy}/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.onap.aai</groupId>
 			<artifactId>babel</artifactId>
@@ -111,20 +88,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>${javax.ws.rs-api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>${jsr311-api.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey-client.version}</version>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.onap.aai</groupId>
@@ -134,10 +100,14 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>${gson.version}</version>
 		</dependency>
 
 		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
@@ -147,40 +117,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<version>3.19.0-GA</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${fasterxml.version}</version><!--$NO-MVN-MAN-VER$ -->
-		</dependency>
-
-		<!-- xjc dependencies -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.2.11</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<version>2.2.11</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-core</artifactId>
-			<version>2.2.11</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-xjc</artifactId>
-			<version>2.2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
@@ -204,17 +141,11 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.1.7</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecomp.sdc.sdc-distribution-client</groupId>
+			<groupId>org.onap.sdc.sdc-distribution-client</groupId>
 			<artifactId>sdc-distribution-client</artifactId>
-			<version>1.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5</version>
+			<version>1.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -224,7 +155,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-security</artifactId>
-			<version>9.3.8.RC0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -236,25 +166,9 @@
 			<version>2.12.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.yaml</groupId>
-			<artifactId>snakeyaml</artifactId>
-			<version>1.18</version>
-		</dependency>
-
-		<!-- apache commons -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>${commons-compress.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>${apache.lang3.version}</version>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -263,157 +177,60 @@
 		</dependency>
 	</dependencies>
 
-	<!-- Plugins and repositories -->
-	<pluginRepositories>
-		<pluginRepository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>EvoSuite</id>
-			<name>EvoSuite Repository</name>
-			<url>http://www.evosuite.org/m2</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
-	<repositories>
-		<repository>
-			<id>central</id>
-			<name>Maven 2 repository 2</name>
-			<url>http://repo2.maven.org/maven2/</url>
-		</repository>
-		<repository>
-			<id>ecomp-releases</id>
-			<name>ECOMP Release Repository</name>
-			<url>${nexusproxy}/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<id>ecomp-snapshots</id>
-			<name>ECOMP Snapshot Repository</name>
-			<url>${nexusproxy}/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>ecomp-staging</id>
-			<name>ECOMP Staging Repository</name>
-			<url>${nexusproxy}/content/repositories/staging/</url>
-		</repository>
-	</repositories>
+    <!-- Plugins and repositories -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>EvoSuite</id>
+            <name>EvoSuite Repository</name>
+            <url>http://www.evosuite.org/m2</url>
+        </pluginRepository>
+    </pluginRepositories>
 
-	<profiles>
-		<profile>
-			<id>runAjsc</id>
-			<build>
-				<defaultGoal>initialize</defaultGoal>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.3.2</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<includeProjectDependencies>false</includeProjectDependencies>
-									<includePluginDependencies>true</includePluginDependencies>
-									<executable>java</executable>
-									<mainClass>com.att.ajsc.runner.Runner</mainClass>
-									<executableDependency>
-										<groupId>com.att.ajsc</groupId>
-										<artifactId>ajsc-runner</artifactId>
-									</executableDependency>
-									<additionalClasspathElements>
-										<additionalClasspathElement>${basedir}/ajsc-shared-config/etc</additionalClasspathElement>
-									</additionalClasspathElements>
-
-									<environmentVariables>
-										<AJSC_HOME>${runAjscHome}</AJSC_HOME>
-									</environmentVariables>
-
-									<!-- Main AJSC System Properties below (necessary for proper startup) -->
-									<systemProperties>
-										<systemProperty>
-											<key>AJSC_HOME</key>
-											<value>${runAjscHome}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>CONFIG_HOME</key>
-											<value>${basedir}/appconfig-local/</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_CONF_HOME</key>
-											<value>${basedir}/bundleconfig-local</value>
-										</systemProperty>
-										<systemProperty>
-											<key>logback.configurationFile</key>
-											<value>${basedir}/ajsc-shared-config/etc/logback.xml</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_SHARED_CONFIG</key>
-											<value>${basedir}/ajsc-shared-config</value>
-										</systemProperty>
-
-										<sysproperty>
-											<key>AJSC_EXTERNAL_LIB_FOLDERS</key>
-											<value>${basedir}/target/commonLibs</value>
-										</sysproperty>
-										<sysproperty>
-											<key>AJSC_EXTERNAL_PROPERTIES_FOLDERS</key>
-											<value>${basedir}/ajsc-shared-config/etc</value>
-										</sysproperty>
-										<systemProperty>
-											<key>AJSC_SERVICE_NAMESPACE</key>
-											<value>${module.ajsc.namespace.name}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_SERVICE_VERSION</key>
-											<value>${module.ajsc.namespace.version}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>SOACLOUD_SERVICE_VERSION</key>
-											<value>${project.version}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>server.port</key>
-											<value>${serverPort}</value>
-										</systemProperty>
-									</systemProperties>
-
-									<!-- Command Line Arguments to add to the java command. Here, you 
-										can specify the port as well as the Context you want your service to run 
-										in. Use context=/ to run in an unnamed Context (Root Context). The default 
-										configuration of the AJSC is to run under the / Context. Setting the port 
-										here can aid during the development phase of your service. However, you can 
-										leave this argument out entirely, and the AJSC will default to using an Ephemeral 
-										port. -->
-									<arguments>
-										<argument>context=//</argument>
-										<argument>port=${serverPort}</argument>
-										<argument>sslport=${sslport}</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-						<configuration>
-							<executable>java</executable>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>com.att.ajsc</groupId>
-								<artifactId>ajsc-runner</artifactId>
-								<version>${ajscRuntimeVersion}</version>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven 2 repository 2</name>
+            <url>http://repo2.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>ecomp-releases</id>
+            <name>ECOMP Release Repository</name>
+            <url>${nexusproxy}/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>ecomp-snapshots</id>
+            <name>ECOMP Snapshot Repository</name>
+            <url>${nexusproxy}/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>ecomp-staging</id>
+            <name>ECOMP Staging Repository</name>
+            <url>${nexusproxy}/content/repositories/staging/</url>
+        </repository>
+    </repositories>
 
 	<build>
+		<finalName>model-loader</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot.version}</version>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -444,6 +261,30 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>License.txt</header>
+                    <includes>
+                        <include>src/main/java/**</include>
+                        <include>src/test/java/**</include>
+                        <include>version/properties</include>
+                        <include>pom.xml</include>
+                    </includes>
+                    <skipExistingHeaders>true</skipExistingHeaders>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Set goal to "format" to auto update license headers -->
+                            <goal>check</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
@@ -461,108 +302,11 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.4</version><!--$NO-MVN-MAN-VER$ -->
-				<configuration>
-					<argLine>-noverify ${argLine}</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-			</plugin>
-
-			<!-- Checkstyle plugin - used to report on compliance with -->
-			<!-- the Google style guide. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<reportPlugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-checkstyle-plugin</artifactId>
-							<version>2.17</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>checkstyle</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-					</reportPlugins>
-				</configuration>
-			</plugin>
-
-			<!-- license plugin -->
-			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<header>License.txt</header>
-					<includes>
-						<include>src/main/java/**</include>
-						<include>src/test/java/**</include>
-					</includes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>format</goal>
-						</goals>
-						<phase>process-sources</phase>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.2</version>
-			</plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${version.jacoco.maven.plugin}</version>
-                <executions>
-	                <execution>
-	                    <id>jacoco-initialize-unit-tests</id>
-	                    <goals>
-	                        <goal>prepare-agent</goal>
-	                    </goals>
-	                </execution>
-	                <execution> 
-	                    <id>report</id>
-	                    <phase>package</phase>
-	                    <goals>
-	                        <goal>report</goal>
-	                    </goals>
-	                </execution>
-                </executions>
-            </plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
-				<extensions>true</extensions>
-				<configuration>
-					<nexusUrl>${nexusproxy}</nexusUrl>
-					<stagingProfileId>176c31dfe190a</stagingProfileId>
-					<serverId>ecomp-staging</serverId>
-				</configuration>
-			</plugin>
-
 		</plugins>
 	</build>
 </project>

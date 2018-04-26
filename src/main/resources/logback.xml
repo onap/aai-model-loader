@@ -1,12 +1,5 @@
 <configuration scan="true" scanPeriod="3 seconds" debug="false">
-	<!--<jmxConfigurator /> -->
-	<!-- directory path for all other type logs -->
-
 	<property name="logDir" value="${AJSC_HOME}/logs" />
-
-
-	<!-- specify the component name <ECOMP-component-name>::= "MSO" | "DCAE" 
-		| "ASDC " | "AAI" |"Policy" | "SDNC" | "AC" -->
 	<property name="componentName" value="AAI-ML"></property>
 
 	<!-- default eelf log file names -->

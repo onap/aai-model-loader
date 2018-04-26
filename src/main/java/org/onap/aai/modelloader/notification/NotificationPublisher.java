@@ -1,22 +1,22 @@
 /**
- * ============LICENSE_START==========================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
- * ===================================================================
+ * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
- * ===================================================================
+ * Copyright © 2017-2018 European Software Marketing Ltd.
+ * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ============LICENSE_END============================================
+ * ============LICENSE_END=========================================================
  */
 package org.onap.aai.modelloader.notification;
 
@@ -31,12 +31,12 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.openecomp.sdc.api.IDistributionClient;
-import org.openecomp.sdc.api.notification.IArtifactInfo;
-import org.openecomp.sdc.api.notification.INotificationData;
-import org.openecomp.sdc.api.results.IDistributionClientResult;
-import org.openecomp.sdc.utils.DistributionActionResultEnum;
-import org.openecomp.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.IDistributionClient;
+import org.onap.sdc.api.notification.IArtifactInfo;
+import org.onap.sdc.api.notification.INotificationData;
+import org.onap.sdc.api.results.IDistributionClientResult;
+import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.onap.sdc.utils.DistributionStatusEnum;
 
 /**
  * This class is responsible for publishing the status of actions performed working with artifacts.
@@ -46,24 +46,18 @@ class NotificationPublisher {
     private static Logger logger = LoggerFactory.getInstance().getLogger(NotificationPublisher.class);
     private static Logger metricsLogger = LoggerFactory.getInstance().getMetricsLogger(NotificationPublisher.class);
 
-    protected static final String FILESEP =
-            (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
-    protected static final String CONFIG_DIR = System.getProperty("CONFIG_HOME") + FILESEP;
-    protected static final String CONFIG_AUTH_LOCATION = CONFIG_DIR + "auth" + FILESEP;
-    protected static final String CONFIG_FILE = CONFIG_DIR + "model-loader.properties";
-
     private boolean publishingEnabled;
 
     public NotificationPublisher() {
         Properties configProperties = new Properties();
         try {
-            configProperties.load(new FileInputStream(CONFIG_FILE));
+            configProperties.load(new FileInputStream(ModelLoaderConfig.propertiesFile()));
         } catch (IOException e) {
             String errorMsg = "Failed to load configuration: " + e.getMessage();
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);
         }
 
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, CONFIG_AUTH_LOCATION);
+        ModelLoaderConfig config = new ModelLoaderConfig(configProperties);
 
         publishingEnabled = !config.getASDCConnectionDisabled();
     }

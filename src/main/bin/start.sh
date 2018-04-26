@@ -4,7 +4,7 @@
 #  org.onap.aai
 #  ===================================================================
 #  Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
-#  Copyright © 2017-2018 Amdocs
+#  Copyright © 2017-2018 European Software Marketing Ltd.
 #  ===================================================================
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -20,27 +20,37 @@
 #  ============LICENSE_END============================================
 #*******************************************************************************
 
-BASEDIR="/opt/app/model-loader/"
-AJSC_HOME="$BASEDIR"
+# AJSC_HOME is required for EELF logging.
+# This path is referenced in the file logback.xml.
+AJSC_HOME="${AJSC_HOME-/opt/app/model-loader}"
 
 if [ -z "$CONFIG_HOME" ]; then
-	echo "CONFIG_HOME must be set in order to start up process"
-	exit 1
+    echo "CONFIG_HOME must be set in order to start up the process"
+    echo "The expected value is a folder containing the model-loader.properties file"
+    exit 1
 fi
 
-CLASSPATH="$AJSC_HOME/lib/*"
-CLASSPATH="$CLASSPATH:$AJSC_HOME/extJars/"
-CLASSPATH="$CLASSPATH:$AJSC_HOME/etc/"
+JARFILE="$AJSC_HOME/model-loader.jar"
+
+# Some properties are repeated here for debugging purposes.
 PROPS="-DAJSC_HOME=$AJSC_HOME"
-PROPS="$PROPS -DAJSC_CONF_HOME=$BASEDIR/bundleconfig/"
-PROPS="$PROPS -Dlogback.configurationFile=$BASEDIR/bundleconfig/etc/logback.xml"
-PROPS="$PROPS -DAJSC_SHARED_CONFIG=$AJSC_CONF_HOME"
-PROPS="$PROPS -DAJSC_SERVICE_NAMESPACE=model-loader"
-PROPS="$PROPS -DAJSC_SERVICE_VERSION=v1"
-PROPS="$PROPS -Dserver.port=9500"
 PROPS="$PROPS -DCONFIG_HOME=$CONFIG_HOME"
+PROPS="$PROPS -Dcom.att.eelf.logging.path=$AJSC_HOME"
+PROPS="$PROPS -Dcom.att.eelf.logging.file=logback.xml"
+PROPS="$PROPS -Dlogback.configurationFile=$AJSC_HOME/logback.xml"
+PROPS="$PROPS -Dserver.port=9500"
 JVM_MAX_HEAP=${MAX_HEAP:-1024}
 
-echo $CLASSPATH
+if [ -z "${java_runtime_arguments}" ]; then
+  java_runtime_arguments="-Xms75m -Xmx${JVM_MAX_HEAP}m \
+ -Dcom.sun.management.jmxremote \
+ -Dcom.sun.management.jmxremote.authenticate=false \
+ -Dcom.sun.management.jmxremote.ssl=false \
+ -Dcom.sun.management.jmxremote.local.only=false \
+ -Dcom.sun.management.jmxremote.port=1099 \
+ -Dcom.sun.management.jmxremote.rmi.port=1099 \
+ -Djava.rmi.server.hostname=127.0.0.1"
+fi
 
-exec java -Xmx${JVM_MAX_HEAP}m $PROPS -classpath $CLASSPATH com.att.ajsc.runner.Runner context=// port=9500
+echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
+java $java_runtime_arguments $PROPS -jar $JARFILE

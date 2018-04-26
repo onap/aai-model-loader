@@ -1,8 +1,7 @@
 # Introduction
 
 The A&AI Model Loader Service is an application that facilitates
-distribution, ingestion of new service and resource models, and vnf
-catalogs from the SDC to the A&AI.
+distribution and ingestion of new service and resource models from SDC to A&AI.
 
 ## Features
 
@@ -16,13 +15,13 @@ The Model Loader:
 ## Compiling Model Loader
 
 Model Loader can be compiled by running `mvn clean install`
-A Model Loader docker image can be created by running `docker build -t openecomp/model-loader target`
+A Model Loader docker image can be created by running `docker build -t onap/model-loader target`
 
 ## Running Model Loader 
 
-### Deploying The Micro Service 
+### Deploying The MicroService 
 
-Push the Docker image that you have built to your Docker repository and pull it down to the location that you will be running the search service from.
+Push the Docker image to your Docker repository. Pull this down to the host machine.
 
 **Create the following directories on the host machine:**
 
@@ -74,7 +73,7 @@ _model-loader.properties_
     ml.distribution.USER=<username>
     
     # Artifact type we want to download from the SDC (the values below will typically suffice)
-    ml.distribution.ARTIFACT_TYPES=MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG
+    ml.distribution.ARTIFACT_TYPES=MMODEL_QUERY_SPEC,TOSCA_CSAR
     
     # List of message bus addresses on which to listen for distribution events
     ml.distribution.MSG_BUS_ADDRESSES=<host1>,<host2>
@@ -89,7 +88,7 @@ _model-loader.properties_
     ml.aai.NAMED_QUERY_URL=/aai/v*/service-design-and-creation/named-queries/named-query/
     
     # A&AI endpoint to post vnf images
-    ml.aai.VNF_IMAGE_URL=/aai/v8/service-design-and-creation/vnf-images
+    ml.aai.VNF_IMAGE_URL=/aai/v*/service-design-and-creation/vnf-images
     
     # Name of certificate to use in connecting to the A&AI
     ml.aai.KEYSTORE_FILE=aai-os-cert.p12

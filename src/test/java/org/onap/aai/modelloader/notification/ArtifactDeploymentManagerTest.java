@@ -1,22 +1,22 @@
 /**
- * ============LICENSE_START==========================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
- * ===================================================================
+ * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
- * ===================================================================
+ * Copyright © 2017-2018 European Software Marketing Ltd.
+ * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ============LICENSE_END============================================
+ * ============LICENSE_END=========================================================
  */
 package org.onap.aai.modelloader.notification;
 
@@ -46,9 +46,8 @@ import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
-import org.openecomp.sdc.api.IDistributionClient;
-import org.openecomp.sdc.api.notification.IArtifactInfo;
-import org.openecomp.sdc.api.notification.INotificationData;
+import org.onap.sdc.api.IDistributionClient;
+import org.onap.sdc.api.notification.INotificationData;
 
 /**
  * Tests {@link ArtifactDeploymentManager }
@@ -94,10 +93,9 @@ public class ArtifactDeploymentManagerTest {
         manager = null;
     }
 
-
     private List<BabelArtifact> setupTest(byte[] xml, INotificationData data) throws IOException {
         List<BabelArtifact> toscaArtifacts = new ArrayList<>();
-        IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
+        org.onap.sdc.api.notification.IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         BabelArtifact xmlArtifact =
                 new BabelArtifact(artifactInfo.getArtifactName(), BabelArtifact.ArtifactType.MODEL, new String(xml));

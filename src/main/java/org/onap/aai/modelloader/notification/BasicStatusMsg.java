@@ -18,28 +18,40 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.fixture;
+package org.onap.aai.modelloader.notification;
 
-import java.util.List;
-import org.onap.sdc.api.notification.IArtifactInfo;
-import org.onap.sdc.api.notification.IResourceInstance;
+import org.onap.sdc.api.consumer.IDistributionStatusMessageBasic;
+import org.onap.sdc.utils.DistributionStatusEnum;
 
-/**
- * This class builds an instance of IArtifactInfo for test purposes.
- */
-class ResourceInstanceBuilder {
+public class BasicStatusMsg implements IDistributionStatusMessageBasic {
 
-    /**
-     * Builds an implementation of IResourceInstance for test purposes.
-     *
-     * @param artifacts collection of artifacts that make up the resource
-     * @return IResourceInstance implementation of IResourceInstance for test purposes
-     */
-    static IResourceInstance build(final List<IArtifactInfo> artifacts) {
-        IResourceInstance instance = new TestResourceInstanceImpl();
+    private static final String COMPONENT_NAME = "AAI";
+    protected DistributionStatusEnum status;
+    protected String distributionId;
+    protected String consumerId;
 
-        ((TestResourceInstanceImpl) instance).setArtifacts(artifacts);
-
-        return instance;
+    @Override
+    public long getTimestamp() {
+        return System.currentTimeMillis();
     }
+
+    @Override
+    public DistributionStatusEnum getStatus() {
+        return status;
+    }
+
+    @Override
+    public String getDistributionID() {
+        return distributionId;
+    }
+
+    @Override
+    public String getConsumerID() {
+        return consumerId;
+    }
+
+    public String getComponentName() {
+        return COMPONENT_NAME;
+    }
+
 }
