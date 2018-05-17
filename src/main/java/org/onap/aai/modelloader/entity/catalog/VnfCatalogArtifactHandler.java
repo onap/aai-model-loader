@@ -89,7 +89,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             // If an empty dataItem is supplied, do nothing.
             if (dataItem.isEmpty()) {
                 logger.warn(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Empty image data supplied, skipping ingestion.");
-                return;
+                continue;
             }
 
             String urlParams;
@@ -142,16 +142,11 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
         String uuid = UUID.randomUUID().toString();
         dataItem.put(ATTR_UUID, uuid);
 
-        String payload = createVnfImagePayload(dataItem);
+        String payload = new Gson().toJson(dataItem);
         String putUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + uuid;
         OperationResult putResp =
                 restClient.putResource(putUrl, payload, distributionId, MediaType.APPLICATION_JSON_TYPE);
         return putResp != null && putResp.getResultCode() == Response.Status.CREATED.getStatusCode();
-    }
-
-    private String createVnfImagePayload(Map<String, String> dataItem) {
-        dataItem.put(ATTR_UUID, UUID.randomUUID().toString());
-        return new Gson().toJson(dataItem);
     }
 
     private List<Map<String, String>> unmarshallVnfcData(Artifact vnfcArtifact) {
