@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,24 +18,20 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.service;
+package org.onap.aai.modelloader.restclient;
 
-import org.junit.Test;
+public class BabelServiceClientException extends Exception {
 
-/**
- * Tests for ModelLoaderApplication class
- *
- */
-public class TestModelLoaderApplication {
+    /**
+     * Babel Service Client Exception.
+     */
+    private static final long serialVersionUID = 1L;
 
-    static {
-        System.setProperty("CONFIG_HOME", "src/test/resources");
+    public BabelServiceClientException(String message) {
+        super(message);
     }
 
-    @Test
-    public void testServiceStarts() {
-        // The SDC Distribution Client is expected to fail to initialise.
-        ModelLoaderApplication.main(new String[0]);
+    public BabelServiceClientException(Exception ex) {
+        super(ex);
     }
-
 }

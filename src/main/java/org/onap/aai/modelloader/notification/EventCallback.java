@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -28,13 +28,15 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.extraction.ArtifactInfoExtractor;
-import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
+import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
+import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.consumer.INotificationCallback;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EventCallback implements INotificationCallback {
     private static Logger logger = LoggerFactory.getInstance().getLogger(EventCallback.class.getName());
@@ -42,8 +44,11 @@ public class EventCallback implements INotificationCallback {
 
     private ArtifactDeploymentManager artifactDeploymentManager;
     private ArtifactDownloadManager artifactDownloadManager;
+    private NotificationPublisher notificationPublisher;
     private IDistributionClient client;
     private ModelLoaderConfig config;
+    @Autowired
+    private BabelServiceClientFactory babelServiceClientFactory;
 
     public EventCallback(IDistributionClient client, ModelLoaderConfig config) {
         this.client = client;
@@ -63,18 +68,35 @@ public class EventCallback implements INotificationCallback {
                 getArtifactDownloadManager().downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
 
         if (success) {
-            success = getArtifactDeploymentManager().deploy(data, artifacts, modelArtifacts, catalogArtifacts);
+            success = getArtifactDeploymentManager().deploy(data, modelArtifacts, catalogArtifacts);
         }
 
         String statusString = success ? "SUCCESS" : "FAILURE";
         auditLogger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
                 "Processed distribution " + data.getDistributionID() + "  (" + statusString + ")");
+
+        publishNotifications(data, "TOSCA_CSAR", artifacts, success);
+
         MDC.clear();
+    }
+
+
+    private void publishNotifications(INotificationData data, String filterType, List<IArtifactInfo> artifacts,
+            boolean deploymentSuccess) {
+        if (deploymentSuccess) {
+            artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
+                    .forEach(a -> getNotificationPublisher().publishDeploySuccess(client, data, a));
+            getNotificationPublisher().publishComponentSuccess(client, data);
+        } else {
+            artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
+                    .forEach(a -> getNotificationPublisher().publishDeployFailure(client, data, a));
+            getNotificationPublisher().publishComponentFailure(client, data, "deploy failure");
+        }
     }
 
     private ArtifactDeploymentManager getArtifactDeploymentManager() {
         if (artifactDeploymentManager == null) {
-            artifactDeploymentManager = new ArtifactDeploymentManager(client, config);
+            artifactDeploymentManager = new ArtifactDeploymentManager(config);
         }
 
         return artifactDeploymentManager;
@@ -82,9 +104,18 @@ public class EventCallback implements INotificationCallback {
 
     private ArtifactDownloadManager getArtifactDownloadManager() {
         if (artifactDownloadManager == null) {
-            artifactDownloadManager = new ArtifactDownloadManager(client, config, new BabelServiceClientFactory());
+            artifactDownloadManager = new ArtifactDownloadManager(client, config, babelServiceClientFactory);
         }
 
         return artifactDownloadManager;
+    }
+
+
+    private NotificationPublisher getNotificationPublisher() {
+        if (notificationPublisher == null) {
+            notificationPublisher = new NotificationPublisher();
+        }
+
+        return notificationPublisher;
     }
 }

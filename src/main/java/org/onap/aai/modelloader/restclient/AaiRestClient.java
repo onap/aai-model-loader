@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -133,7 +133,7 @@ public class AaiRestClient {
     public OperationResult getAndDeleteResource(String url, String transId) {
         // First, GET the model
         OperationResult getResponse = getResource(url, transId, MediaType.APPLICATION_XML_TYPE);
-        if ((getResponse == null) || (getResponse.getResultCode() != Response.Status.OK.getStatusCode())) {
+        if (getResponse == null || getResponse.getResultCode() != Response.Status.OK.getStatusCode()) {
             return getResponse;
         }
 
@@ -151,7 +151,7 @@ public class AaiRestClient {
 
 
     public boolean useBasicAuth() {
-        return (config.getAaiAuthenticationUser() != null) && (config.getAaiAuthenticationPassword() != null);
+        return config.getAaiAuthenticationUser() != null && config.getAaiAuthenticationPassword() != null;
     }
 
     private RestClient setupClient() {

@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -27,7 +27,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 /**
- * Tests for NotificationDataImpl class
+ * Tests for NotificationDataImpl class.
  *
  */
 public class TestVnfImageException {
@@ -41,8 +41,7 @@ public class TestVnfImageException {
         assertThat(exception.getImageId(), is(equalTo("id2")));
         assertThat(exception.getResultCode().get(), is(equalTo(1)));
 
-        Exception e = new Exception("message");
-        exception = new VnfImageException(e);
+        exception = new VnfImageException(new Exception("message"));
         assertThat(exception.getImageId(), is(equalTo("message")));
     }
 

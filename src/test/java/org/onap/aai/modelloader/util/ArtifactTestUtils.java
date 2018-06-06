@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -21,14 +21,34 @@
 package org.onap.aai.modelloader.util;
 
 import java.io.IOException;
+import java.net.URL;
 import org.apache.commons.io.IOUtils;
+import org.onap.aai.babel.service.data.BabelArtifact;
 
 /**
  * This class provides some utilities to assist with running tests.
  */
 public class ArtifactTestUtils {
+    public static BabelArtifact loadModelArtifact(String resource) throws IOException {
+        return new BabelArtifact("ModelArtifact", BabelArtifact.ArtifactType.MODEL,
+                ArtifactTestUtils.loadResourceAsString(resource));
+    }
 
     public byte[] loadResource(String resourceName) throws IOException {
-        return IOUtils.toByteArray(ArtifactTestUtils.class.getClassLoader().getResource(resourceName));
+        URL resource = getResource(resourceName);
+        if (resource != null) {
+            return IOUtils.toByteArray(resource);
+        } else {
+            throw new IOException("Cannot locate resource: " + resourceName);
+        }
     }
+
+    public static String loadResourceAsString(String resourceName) throws IOException {
+        return IOUtils.toString(getResource(resourceName));
+    }
+
+    private static URL getResource(String resourceName) {
+        return ArtifactTestUtils.class.getClassLoader().getResource(resourceName);
+    }
+
 }

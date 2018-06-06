@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -36,10 +36,8 @@ class ResourceInstanceBuilder {
      * @return IResourceInstance implementation of IResourceInstance for test purposes
      */
     static IResourceInstance build(final List<IArtifactInfo> artifacts) {
-        IResourceInstance instance = new TestResourceInstanceImpl();
-
-        ((TestResourceInstanceImpl) instance).setArtifacts(artifacts);
-
+        TestResourceInstanceImpl instance = new TestResourceInstanceImpl();
+        instance.setArtifacts(artifacts);
         return instance;
     }
 }

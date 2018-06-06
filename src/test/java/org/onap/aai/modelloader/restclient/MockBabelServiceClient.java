@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,20 +18,24 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.service;
+package org.onap.aai.modelloader.restclient;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.Collections;
+import java.util.List;
+import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
 
 /**
- * Model Loader Spring Boot Application.
+ * Mocked Client for interfacing with Babel.
+ *
  */
+public class MockBabelServiceClient implements BabelServiceClient {
 
-@SpringBootApplication
-public class ModelLoaderApplication {
+    public MockBabelServiceClient(ModelLoaderConfig config) throws BabelServiceClientException {}
 
-    public static void main(String[] args) {
-        SpringApplication.run(ModelLoaderApplication.class, args);
+    @Override
+    public List<BabelArtifact> postArtifact(byte[] artifactPayload, String artifactName, String artifactVersion,
+            String transactionId) throws BabelServiceClientException {
+        return Collections.emptyList();
     }
-
 }

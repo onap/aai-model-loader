@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -36,13 +36,4 @@ public class BabelArtifactParsingException extends Exception {
         super(message);
     }
 
-    /**
-     * Constructor for an instance of this exception with a message and actual exception encountered.
-     *
-     * @param message information about the exception
-     * @param cause the actual exception that was encountered
-     */
-    public BabelArtifactParsingException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

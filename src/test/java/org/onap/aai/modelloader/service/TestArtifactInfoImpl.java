@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -39,19 +39,19 @@ public class TestArtifactInfoImpl {
     public void testGettersAndSetters() {
         ArtifactInfoImpl info = new ArtifactInfoImpl();
         String artifactName = "testname";
-        String artifactType = "test-type";
-        String artifactVersion = "v1";
-        String artifactDescription = "test description";
 
         info.setArtifactName(artifactName);
         assertThat(info.getArtifactName(), is(equalTo(artifactName)));
 
+        String artifactType = "test-type";
         info.setArtifactType(artifactType);
         assertThat(info.getArtifactType(), is(equalTo(artifactType)));
 
+        String artifactVersion = "v1";
         info.setArtifactVersion(artifactVersion);
         assertThat(info.getArtifactVersion(), is(equalTo(artifactVersion)));
 
+        String artifactDescription = "test description";
         info.setArtifactDescription(artifactDescription);
         assertThat(info.getArtifactDescription(), is(equalTo(artifactDescription)));
 

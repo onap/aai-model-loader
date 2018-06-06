@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -33,14 +33,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.onap.aai.modelloader.fixture.ArtifactInfoBuilder;
-import org.onap.aai.modelloader.fixture.TestNotificationDataImpl;
+import org.onap.aai.modelloader.fixture.MockNotificationDataImpl;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
- * Tests {@link ArtifactInfoExtractor}
+ * Tests {@link ArtifactInfoExtractor}.
  */
-public class ArtifactInfoExtractorTest {
+public class TestArtifactInfoExtractor {
 
     private ArtifactInfoExtractor extractor;
 
@@ -65,7 +65,7 @@ public class ArtifactInfoExtractorTest {
 
     @Test
     public void extract_dataHasNullArtifacts() {
-        doEmptyArtifactsTest(new TestNotificationDataImpl());
+        doEmptyArtifactsTest(new MockNotificationDataImpl());
     }
 
     @Test

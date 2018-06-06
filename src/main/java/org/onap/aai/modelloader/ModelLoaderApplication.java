@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,18 +18,20 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.entity.catalog;
+package org.onap.aai.modelloader;
 
-import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.modelloader.entity.ArtifactType;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public class VnfCatalogArtifact extends Artifact {
+/**
+ * Model Loader Spring Boot Application.
+ */
 
-    public VnfCatalogArtifact(String payload) {
-        this(ArtifactType.VNF_CATALOG, payload);
+@SpringBootApplication
+public class ModelLoaderApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ModelLoaderApplication.class, args);
     }
-    public VnfCatalogArtifact(ArtifactType artifactType, String payload) {
-        super(artifactType);
-        setPayload(payload);
-    }
+
 }

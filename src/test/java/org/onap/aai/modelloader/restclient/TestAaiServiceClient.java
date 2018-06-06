@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 
 /**
- * Local testing of the Babel service
+ * Local testing of the A&AI Service client.
  *
  */
 public class TestAaiServiceClient {
@@ -55,6 +55,8 @@ public class TestAaiServiceClient {
 
         Properties props = new Properties();
         props.put("ml.aai.KEYSTORE_PASSWORD", "2244");
+        props.put("ml.aai.KEYSTORE_FILE", "src/test/resources/auth/aai-client-cert.p12");
+        props.put("ml.aai.KEYSTORE_PASSWORD", "OBF:1i9a1u2a1unz1lr61wn51wn11lss1unz1u301i6o");
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
         aaiClient = new AaiRestClient(config);
     }
@@ -73,7 +75,7 @@ public class TestAaiServiceClient {
 
     @Test
     public void testOperations() {
-        String url = "http://localhost";
+        String url = "http://localhost:8080";
         String transId = "";
         MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
         aaiClient.getResource(url, "", mediaType);

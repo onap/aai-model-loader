@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -28,15 +28,15 @@ import org.onap.sdc.api.notification.IResourceInstance;
 /**
  * This class is an implementation of INotificationData for test purposes.
  */
-public class TestNotificationDataImpl implements INotificationData {
+public class MockNotificationDataImpl implements INotificationData {
 
-    private String distributionID;
+    private String distributionId;
     private List<IResourceInstance> resources;
     private List<IArtifactInfo> serviceArtifacts;
 
     @Override
     public String getDistributionID() {
-        return distributionID;
+        return distributionId;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class TestNotificationDataImpl implements INotificationData {
     }
 
     @Override
-    public IArtifactInfo getArtifactMetadataByUUID(String s) {
+    public IArtifactInfo getArtifactMetadataByUUID(String uuid) {
         return null;
     }
 
@@ -87,8 +87,8 @@ public class TestNotificationDataImpl implements INotificationData {
         this.serviceArtifacts = serviceArtifacts;
     }
 
-    public void setDistributionID(String distributionID) {
-        this.distributionID = distributionID;
+    public void setDistributionId(String distributionId) {
+        this.distributionId = distributionId;
     }
 
     @Override

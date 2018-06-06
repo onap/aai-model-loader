@@ -39,7 +39,8 @@ import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
-import org.onap.aai.modelloader.restclient.BabelServiceClientFactory;
+import org.onap.aai.modelloader.restclient.BabelServiceClientException;
+import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -202,7 +203,7 @@ public class ArtifactDownloadManager {
         try {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel client");
             babelClient = clientFactory.create(config);
-        } catch (Exception e) {
+        } catch (BabelServiceClientException e) {
             logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
                     "Error posting artifact " + artifact.getArtifactName() + " " + serviceVersion + " to Babel: "
                             + e.getLocalizedMessage());

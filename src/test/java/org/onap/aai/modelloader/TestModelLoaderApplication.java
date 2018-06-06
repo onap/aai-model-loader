@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,18 +18,25 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.entity.catalog;
+package org.onap.aai.modelloader;
 
-import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.modelloader.entity.ArtifactType;
+import org.junit.Test;
+import org.onap.aai.modelloader.ModelLoaderApplication;
 
-public class VnfCatalogArtifact extends Artifact {
+/**
+ * Tests for ModelLoaderApplication class.
+ *
+ */
+public class TestModelLoaderApplication {
 
-    public VnfCatalogArtifact(String payload) {
-        this(ArtifactType.VNF_CATALOG, payload);
+    static {
+        System.setProperty("CONFIG_HOME", "src/test/resources");
     }
-    public VnfCatalogArtifact(ArtifactType artifactType, String payload) {
-        super(artifactType);
-        setPayload(payload);
+
+    @Test
+    public void testServiceStarts() {
+        // The SDC Distribution Client is disabled.
+        ModelLoaderApplication.main(new String[0]);
     }
+
 }

@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,18 +18,20 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.entity.catalog;
+package org.onap.aai.modelloader.service;
 
-import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.modelloader.entity.ArtifactType;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.BabelServiceClientException;
+import org.onap.aai.modelloader.restclient.MockBabelServiceClient;
+import org.springframework.stereotype.Service;
 
-public class VnfCatalogArtifact extends Artifact {
+@Service
+public class MockBabelServiceClientFactory implements BabelServiceClientFactory {
 
-    public VnfCatalogArtifact(String payload) {
-        this(ArtifactType.VNF_CATALOG, payload);
+    @Override
+    public BabelServiceClient create(ModelLoaderConfig config) throws BabelServiceClientException {
+        return new MockBabelServiceClient(config);
     }
-    public VnfCatalogArtifact(ArtifactType artifactType, String payload) {
-        super(artifactType);
-        setPayload(payload);
-    }
+
 }

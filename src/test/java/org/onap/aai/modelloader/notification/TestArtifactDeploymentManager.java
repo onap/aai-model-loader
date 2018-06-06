@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,7 +20,8 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -45,14 +46,15 @@ import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
+import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
+import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
-import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
- * Tests {@link ArtifactDeploymentManager }
+ * Tests {@link ArtifactDeploymentManager}.
  */
-public class ArtifactDeploymentManagerTest {
+public class TestArtifactDeploymentManager {
 
     private static final String CONFIG_FILE = "model-loader.properties";
     private static final String SHOULD_HAVE_RETURNED_FALSE = "This should have returned false";
@@ -60,37 +62,51 @@ public class ArtifactDeploymentManagerTest {
     private Properties configProperties;
     private ArtifactDeploymentManager manager;
 
-    private IDistributionClient mockDistributionClient;
     private ModelArtifactHandler mockModelArtifactHandler;
-    private NotificationPublisher mockNotificationPublisher;
     private VnfCatalogArtifactHandler mockVnfCatalogArtifactHandler;
 
     @Before
     public void setup() throws IOException {
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
 
-        mockDistributionClient = mock(IDistributionClient.class);
         mockModelArtifactHandler = mock(ModelArtifactHandler.class);
-        mockNotificationPublisher = mock(NotificationPublisher.class);
         mockVnfCatalogArtifactHandler = mock(VnfCatalogArtifactHandler.class);
 
-        manager = new ArtifactDeploymentManager(mockDistributionClient, config);
+        manager = new ArtifactDeploymentManager(new ModelLoaderConfig(configProperties, null));
 
         Whitebox.setInternalState(manager, "modelArtifactHandler", mockModelArtifactHandler);
-        Whitebox.setInternalState(manager, "notificationPublisher", mockNotificationPublisher);
         Whitebox.setInternalState(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
     }
 
     @After
     public void tearDown() {
         configProperties = null;
-        mockDistributionClient = null;
         mockModelArtifactHandler = null;
-        mockNotificationPublisher = null;
         mockVnfCatalogArtifactHandler = null;
         manager = null;
+    }
+
+    @Test
+    public void deploy_csarDeploymentsFailed() throws IOException, BabelArtifactParsingException {
+        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
+        byte[] xml = new ArtifactTestUtils().loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
+        List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
+        List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
+
+        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+                .thenReturn(false);
+
+        assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, modelArtifacts, new ArrayList<>()), is(false));
+
+        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
+                any());
+        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).pushArtifacts(eq(modelArtifacts),
+                eq(data.getDistributionID()), any(), any());
+        Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()), eq(data.getDistributionID()),
+                any());
+        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(eq(new ArrayList<Artifact>()),
+                eq(data.getDistributionID()), any());
     }
 
     private List<BabelArtifact> setupTest(byte[] xml, INotificationData data) throws IOException {
@@ -115,11 +131,8 @@ public class ArtifactDeploymentManagerTest {
         when(mockModelArtifactHandler.pushArtifacts(any(), any(), any(), any())).thenReturn(true);
         when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(false);
-        Mockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                data.getServiceArtifacts().get(0));
 
-        assertFalse(SHOULD_HAVE_RETURNED_FALSE,
-                manager.deploy(data, data.getServiceArtifacts(), new ArrayList<>(), catalogFiles));
+        assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, new ArrayList<>(), catalogFiles), is(false));
 
         Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(new ArrayList<Artifact>()),
                 eq(data.getDistributionID()), any(), any());
@@ -129,15 +142,27 @@ public class ArtifactDeploymentManagerTest {
                 any());
         Mockito.verify(mockVnfCatalogArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
                 eq(data.getDistributionID()), any());
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                data.getServiceArtifacts().get(0));
     }
 
-    private void doFailedCombinedTests(boolean modelsOK, boolean catalogsOK)
+    @Test
+    public void testNoArtifactsDeployed() throws IOException, BabelArtifactParsingException, InvalidArchiveException {
+        doFailedCombinedTests(false, false);
+    }
+
+    @Test
+    public void testModelsNotDeployed() throws IOException, BabelArtifactParsingException, InvalidArchiveException {
+        doFailedCombinedTests(false, true);
+    }
+
+    @Test
+    public void testCatalogsNotDeployed() throws IOException, BabelArtifactParsingException, InvalidArchiveException {
+        doFailedCombinedTests(true, false);
+    }
+
+    private void doFailedCombinedTests(boolean modelsDeployed, boolean catalogsDeployed)
             throws IOException, BabelArtifactParsingException, InvalidArchiveException {
         INotificationData data = getNotificationDataWithOneOfEach();
-        ArtifactTestUtils artifactTestUtils = new ArtifactTestUtils();
-        byte[] xml = artifactTestUtils.loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
+        byte[] xml = new ArtifactTestUtils().loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
         List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
         List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
 
@@ -145,35 +170,25 @@ public class ArtifactDeploymentManagerTest {
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
         when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
-                .thenReturn(catalogsOK);
+                .thenReturn(catalogsDeployed);
         when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
-                .thenReturn(modelsOK);
+                .thenReturn(modelsDeployed);
 
-        Mockito.doNothing().when(mockNotificationPublisher).publishDeploySuccess(mockDistributionClient, data,
-                data.getServiceArtifacts().get(0));
-        Mockito.doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                data.getServiceArtifacts().get(0));
-
-        assertFalse(SHOULD_HAVE_RETURNED_FALSE,
-                manager.deploy(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles));
+        assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, modelArtifacts, catalogFiles), is(false));
 
         // Catalog artifacts are only pushed if models are successful.
         Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
                 any());
-        if (modelsOK) {
+        if (modelsDeployed) {
             Mockito.verify(mockVnfCatalogArtifactHandler).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
                     any(), any());
         }
 
-        if (modelsOK && catalogsOK) {
-            Mockito.verify(mockNotificationPublisher).publishDeploySuccess(mockDistributionClient, data,
-                    data.getServiceArtifacts().get(0));
+        if (modelsDeployed && catalogsDeployed) {
             Mockito.verify(mockModelArtifactHandler, Mockito.never()).rollback(any(), any(), any());
             Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(any(), any(), any());
         } else {
-            Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data,
-                    data.getServiceArtifacts().get(0));
-            if (modelsOK) {
+            if (modelsDeployed) {
                 Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
                         eq(data.getDistributionID()), any());
                 Mockito.verify(mockVnfCatalogArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
@@ -186,4 +201,35 @@ public class ArtifactDeploymentManagerTest {
         }
     }
 
+    /**
+     * Deploy both models and VNF images.
+     * 
+     * @throws IOException
+     * @throws BabelArtifactParsingException
+     * @throws InvalidArchiveException
+     */
+    @Test
+    public void testDeploySuccess() throws IOException, BabelArtifactParsingException, InvalidArchiveException {
+        INotificationData data = getNotificationDataWithOneOfEach();
+        byte[] xml = new ArtifactTestUtils().loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
+        List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
+        List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
+
+        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
+        catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
+
+        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+                .thenReturn(true);
+        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+                .thenReturn(true);
+
+        assertThat(manager.deploy(data, modelArtifacts, catalogFiles), is(true));
+
+        Mockito.verify(mockVnfCatalogArtifactHandler).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
+                any(), any());
+        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
+                any());
+        Mockito.verify(mockModelArtifactHandler, Mockito.never()).rollback(any(), any(), any());
+        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(any(), any(), any());
+    }
 }

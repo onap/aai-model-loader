@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -40,17 +41,18 @@ public class ModelSorterTest {
         ModelArtifact model = buildTestModel();
         ModelSorter.Node nodeA = new ModelSorter.Node(model);
         ModelSorter.Node nodeB = new ModelSorter.Node(model);
-        ModelSorter.Node nodeC = new ModelSorter.Node(model);
 
         ModelSorter.Edge edgeA = new ModelSorter.Edge(nodeA, nodeB);
-        ModelSorter.Edge edgeB = new ModelSorter.Edge(nodeA, nodeB);
-        ModelSorter.Edge edgeC = new ModelSorter.Edge(nodeB, nodeA);
-        ModelSorter.Edge edgeD = new ModelSorter.Edge(nodeA, nodeC);
 
         assertThat(edgeA, is(equalTo(edgeA)));
         assertThat(edgeA, is(not(equalTo(null))));
         assertThat(edgeA, is(not(equalTo(model))));
 
+        ModelSorter.Edge edgeB = new ModelSorter.Edge(nodeA, nodeB);
+        ModelSorter.Edge edgeC = new ModelSorter.Edge(nodeB, nodeA);
+
+        ModelSorter.Node nodeC = new ModelSorter.Node(model);
+        ModelSorter.Edge edgeD = new ModelSorter.Edge(nodeA, nodeC);
         assertThat(edgeA, is(equalTo(edgeB)));
         assertThat(edgeA, is(not(equalTo(edgeC))));
         assertThat(edgeA, is(not(equalTo(edgeD))));
@@ -60,15 +62,29 @@ public class ModelSorterTest {
     public void nodeEquality() throws BabelArtifactParsingException {
         ModelArtifact model = buildTestModel();
         ModelSorter.Node nodeA = new ModelSorter.Node(model);
-        ModelSorter.Node nodeB = new ModelSorter.Node(model);
 
         assertThat(nodeA, is(equalTo(nodeA)));
         assertThat(nodeA, is(not(equalTo(null))));
         assertThat(nodeA, is(not(equalTo(model))));
 
+        ModelSorter.Node nodeB = new ModelSorter.Node(model);
         assertThat(nodeA, is(equalTo(nodeB)));
         assertThat(nodeA.toString(), is(equalTo(nodeB.toString())));
         assertThat(nodeA, is(not(equalTo(new ModelSorter.Node(new ModelArtifact())))));
+    }
+
+    @Test
+    public void testToString() throws BabelArtifactParsingException {
+        ModelArtifact model = buildTestModel();
+
+        ModelSorter.Node nodeA = new ModelSorter.Node(model);
+        assertThat(nodeA.toString(), not(isEmptyString()));
+
+        ModelSorter.Node nodeB = new ModelSorter.Node(model);
+        nodeA.addEdge(nodeB);
+        assertThat(nodeA.toString(), not(isEmptyString()));
+        assertThat(nodeB.toString(), not(isEmptyString()));
+
     }
 
     @Test
@@ -84,20 +100,32 @@ public class ModelSorterTest {
 
     @Test
     public void multipleModels() throws BabelArtifactParsingException {
-        Artifact a = buildTestModel("aaaa", "mvaaaa", "cccc|mvcccc");
-        Artifact b = buildTestModel("bbbb", "mvbbbb", "aaaa|mvaaaa");
-        Artifact c = buildTestModel("cccc", "mvcccc");
-        List<Artifact> expected = Arrays.asList(c, a, b);
-        assertThat(new ModelSorter().sort(Arrays.asList(a, b, c)), is(expected));
+        Artifact artA = buildTestModel("aaaa", "mvaaaa", "cccc|mvcccc");
+        Artifact artB = buildTestModel("bbbb", "mvbbbb", "aaaa|mvaaaa");
+        Artifact artC = buildTestModel("cccc", "mvcccc");
+        List<Artifact> expected = Arrays.asList(artC, artA, artB);
+        assertThat(new ModelSorter().sort(Arrays.asList(artA, artB, artC)), is(expected));
+    }
+
+
+    @Test
+    public void multipleModelsWithMultipleIncomingEdges() throws BabelArtifactParsingException {
+        ModelArtifact artA = buildTestModel("aaaa", "mvaaaa", "cccc|mvcccc");
+        Artifact artB = buildTestModel("bbbb", "mvbbbb", "aaaa|mvaaaa");
+        Artifact artC = buildTestModel("cccc", "mvcccc");
+        Artifact artD = buildTestModel("dddd", "mvdddd", "cccc|mvcccc");
+        artA.addDependentModelId("dddd|mvdddd");
+        List<Artifact> expected = Arrays.asList(artC, artD, artA, artB);
+        assertThat(new ModelSorter().sort(Arrays.asList(artA, artB, artC, artD)), is(expected));
     }
 
     @Test
     public void multipleModelsAndNamedQueries() throws BabelArtifactParsingException {
-        Artifact a = buildTestModel("aaaa", "1111", "cccc|2222");
+        Artifact artifact = buildTestModel("aaaa", "1111", "cccc|2222");
         Artifact nq1 = buildTestNamedQuery("nq1", "aaaa|1111");
         Artifact nq2 = buildTestNamedQuery("nqw", "existing-model");
-        List<Artifact> expected = Arrays.asList(a, nq2, nq1);
-        assertThat(new ModelSorter().sort(Arrays.asList(nq1, nq2, a)), is(expected));
+        List<Artifact> expected = Arrays.asList(artifact, nq2, nq1);
+        assertThat(new ModelSorter().sort(Arrays.asList(nq1, nq2, artifact)), is(expected));
     }
 
     @Test(expected = BabelArtifactParsingException.class)

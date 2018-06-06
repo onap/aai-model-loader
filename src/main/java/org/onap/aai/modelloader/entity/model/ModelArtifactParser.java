@@ -54,8 +54,8 @@ public class ModelArtifactParser extends AbstractModelArtifactParser {
         } else {
             if (node.getNodeName().equalsIgnoreCase(MODEL_VER)) {
                 ((ModelArtifact) model).setModelVer(node);
-                if ((((ModelArtifact) model).getModelNamespace() != null)
-                        && (!((ModelArtifact) model).getModelNamespace().isEmpty())) {
+                if (((ModelArtifact) model).getModelNamespace() != null
+                        && !((ModelArtifact) model).getModelNamespace().isEmpty()) {
                     Element e = (Element) node;
                     e.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns",
                             ((ModelArtifact) model).getModelNamespace());

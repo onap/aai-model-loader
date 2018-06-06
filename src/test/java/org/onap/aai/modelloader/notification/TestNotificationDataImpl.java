@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,7 +18,7 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.service;
+package org.onap.aai.modelloader.notification;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -37,7 +37,6 @@ public class TestNotificationDataImpl {
     public void testGettersAndSetters() {
         NotificationDataImpl data = new NotificationDataImpl();
         String distributionId = "testid";
-        String context = "testcontext";
 
         data.setDistributionID(distributionId);
         assertThat(data.getDistributionID(), is(equalTo(distributionId)));
@@ -53,6 +52,7 @@ public class TestNotificationDataImpl {
         assertThat(data.getServiceArtifacts().size(), is(0));
 
         // Unsupported method!
+        String context = "testcontext";
         data.setWorkloadContext(context);
         assertThat(data.getWorkloadContext(), is(equalTo(null)));
     }

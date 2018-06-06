@@ -20,7 +20,7 @@
  */
 package org.onap.aai.modelloader.entity;
 
-public abstract class Artifact {
+public class Artifact {
 
     private String payload;
     private ArtifactType type;

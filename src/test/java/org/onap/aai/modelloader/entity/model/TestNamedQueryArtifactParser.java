@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,6 +20,9 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.isEmptyString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Files;
@@ -28,12 +31,12 @@ import java.util.List;
 import org.junit.Test;
 import org.onap.aai.modelloader.entity.Artifact;
 
-public class NamedQueryArtifactParserTest {
+public class TestNamedQueryArtifactParser {
+
+    private static final String MODEL_FILE = "src/test/resources/models/named-query-wan-connector.xml";
 
     @Test
     public void testParseNamedQuery() throws Exception {
-        final String MODEL_FILE = "src/test/resources/models/named-query-wan-connector.xml";
-
         try {
             String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE)));
 
@@ -43,8 +46,8 @@ public class NamedQueryArtifactParserTest {
             assertTrue(modelList.size() == 1);
 
             NamedQueryArtifact model = (NamedQueryArtifact) modelList.get(0);
-            System.out.println(model.toString());
 
+            assertThat(model.toString(), not(isEmptyString()));
             assertTrue(model.getNamedQueryUuid().equalsIgnoreCase("94cac189-8d88-4d63-a194-f44214e080ff"));
             assertTrue(model.getType().toString().equalsIgnoreCase("NAMED_QUERY"));
             assertTrue(model.getDependentModelIds().size() == 4);

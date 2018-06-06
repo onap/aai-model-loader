@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,6 +20,7 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -28,15 +29,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
+import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
- * Tests {@link BabelArtifactConverter}
+ * Tests {@link BabelArtifactConverter}.
  */
-public class BabelArtifactConverterTest {
+public class TestBabelArtifactConverter {
 
     @Test(expected = NullPointerException.class)
     public void convert_nullToscaFiles() throws BabelArtifactParsingException {
@@ -45,20 +49,20 @@ public class BabelArtifactConverterTest {
     }
 
     @Test
-    public void convert_emptyToscaFiles() throws BabelArtifactParsingException {
+    public void testEmptyToscaFiles() throws BabelArtifactParsingException {
         assertTrue("Nothing should have been returned",
                 new BabelArtifactConverter().convertToModel(new ArrayList<>()).isEmpty());
     }
 
     @Test(expected = BabelArtifactParsingException.class)
-    public void convert_problemWithConvertedXML() throws IOException, BabelArtifactParsingException {
-        byte[] problemXML =
+    public void testInvalidXml() throws IOException, BabelArtifactParsingException {
+        byte[] problemXml =
                 "<model xmlns=\"http://org.openecomp.aai.inventory/v10\"><rubbish>This is some xml that should cause the model artifact parser to throw an erorr</rubbish></model>"
                         .getBytes();
 
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        List<BabelArtifact> toscaArtifacts = setupTest(problemXML, data);
+        List<BabelArtifact> toscaArtifacts = setupTest(problemXml, data);
 
         new BabelArtifactConverter().convertToModel(toscaArtifacts);
         fail("An instance of ModelArtifactParsingException should have been thrown");
@@ -73,5 +77,19 @@ public class BabelArtifactConverterTest {
         toscaArtifacts.add(xmlArtifact);
 
         return toscaArtifacts;
+    }
+
+    @Test
+    public void convert_singleResourceFile() throws BabelArtifactParsingException, IOException {
+        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
+
+        byte[] xml = new ArtifactTestUtils().loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
+        List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
+
+        List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
+
+        assertTrue("There should have been 1 artifact", modelArtifacts.size() == 1);
+        assertEquals(new String(xml), modelArtifacts.get(0).getPayload());
+        assertEquals(ArtifactType.MODEL, modelArtifacts.get(0).getType());
     }
 }

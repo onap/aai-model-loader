@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -36,13 +36,14 @@ import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
+import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
- * Tests {@link EventCallback}
+ * Tests {@link EventCallback}.
  */
-public class EventCallbackTest {
+public class TestEventCallback {
 
     private static final String CONFIG_FILE = "model-loader.properties";
 
@@ -53,6 +54,7 @@ public class EventCallbackTest {
     private ArtifactDeploymentManager mockArtifactDeploymentManager;
     private ArtifactDownloadManager mockArtifactDownloadManager;
     private IDistributionClient mockDistributionClient;
+    private NotificationPublisher mockNotificationPublisher;
 
     @Before
     public void setup() throws IOException {
@@ -63,11 +65,13 @@ public class EventCallbackTest {
         mockArtifactDeploymentManager = mock(ArtifactDeploymentManager.class);
         mockArtifactDownloadManager = mock(ArtifactDownloadManager.class);
         mockDistributionClient = mock(IDistributionClient.class);
+        mockNotificationPublisher = mock(NotificationPublisher.class);
 
         eventCallback = new EventCallback(mockDistributionClient, config);
 
         Whitebox.setInternalState(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
         Whitebox.setInternalState(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
+        Whitebox.setInternalState(eventCallback, "notificationPublisher", mockNotificationPublisher);
     }
 
     @After
@@ -103,14 +107,13 @@ public class EventCallbackTest {
         when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
                 any(List.class), any(List.class))).thenReturn(true);
 
-        when(mockArtifactDeploymentManager.deploy(any(INotificationData.class), any(List.class), any(List.class),
-                any(List.class))).thenReturn(true);
+        when(mockArtifactDeploymentManager.deploy(any(INotificationData.class), any(List.class), any(List.class)))
+                .thenReturn(true);
 
         eventCallback.activateCallback(data);
 
         verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
                 any(List.class), any(List.class));
-        verify(mockArtifactDeploymentManager).deploy(any(INotificationData.class), any(List.class), any(List.class),
-                any(List.class));
+        verify(mockArtifactDeploymentManager).deploy(any(INotificationData.class), any(List.class), any(List.class));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -60,11 +60,11 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
             List<Artifact> completedArtifacts) {
         OperationResult getResponse =
                 aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML_TYPE);
-        if ((getResponse == null) || (getResponse.getResultCode() != Response.Status.OK.getStatusCode())) {
+        if (getResponse == null || getResponse.getResultCode() != Response.Status.OK.getStatusCode()) {
             // Only attempt the PUT if the model doesn't already exist
             OperationResult putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId,
                     MediaType.APPLICATION_XML_TYPE);
-            if ((putResponse != null) && (putResponse.getResultCode() == Response.Status.CREATED.getStatusCode())) {
+            if (putResponse != null && putResponse.getResultCode() == Response.Status.CREATED.getStatusCode()) {
                 completedArtifacts.add(this);
                 logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
                         getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
@@ -92,7 +92,7 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
         String subURL = config.getAaiNamedQueryUrl(getModelNamespaceVersion()).trim();
         String instance = this.getNamedQueryUuid();
 
-        if ((!baseURL.endsWith("/")) && (!subURL.startsWith("/"))) {
+        if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {
             baseURL = baseURL + "/";
         }
 

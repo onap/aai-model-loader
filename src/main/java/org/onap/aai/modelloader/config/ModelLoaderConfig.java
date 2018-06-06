@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -43,30 +43,33 @@ public class ModelLoaderConfig implements IConfiguration {
     private static final String SUFFIX_KEYSTORE_FILE = "KEYSTORE_FILE";
     private static final String SUFFIX_KEYSTORE_PASS = "KEYSTORE_PASSWORD";
 
+    private static final String SUFFIX_TRUSTSTORE_FILE = "TRUSTSTORE_FILE";
+    private static final String SUFFIX_TRUSTSTORE_PASS = "TRUSTSTORE_PASSWORD";
+
     // Configuration file properties
-    protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH =
-            PREFIX_DISTRIBUTION_CLIENT + "ACTIVE_SERVER_TLS_AUTH";
-    protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED =
-            PREFIX_DISTRIBUTION_CLIENT + "ASDC_CONNECTION_DISABLE";
+	protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH = PREFIX_DISTRIBUTION_CLIENT
+			+ "ACTIVE_SERVER_TLS_AUTH";
+	protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED = PREFIX_DISTRIBUTION_CLIENT
+			+ "ASDC_CONNECTION_DISABLE";
     protected static final String PROP_ML_DISTRIBUTION_ASDC_ADDRESS = PREFIX_DISTRIBUTION_CLIENT + "ASDC_ADDRESS";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_GROUP = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_GROUP";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_ID = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_ID";
-    protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME =
-            PREFIX_DISTRIBUTION_CLIENT + "ENVIRONMENT_NAME";
-    protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD =
-            PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_PASS;
-    protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE =
-            PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_FILE;
+	protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME = PREFIX_DISTRIBUTION_CLIENT
+			+ "ENVIRONMENT_NAME";
+	protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD = PREFIX_DISTRIBUTION_CLIENT
+			+ SUFFIX_KEYSTORE_PASS;
+	protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE = PREFIX_DISTRIBUTION_CLIENT
+			+ SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_ML_DISTRIBUTION_PASSWORD = PREFIX_DISTRIBUTION_CLIENT + "PASSWORD";
-    protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL =
-            PREFIX_DISTRIBUTION_CLIENT + "POLLING_INTERVAL";
+	protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL = PREFIX_DISTRIBUTION_CLIENT
+			+ "POLLING_INTERVAL";
     protected static final String PROP_ML_DISTRIBUTION_POLLING_TIMEOUT = PREFIX_DISTRIBUTION_CLIENT + "POLLING_TIMEOUT";
     protected static final String PROP_ML_DISTRIBUTION_USER = PREFIX_DISTRIBUTION_CLIENT + "USER";
     protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT + "ARTIFACT_TYPES";
-    protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES =
-            PREFIX_DISTRIBUTION_CLIENT + "MSG_BUS_ADDRESSES";
-    protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP =
-            PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
+	protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES = PREFIX_DISTRIBUTION_CLIENT
+			+ "MSG_BUS_ADDRESSES";
+	protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP = PREFIX_DISTRIBUTION_CLIENT
+			+ "USE_HTTPS_WITH_DMAAP";
 
     protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
     protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
@@ -80,6 +83,8 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
     protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_BABEL_KEYSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_KEYSTORE_PASS;
+    protected static final String PROP_BABEL_TRUSTSTORE_FILE = PREFIX_BABEL + SUFFIX_TRUSTSTORE_FILE;
+    protected static final String PROP_BABEL_TRUSTSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_TRUSTSTORE_PASS;
     protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
 
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
@@ -95,8 +100,8 @@ public class ModelLoaderConfig implements IConfiguration {
 
     private String modelVersion = null;
 
-    protected static final String FILESEP =
-            (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
+	protected static final String FILESEP = (System.getProperty("file.separator") == null) ? "/"
+			: System.getProperty("file.separator");
 
     public static void setConfigHome(String configHome) {
         ModelLoaderConfig.configHome = configHome;
@@ -113,8 +118,10 @@ public class ModelLoaderConfig implements IConfiguration {
     /**
      * Original constructor
      *
-     * @param modelLoaderProperties properties needed to be configured for the model loader
-     * @param certLocation location of the certificate
+	 * @param modelLoaderProperties
+	 *            properties needed to be configured for the model loader
+	 * @param certLocation
+	 *            location of the certificate
      */
     public ModelLoaderConfig(Properties modelLoaderProperties, String certLocation) {
         this.modelLoaderProperties = modelLoaderProperties;
@@ -139,11 +146,10 @@ public class ModelLoaderConfig implements IConfiguration {
         }
     }
 
-
     @Override
     public boolean activateServerTLSAuth() {
         String value = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH);
-        return value == null ? false : Boolean.parseBoolean(value);
+        return value != null && Boolean.parseBoolean(value);
     }
 
     @Override
@@ -209,7 +215,7 @@ public class ModelLoaderConfig implements IConfiguration {
     @Override
     public Boolean isUseHttpsWithDmaap() {
         String useHTTPS = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
-        return useHTTPS == null ? false : Boolean.valueOf(useHTTPS);
+        return useHTTPS != null && Boolean.valueOf(useHTTPS);
     }
 
     @Override
@@ -227,7 +233,7 @@ public class ModelLoaderConfig implements IConfiguration {
             return null;
         } else {
             return certLocation + File.separator + filename;
-        }   
+        }
     }
 
     public String getAaiKeyStorePassword() {
@@ -236,6 +242,19 @@ public class ModelLoaderConfig implements IConfiguration {
 
     public String getBabelKeyStorePassword() {
         return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_PASSWORD));
+    }
+
+    public String getBabelTrustStorePath() {
+        String filename = modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_FILE);
+        if (filename == null) {
+            return null;
+        } else {
+            return certLocation + File.separator + filename;
+        }
+    }
+
+    public String getBabelTrustStorePassword() {
+        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_PASSWORD));
     }
 
     public String getAaiBaseUrl() {

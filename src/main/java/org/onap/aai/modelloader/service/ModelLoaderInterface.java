@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -31,15 +31,15 @@ public interface ModelLoaderInterface {
     @RequestMapping(value = "/loadModel/{modelid}", //
             method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public Response loadModel(String modelid);
+    Response loadModel(String modelid);
 
     @RequestMapping(value = "/saveModel/{modelid}/{modelname}", //
             method = RequestMethod.PUT, produces = "application/json")
     @ResponseBody
-    public Response saveModel(String modelid, String modelname);
+    Response saveModel(String modelid, String modelname);
 
     @RequestMapping(value = "/ingestModel/{modelName}/{modelVersion}", //
             method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    public Response ingestModel(String modelid, String modelVersion, String payload) throws IOException;
+    Response ingestModel(String modelid, String modelVersion, String payload) throws IOException;
 }

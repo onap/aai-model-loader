@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -32,17 +32,19 @@ import org.onap.sdc.api.notification.IResourceInstance;
 public class NotificationDataFixtureBuilder {
 
     private static final String DESCRIPTION_OF_RESOURCE = "description of resource";
-    private static final INotificationData EMPTY_NOTIFICATION_DATA = new TestNotificationDataImpl();
+    private static final MockNotificationDataImpl EMPTY_NOTIFICATION_DATA = new MockNotificationDataImpl();
     private static final String MODEL_QUERY_SPEC = "MODEL_QUERY_SPEC";
-    private static final INotificationData NOTIFICATION_DATA_WITH_CATALOG_FILE = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_MODEL_QUERY_SPEC = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_INVALID_TYPE = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_ONE_OF_EACH = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_ONE_RESOURCE = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_ONE_SERVICE = new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_ONE_SERVICE_AND_RESOURCES =
-            new TestNotificationDataImpl();
-    private static final INotificationData NOTIFICATION_DATA_WITH_TOSCA_CSAR_FILE = new TestNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_CATALOG_FILE = new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_MODEL_QUERY_SPEC =
+            new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_INVALID_TYPE = new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_ONE_OF_EACH = new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_ONE_RESOURCE = new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_ONE_SERVICE = new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_ONE_SERVICE_AND_RESOURCES =
+            new MockNotificationDataImpl();
+    private static final MockNotificationDataImpl NOTIFICATION_DATA_WITH_TOSCA_CSAR_FILE =
+            new MockNotificationDataImpl();
     private static final String RESOURCE = "resource";
     private static final String TOSCA_CSAR = "TOSCA_CSAR";
     private static final String INVALID_TYPE = "INVALID_TYPE";
@@ -61,8 +63,8 @@ public class NotificationDataFixtureBuilder {
     }
 
     private static void buildEmptyNotificationData() {
-        ((TestNotificationDataImpl) EMPTY_NOTIFICATION_DATA).setResources(new ArrayList<>());
-        ((TestNotificationDataImpl) EMPTY_NOTIFICATION_DATA).setServiceArtifacts(new ArrayList<>());
+        EMPTY_NOTIFICATION_DATA.setResources(new ArrayList<>());
+        EMPTY_NOTIFICATION_DATA.setServiceArtifacts(new ArrayList<>());
     }
 
     private static void buildWithCatalogFile() {
@@ -74,7 +76,7 @@ public class NotificationDataFixtureBuilder {
         List<IArtifactInfo> artifacts =
                 ArtifactInfoBuilder.buildArtifacts(new String[][] {{"R", RESOURCE, DESCRIPTION_OF_RESOURCE, VERSION}});
         resources.add(ResourceInstanceBuilder.build(artifacts));
-        ((TestNotificationDataImpl) NOTIFICATION_DATA_WITH_ONE_RESOURCE).setResources(resources);
+        NOTIFICATION_DATA_WITH_ONE_RESOURCE.setResources(resources);
     }
 
     private static void buildWithModelQuerySpec() {
@@ -96,18 +98,18 @@ public class NotificationDataFixtureBuilder {
         artifacts = ArtifactInfoBuilder
                 .buildArtifacts(new String[][] {{MODEL_QUERY_SPEC, "resource2", "description of resource2", VERSION}});
         resources.add(ResourceInstanceBuilder.build(artifacts));
-        ((TestNotificationDataImpl) NOTIFICATION_DATA_WITH_ONE_OF_EACH).setResources(resources);
+        NOTIFICATION_DATA_WITH_ONE_OF_EACH.setResources(resources);
     }
 
     private static void buildWithOneService() {
         buildService("S", NOTIFICATION_DATA_WITH_ONE_SERVICE);
     }
 
-    private static void buildService(String type, INotificationData data) {
+    private static void buildService(String type, MockNotificationDataImpl data) {
         List<IArtifactInfo> artifacts = new ArrayList<>();
         artifacts.add(ArtifactInfoBuilder.build(type, "service", "description of service", "s1.0"));
-        ((TestNotificationDataImpl) data).setDistributionID("ID");
-        ((TestNotificationDataImpl) data).setServiceArtifacts(artifacts);
+        data.setDistributionId("ID");
+        data.setServiceArtifacts(artifacts);
     }
 
     private static void buildWithOneServiceAndResources() {
@@ -117,7 +119,7 @@ public class NotificationDataFixtureBuilder {
         List<IArtifactInfo> artifacts = ArtifactInfoBuilder
                 .buildArtifacts(new String[][] {{TOSCA_CSAR, RESOURCE, "description of resource", VERSION}});
         resources.add(ResourceInstanceBuilder.build(artifacts));
-        ((TestNotificationDataImpl) NOTIFICATION_DATA_WITH_ONE_SERVICE_AND_RESOURCES).setResources(resources);
+        NOTIFICATION_DATA_WITH_ONE_SERVICE_AND_RESOURCES.setResources(resources);
     }
 
     private static void buildWithToscaCsarFile() {

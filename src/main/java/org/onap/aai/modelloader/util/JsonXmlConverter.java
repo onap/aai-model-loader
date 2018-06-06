@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
-public class JsonXmlConverter {
+public final class JsonXmlConverter {
 
     private JsonXmlConverter() {
         throw new AssertionError("Instantiating utility class.");
@@ -38,17 +38,20 @@ public class JsonXmlConverter {
      * @return - true if the string represents a valid JSON object, false, otherwise.
      */
     public static boolean isValidJson(String text) {
+        boolean isValid;
         try {
             new JSONObject(text);
+            isValid = true;
         } catch (JSONException ex) {
             try {
                 new JSONArray(text);
+                isValid = true;
             } catch (JSONException ex1) {
-                return false;
+                isValid = false;
             }
         }
 
-        return true;
+        return isValid;
     }
 
     /**

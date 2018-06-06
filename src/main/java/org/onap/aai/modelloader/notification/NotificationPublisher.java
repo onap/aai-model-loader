@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,8 +20,9 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -41,7 +42,7 @@ import org.onap.sdc.utils.DistributionStatusEnum;
 /**
  * This class is responsible for publishing the status of actions performed working with artifacts.
  */
-class NotificationPublisher {
+public class NotificationPublisher {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(NotificationPublisher.class);
     private static Logger metricsLogger = LoggerFactory.getInstance().getMetricsLogger(NotificationPublisher.class);
@@ -51,7 +52,7 @@ class NotificationPublisher {
     public NotificationPublisher() {
         Properties configProperties = new Properties();
         try {
-            configProperties.load(new FileInputStream(ModelLoaderConfig.propertiesFile()));
+            configProperties.load(Files.newInputStream(Paths.get(ModelLoaderConfig.propertiesFile())));
         } catch (IOException e) {
             String errorMsg = "Failed to load configuration: " + e.getMessage();
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);
@@ -141,28 +142,10 @@ class NotificationPublisher {
      * @param data data about the notification that resulted in this message being created
      * @param artifact the specific artifact to have its deployment status reported on
      */
-    void publishDeployFailure(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
+    public void publishDeployFailure(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
         publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_ERROR, "failure");
     }
 
-    private void publishDeployStatus(IDistributionClient client, INotificationData data, IArtifactInfo artifact,
-            DistributionStatusEnum distributionStatusEnum, String result) {
-        if (publishingEnabled) {
-            MdcOverride override = initMDCStartTime();
-
-            IDistributionClientResult sendStatus = client.sendDeploymentStatus(
-                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum));
-            metricsLogger.info(ModelLoaderMsgs.EVENT_PUBLISHED, null, override, "deploy " + result,
-                    artifact.getArtifactName(), sendStatus.getDistributionActionResult().toString());
-
-            if (sendStatus.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
-                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-                        "Failed to publish deploy " + result + " status: " + sendStatus.getDistributionMessageResult());
-            }
-        } else {
-            logPublishingDisabled(distributionStatusEnum.toString(), result);
-        }
-    }
 
     /**
      * This method is responsible for publishing notification that the deployment of an artifact was succesful.
@@ -171,11 +154,11 @@ class NotificationPublisher {
      * @param data data about the notification that resulted in this message being created
      * @param artifact the specific artifact to have its deployment status reported on
      */
-    void publishDeploySuccess(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
+    public void publishDeploySuccess(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
         publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_OK, "success");
     }
 
-    void publishComponentSuccess(IDistributionClient client, INotificationData data) {
+    public void publishComponentSuccess(IDistributionClient client, INotificationData data) {
         if (publishingEnabled) {
             MdcOverride override = initMDCStartTime();
 
@@ -194,7 +177,7 @@ class NotificationPublisher {
         }
     }
 
-    void publishComponentFailure(IDistributionClient client, INotificationData data, String errorReason) {
+    public void publishComponentFailure(IDistributionClient client, INotificationData data, String errorReason) {
         if (publishingEnabled) {
             MdcOverride override = initMDCStartTime();
 
@@ -211,6 +194,25 @@ class NotificationPublisher {
             }
         } else {
             logPublishingDisabled(DistributionStatusEnum.COMPONENT_DONE_ERROR.toString(), errorReason);
+        }
+    }
+
+    private void publishDeployStatus(IDistributionClient client, INotificationData data, IArtifactInfo artifact,
+            DistributionStatusEnum distributionStatusEnum, String result) {
+        if (publishingEnabled) {
+            MdcOverride override = initMDCStartTime();
+
+            IDistributionClientResult sendStatus = client.sendDeploymentStatus(
+                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum));
+            metricsLogger.info(ModelLoaderMsgs.EVENT_PUBLISHED, null, override, "deploy " + result,
+                    artifact.getArtifactName(), sendStatus.getDistributionActionResult().toString());
+
+            if (sendStatus.getDistributionActionResult() != DistributionActionResultEnum.SUCCESS) {
+                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
+                        "Failed to publish deploy " + result + " status: " + sendStatus.getDistributionMessageResult());
+            }
+        } else {
+            logPublishingDisabled(distributionStatusEnum.toString(), result);
         }
     }
 

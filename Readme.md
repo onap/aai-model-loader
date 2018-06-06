@@ -1,7 +1,7 @@
 # Introduction
 
-The A&AI Model Loader Service is an application that facilitates
-distribution and ingestion of new service and resource models from SDC to A&AI.
+The A&AI Model Loader Service is an application that facilitates the distribution and ingestion of 
+new service and resource models from the SDC to the A&AI.
 
 ## Features
 
@@ -11,15 +11,13 @@ The Model Loader:
 * polls the UEB/DMaap cluster for notification events
 * downloads artifacts from SDC upon receipt of a distribution event
 * pushes distribution components to A&AI
-		    
+
 ## Compiling Model Loader
 
 Model Loader can be compiled by running `mvn clean install`
 A Model Loader docker image can be created by running `docker build -t onap/model-loader target`
 
 ## Running Model Loader 
-
-### Deploying The MicroService 
 
 Push the Docker image to your Docker repository. Pull this down to the host machine.
 
@@ -37,7 +35,8 @@ You will be mounting these as data volumes when you start the Docker container. 
 
 The following file must be present in this directory on the host machine:
     
-_model-loader.properties_  
+_model-loader.properties_
+
     # Always false.  TLS Auth currently not supported 
     ml.distribution.ACTIVE_SERVER_TLS_AUTH=false
     
@@ -73,7 +72,7 @@ _model-loader.properties_
     ml.distribution.USER=<username>
     
     # Artifact type we want to download from the SDC (the values below will typically suffice)
-    ml.distribution.ARTIFACT_TYPES=MMODEL_QUERY_SPEC,TOSCA_CSAR
+    ml.distribution.ARTIFACT_TYPES=MODEL_QUERY_SPEC,TOSCA_CSAR
     
     # List of message bus addresses on which to listen for distribution events
     ml.distribution.MSG_BUS_ADDRESSES=<host1>,<host2>
@@ -118,7 +117,7 @@ The certificate used to connected to the A&AI
 
 **Start the service:**
 
-You can now start the Docker container for the _Search Data Service_, in the following manner:
+You can now start the Docker container for the _Model Loader Service_, e.g:
 
 	docker run -d \
 		-e CONFIG_HOME=/opt/app/model-loader/config/ \
@@ -127,6 +126,7 @@ You can now start the Docker container for the _Search Data Service_, in the fol
 	    --name model-loader \
 	    {{your docker repo}}/model-loader
     
-Where,
-
-    {{your docker repo}} = The Docker repository you have published your image to.
+where
+ 
+    {{your docker repo}}
+is the Docker repository you have published your image to.

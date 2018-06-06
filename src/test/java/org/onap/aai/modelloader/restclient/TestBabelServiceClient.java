@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -31,11 +31,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -51,10 +46,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.restclient.BabelServiceClient.BabelServiceException;
+import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
 
 /**
- * Local testing of the Babel service
+ * Local testing of the Babel service client.
  *
  */
 public class TestBabelServiceClient {
@@ -62,16 +57,14 @@ public class TestBabelServiceClient {
     private Server server;
     private String responseBody;
 
-    {
+    @Before
+    public void startJetty() throws Exception {
         List<BabelArtifact> response = new ArrayList<>();
         response.add(new BabelArtifact("", null, ""));
         response.add(new BabelArtifact("", null, ""));
         response.add(new BabelArtifact("", null, ""));
         responseBody = new Gson().toJson(response);
-    }
 
-    @Before
-    public void startJetty() throws Exception {
         server = new Server(8080);
         server.setHandler(getMockHandler());
         server.start();
@@ -83,14 +76,17 @@ public class TestBabelServiceClient {
     }
 
     @Test
-    public void testRestClient() throws UnrecoverableKeyException, KeyManagementException, NoSuchAlgorithmException,
-            KeyStoreException, CertificateException, IOException, BabelServiceException, URISyntaxException {
+    public void testRestClient() throws BabelServiceClientException, IOException, URISyntaxException {
         Properties configProperties = new Properties();
         configProperties.put("ml.babel.KEYSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
+        configProperties.put("ml.babel.KEYSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
+        configProperties.put("ml.babel.TRUSTSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
+        // In a real deployment this would be a different file (to the client keystore)
+        configProperties.put("ml.babel.TRUSTSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
         configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
         BabelServiceClient client =
-                new BabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
+                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
         List<BabelArtifact> result =
                 client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
                         "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
@@ -120,4 +116,3 @@ public class TestBabelServiceClient {
         return handler;
     }
 }
-

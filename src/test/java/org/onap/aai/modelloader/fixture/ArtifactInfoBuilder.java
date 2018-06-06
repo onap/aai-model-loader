@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -42,12 +42,12 @@ public class ArtifactInfoBuilder {
      */
     public static IArtifactInfo build(final String type, final String name, final String description,
             final String version) {
-        IArtifactInfo artifact = new ArtifactInfoImpl();
+        ArtifactInfoImpl artifact = new ArtifactInfoImpl();
 
-        ((ArtifactInfoImpl) artifact).setArtifactType(type);
-        ((ArtifactInfoImpl) artifact).setArtifactName(name);
-        ((ArtifactInfoImpl) artifact).setArtifactDescription(description);
-        ((ArtifactInfoImpl) artifact).setArtifactVersion(version);
+        artifact.setArtifactType(type);
+        artifact.setArtifactName(name);
+        artifact.setArtifactDescription(description);
+        artifact.setArtifactVersion(version);
 
         return artifact;
     }
@@ -63,7 +63,7 @@ public class ArtifactInfoBuilder {
      * <p/>
      *
      * @param artifactInfoBits a two dimensional array of data used to build the artifacts
-     * @return List<IArtifactInfo> a list of artifacts built from the given array of info
+     * @return List&lt;IArtifactInfo&gt; a list of artifacts built from the given array of info
      */
     static List<IArtifactInfo> buildArtifacts(final String[][] artifactInfoBits) {
         List<IArtifactInfo> artifacts = new ArrayList<>();

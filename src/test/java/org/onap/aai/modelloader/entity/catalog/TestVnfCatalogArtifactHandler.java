@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,12 +20,15 @@
  */
 package org.onap.aai.modelloader.entity.catalog;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -41,24 +44,19 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.restclient.client.OperationResult;
 
-public class VnfCatalogArtifactHandlerTest {
+public class TestVnfCatalogArtifactHandler {
 
     protected static String CONFIG_FILE = "model-loader.properties";
 
+    private AaiRestClient mockRestClient = mock(AaiRestClient.class);
+
+    /**
+     * Update A&AI with 4 images, 2 of which already exist.
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testWithMocks() throws Exception {
-
-        Properties configProperties = new Properties();
-        try {
-            configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        } catch (IOException e) {
-            fail();
-        }
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
-        config.setModelVersion("11");
-
-        AaiRestClient mockRestClient = mock(AaiRestClient.class);
-
+    public void testUpdateVnfImages() throws Exception {
         // GET operation
         OperationResult mockGetResp = mock(OperationResult.class);
 
@@ -69,32 +67,64 @@ public class VnfCatalogArtifactHandlerTest {
                 .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
                 .thenReturn(Response.Status.OK.getStatusCode());
         // @formatter:on
+
         when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class)))
                 .thenReturn(mockGetResp);
+        mockPutOperations();
 
-        // PUT operation
-        OperationResult mockPutResp = mock(OperationResult.class);
+        // Example VNF Catalog XML
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        assertThat(handler.pushArtifacts(createVnfCatalogArtifact(), "test", new ArrayList<Artifact>(), mockRestClient),
+                is(true));
 
-        when(mockPutResp.getResultCode()).thenReturn(Response.Status.CREATED.getStatusCode());
-        when(mockRestClient.putResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.any(MediaType.class))).thenReturn(mockPutResp);
+        assertPutOperationsSucceeded();
+    }
 
-        // Example VNF Catalog with
-        VnfCatalogArtifactHandler vnfCAH = new VnfCatalogArtifactHandler(config);
+    private ModelLoaderConfig createConfig() {
+        Properties configProperties = new Properties();
+        try {
+            configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
+        } catch (IOException e) {
+            fail();
+        }
+        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
+        return config;
+    }
+
+    /**
+     * Example VNF Catalog based on JSON data (returned by Babel)
+     * 
+     * @return test Artifacts
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
+    private List<Artifact> createVnfCatalogArtifact() throws IOException, UnsupportedEncodingException {
         String examplePath = "src/test/resources/imagedataexample.json";
         byte[] encoded = Files.readAllBytes(Paths.get(examplePath));
         List<Artifact> artifacts = new ArrayList<Artifact>();
         artifacts.add(new VnfCatalogArtifact(new String(encoded, "utf-8")));
+        return artifacts;
+    }
 
-        assertTrue(vnfCAH.pushArtifacts(artifacts, "test", new ArrayList<Artifact>(), mockRestClient));
+    /**
+     * Always return CREATED (success) for a PUT operation.
+     */
+    private void mockPutOperations() {
+        OperationResult mockPutResp = mock(OperationResult.class);
+        when(mockPutResp.getResultCode()).thenReturn(Response.Status.CREATED.getStatusCode());
+        when(mockRestClient.putResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.any(MediaType.class))).thenReturn(mockPutResp);
+    }
 
+    private void assertPutOperationsSucceeded() {
         // Only two of the VNF images should be pushed
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        AaiRestClient r = Mockito.verify(mockRestClient, Mockito.times(2));
-        r.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(), Mockito.any(MediaType.class));
-        assertTrue(argument.getAllValues().get(0).contains("3.16.9"));
-        assertTrue(argument.getAllValues().get(0).contains("VM00"));
-        assertTrue(argument.getAllValues().get(1).contains("3.16.1"));
-        assertTrue(argument.getAllValues().get(1).contains("VM01"));
+        AaiRestClient mockedClient = Mockito.verify(mockRestClient, Mockito.times(2));
+        mockedClient.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(),
+                Mockito.any(MediaType.class));
+        assertThat(argument.getAllValues().get(0), containsString("3.16.9"));
+        assertThat(argument.getAllValues().get(0), containsString("VM00"));
+        assertThat(argument.getAllValues().get(1), containsString("3.16.1"));
+        assertThat(argument.getAllValues().get(1), containsString("VM01"));
     }
 }

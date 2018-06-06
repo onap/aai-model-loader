@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -20,8 +20,8 @@
  */
 package org.onap.aai.modelloader.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
@@ -33,25 +33,30 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class JsonXmlConverterTest {
+public class TestJsonXmlConverter {
+
+    private static final String XML_MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
+    private static final String JSON_MODEL_FILE = "src/test/resources/models/l3-network-widget.json";
+
+    @Test
+    public void testJsonIsValid() {
+        assertThat(JsonXmlConverter.isValidJson("{}"), is(true));
+        assertThat(JsonXmlConverter.isValidJson("[]"), is(true));
+
+        assertThat(JsonXmlConverter.isValidJson("{"), is(false));
+        assertThat(JsonXmlConverter.isValidJson("["), is(false));
+    }
 
     @Test
     public void testConversion() throws Exception {
-        final String XML_MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
-        final String JSON_MODEL_FILE = "src/test/resources/models/l3-network-widget.json";
-
-        try {
             byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
-            String originalXML = new String(encoded);
-
-            assertFalse(JsonXmlConverter.isValidJson(originalXML));
-
+            assertThat(JsonXmlConverter.isValidJson(new String(encoded)), is(false));
             encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
-            String originalJSON = new String(encoded);
+        String originalJson = new String(encoded);
 
-            assertTrue(JsonXmlConverter.isValidJson(originalJSON));
+        assertThat(JsonXmlConverter.isValidJson(originalJson), is(true));
 
-            String xmlFromJson = JsonXmlConverter.convertJsonToXml(originalJSON);
+        String xmlFromJson = JsonXmlConverter.convertJsonToXml(originalJson);
 
             // Spot check one of the attributes
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -69,10 +74,9 @@ public class JsonXmlConverterTest {
                 }
             }
 
-            assertTrue(modelVid.equals("3d560d81-57d0-438b-a2a1-5334dba0651a"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
+        assertThat(modelVid.equals("3d560d81-57d0-438b-a2a1-5334dba0651a"), is(true));
+
+            // Convert the XML form back into JSON
+            JsonXmlConverter.convertXmlToJson(xmlFromJson);
     }
 }

@@ -29,7 +29,7 @@ import org.onap.sdc.utils.DistributionStatusEnum;
 /**
  * This class is responsible for building an instance of {@link DistributionStatusMsg}.
  */
-public class DistributionStatusMessageBuilder {
+public final class DistributionStatusMessageBuilder {
 
     private DistributionStatusMessageBuilder() {}
 

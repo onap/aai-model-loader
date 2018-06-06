@@ -28,7 +28,7 @@ import org.onap.sdc.utils.DistributionStatusEnum;
 /**
  * This class is responsible for building an instance of {@link DistributionStatusMsg}.
  */
-public class CompDoneStatusMessageBuilder {
+public final class CompDoneStatusMessageBuilder {
 
     private CompDoneStatusMessageBuilder() {}
 

@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -18,7 +18,7 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.notification;
+package org.onap.aai.modelloader.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.sdc.api.IDistributionClient;
-import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
@@ -36,29 +34,25 @@ import org.onap.sdc.api.notification.INotificationData;
  */
 public class ArtifactDeploymentManager {
 
-    private IDistributionClient client;
     private ModelLoaderConfig config;
     private ModelArtifactHandler modelArtifactHandler;
     private VnfCatalogArtifactHandler vnfCatalogArtifactHandler;
-    private NotificationPublisher notificationPublisher;
 
-    public ArtifactDeploymentManager(IDistributionClient client, ModelLoaderConfig config) {
-        this.client = client;
+    public ArtifactDeploymentManager(ModelLoaderConfig config) {
         this.config = config;
     }
 
     /**
-     * Deploys model and catalog artifacts to A&AI
+     * Deploys model and catalog artifacts to A&AI.
      *
      * @param data data about the notification that is being processed
-     * @param artifacts the specific artifacts found in the data.
      * @param modelArtifacts collection of artifacts that represent yml files found in a TOSCA_CSAR file that have been
      *        converted to XML and also those for model query specs
      * @param catalogArtifacts collection of artifacts that represent vnf catalog files
      * @return boolean <code>true</code> if all deployments were successful otherwise <code>false</code>
      */
-    public boolean deploy(final INotificationData data, final List<IArtifactInfo> artifacts,
-            final List<Artifact> modelArtifacts, final List<Artifact> catalogArtifacts) {
+    public boolean deploy(final INotificationData data, final List<Artifact> modelArtifacts,
+            final List<Artifact> catalogArtifacts) {
 
         AaiRestClient aaiClient = new AaiRestClient(config);
         String distributionId = data.getDistributionID();
@@ -79,22 +73,7 @@ public class ArtifactDeploymentManager {
             }
         }
 
-        publishNotifications(data, "TOSCA_CSAR", artifacts, deploySuccess);
-
         return deploySuccess;
-    }
-
-    private void publishNotifications(INotificationData data, String filterType, List<IArtifactInfo> artifacts,
-            boolean deploymentSuccess) {
-        if (deploymentSuccess) {
-            artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeploySuccess(client, data, a));
-            getNotificationPublisher().publishComponentSuccess(client, data);
-        } else {
-            artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeployFailure(client, data, a));
-            getNotificationPublisher().publishComponentFailure(client, data, "deploy failure");
-        }
     }
 
     private ModelArtifactHandler getModelArtifactHandler() {
@@ -103,14 +82,6 @@ public class ArtifactDeploymentManager {
         }
 
         return modelArtifactHandler;
-    }
-
-    private NotificationPublisher getNotificationPublisher() {
-        if (notificationPublisher == null) {
-            notificationPublisher = new NotificationPublisher();
-        }
-
-        return notificationPublisher;
     }
 
     private VnfCatalogArtifactHandler getVnfCatalogArtifactHandler() {

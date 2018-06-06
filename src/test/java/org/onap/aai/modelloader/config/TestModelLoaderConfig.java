@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -34,10 +34,10 @@ import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.sdc.utils.ArtifactTypeEnum;
 
 /**
- * Tests for ModelLoaderConfig class
+ * Tests for ModelLoaderConfig class.
  *
  */
-public class ModelLoaderConfigTest {
+public class TestModelLoaderConfig {
 
     @Test
     public void testYangModelArtifactType() {
@@ -89,7 +89,7 @@ public class ModelLoaderConfigTest {
     }
 
     @Test
-    public void testDecryptAAIAuthenticationPassword() {
+    public void testDecryptAaiAuthenticationPassword() {
         String password = "myvoiceismypassword";
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
@@ -97,7 +97,7 @@ public class ModelLoaderConfigTest {
     }
 
     @Test
-    public void testDecryptAAIKeystorePassword() {
+    public void testDecryptAaiKeystorePassword() {
         String password = "myvoiceismypassword";
         ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getAaiKeyStorePassword());
@@ -148,8 +148,7 @@ public class ModelLoaderConfigTest {
     }
 
     @Test
-    public void testNoAAIAuth() throws IOException {
-
+    public void testMissingAuthenticationProperties() throws IOException {
         Properties props = new Properties();
         props.load(new FileInputStream("src/test/resources/model-loader-empty-auth-password.properties"));
 
@@ -180,8 +179,10 @@ public class ModelLoaderConfigTest {
 
 
     /**
-     * @param propertyName
-     * @param propertyValue
+     * Create a Model Loader Configuration object from the supplied Property.
+     * 
+     * @param propertyName property key
+     * @param propertyValue value of the property
      * @return a new ModelLoaderConfig object containing a single obfuscated property value
      */
     private ModelLoaderConfig createObfuscatedTestConfig(String propertyName, String propertyValue) {
