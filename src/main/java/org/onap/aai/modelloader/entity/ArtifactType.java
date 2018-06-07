@@ -24,5 +24,6 @@ public enum ArtifactType {
     MODEL,
     MODEL_V8,
     NAMED_QUERY,
-    VNF_CATALOG;
+    VNF_CATALOG,
+    VNF_CATALOG_XML;
 }

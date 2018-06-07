@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -38,6 +38,7 @@ import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
+import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 import org.onap.aai.modelloader.service.BabelServiceClientFactory;
@@ -68,6 +69,7 @@ public class ArtifactDownloadManager {
     private BabelArtifactConverter babelArtifactConverter;
     private ModelLoaderConfig config;
     private BabelServiceClientFactory clientFactory;
+    private VnfCatalogExtractor vnfCatalogExtractor;
 
     public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config,
             BabelServiceClientFactory clientFactory) {
@@ -149,12 +151,32 @@ public class ArtifactDownloadManager {
 
     public void processToscaArtifacts(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts, byte[] payload,
             IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
+            throws ProcessToscaArtifactsException, InvalidArchiveException {
+        // Get translated artifacts from Babel Service
+        invokeBabelService(modelArtifacts, catalogArtifacts, payload, artifactInfo, distributionId, serviceVersion);
+
+        // Get VNF Catalog artifacts directly from CSAR
+        List<Artifact> csarCatalogArtifacts = getVnfCatalogExtractor().extract(payload, artifactInfo.getArtifactName());
+
+        // Throw an error if VNF Catalog data is present in the Babel payload and directly in the CSAR
+        if (!catalogArtifacts.isEmpty() && !csarCatalogArtifacts.isEmpty()) {
+            logger.error(ModelLoaderMsgs.DUPLICATE_VNFC_DATA_ERROR, artifactInfo.getArtifactName());
+            throw new InvalidArchiveException("CSAR: " + artifactInfo.getArtifactName()
+                    + " contains VNF Catalog data in the format of both TOSCA and XML files. Only one format can be used for each CSAR file.");
+        } else if (!csarCatalogArtifacts.isEmpty()) {
+            catalogArtifacts.addAll(csarCatalogArtifacts);
+        }
+    }
+
+    public void invokeBabelService(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts, byte[] payload,
+            IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
             throws ProcessToscaArtifactsException {
         try {
             BabelServiceClient babelClient = createBabelServiceClient(artifactInfo, serviceVersion);
 
-            logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-                    "Posting artifact: " + artifactInfo.getArtifactName() + ", version: " + serviceVersion);
+            logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
+                    "Posting artifact: " + artifactInfo.getArtifactName() + ", service version: " + serviceVersion
+                            + ", artifact version: " + artifactInfo.getArtifactVersion());
 
             List<BabelArtifact> babelArtifacts =
                     babelClient.postArtifact(payload, artifactInfo.getArtifactName(), serviceVersion, distributionId);
@@ -250,5 +272,13 @@ public class ArtifactDownloadManager {
         }
 
         return babelArtifactConverter;
+    }
+
+    private VnfCatalogExtractor getVnfCatalogExtractor() {
+        if (vnfCatalogExtractor == null) {
+            vnfCatalogExtractor = new VnfCatalogExtractor();
+        }
+
+        return vnfCatalogExtractor;
     }
 }

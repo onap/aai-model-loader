@@ -49,34 +49,34 @@ public class TestJsonXmlConverter {
 
     @Test
     public void testConversion() throws Exception {
-            byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
-            assertThat(JsonXmlConverter.isValidJson(new String(encoded)), is(false));
-            encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
+        byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
+        assertThat(JsonXmlConverter.isValidJson(new String(encoded)), is(false));
+        encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
         String originalJson = new String(encoded);
 
         assertThat(JsonXmlConverter.isValidJson(originalJson), is(true));
 
         String xmlFromJson = JsonXmlConverter.convertJsonToXml(originalJson);
 
-            // Spot check one of the attributes
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new ByteArrayInputStream(xmlFromJson.getBytes()));
-            NodeList nodeList = doc.getDocumentElement().getChildNodes();
+        // Spot check one of the attributes
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new ByteArrayInputStream(xmlFromJson.getBytes()));
+        NodeList nodeList = doc.getDocumentElement().getChildNodes();
 
-            String modelVid = "notFound";
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node currentNode = nodeList.item(i);
-                if (currentNode.getNodeName().equals("model-invariant-id")) {
-                    modelVid = currentNode.getTextContent();
-                    break;
-                }
+        String modelVid = "notFound";
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node currentNode = nodeList.item(i);
+            if (currentNode.getNodeName().equals("model-invariant-id")) {
+                modelVid = currentNode.getTextContent();
+                break;
             }
+        }
 
         assertThat(modelVid.equals("3d560d81-57d0-438b-a2a1-5334dba0651a"), is(true));
 
-            // Convert the XML form back into JSON
-            JsonXmlConverter.convertXmlToJson(xmlFromJson);
+        // Convert the XML form back into JSON
+        JsonXmlConverter.convertXmlToJson(xmlFromJson);
     }
 }

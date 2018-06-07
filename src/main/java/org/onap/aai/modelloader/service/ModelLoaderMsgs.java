@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -108,7 +108,12 @@ public enum ModelLoaderMsgs implements LogMessageEnum {
     /**
      * Arguments: {0} = artifact name. {1} = artifact type.
      */
-    UNSUPPORTED_ARTIFACT_TYPE;
+    UNSUPPORTED_ARTIFACT_TYPE,
+
+    /**
+     * Arguments: {0} = artifact name.
+     */
+    DUPLICATE_VNFC_DATA_ERROR;
 
     /**
      * Load message bundle (ModelLoaderMsgs.properties file)

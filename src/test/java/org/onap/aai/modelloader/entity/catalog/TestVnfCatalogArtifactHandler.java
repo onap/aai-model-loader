@@ -41,6 +41,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.restclient.client.OperationResult;
 
@@ -80,6 +81,40 @@ public class TestVnfCatalogArtifactHandler {
         assertPutOperationsSucceeded();
     }
 
+    @Test
+    public void testUpdateVnfImagesFromXml() throws Exception {
+        // GET operation
+        OperationResult mockGetResp = mock(OperationResult.class);
+
+        // @formatter:off
+        when(mockGetResp.getResultCode())
+                .thenReturn(Response.Status.OK.getStatusCode())
+                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
+                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
+                .thenReturn(Response.Status.OK.getStatusCode());
+        // @formatter:on
+
+        when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class)))
+                .thenReturn(mockGetResp);
+        mockPutOperations();
+
+        // Example VNF Catalog XML
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        assertThat(
+                handler.pushArtifacts(createVnfCatalogXmlArtifact(), "test", new ArrayList<Artifact>(), mockRestClient),
+                is(true));
+
+        // Only two of the VNF images should be pushed
+        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+        AaiRestClient client = Mockito.verify(mockRestClient, Mockito.times(2));
+        client.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(), Mockito.any(MediaType.class));
+        assertThat(argument.getAllValues().size(), is(2));
+        assertThat(argument.getAllValues().get(0), containsString("5.2.5"));
+        assertThat(argument.getAllValues().get(0), containsString("VM00"));
+        assertThat(argument.getAllValues().get(1), containsString("5.2.4"));
+        assertThat(argument.getAllValues().get(1), containsString("VM00"));
+    }
+
     private ModelLoaderConfig createConfig() {
         Properties configProperties = new Properties();
         try {
@@ -103,6 +138,20 @@ public class TestVnfCatalogArtifactHandler {
         byte[] encoded = Files.readAllBytes(Paths.get(examplePath));
         List<Artifact> artifacts = new ArrayList<Artifact>();
         artifacts.add(new VnfCatalogArtifact(new String(encoded, "utf-8")));
+        return artifacts;
+    }
+
+    /**
+     * Example VNF Catalog based on VNF_CATALOG XML
+     * 
+     * @return test Artifacts
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
+    private List<Artifact> createVnfCatalogXmlArtifact() throws IOException, UnsupportedEncodingException {
+        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/xmlFiles/fortigate.xml"));
+        List<Artifact> artifacts = new ArrayList<Artifact>();
+        artifacts.add(new VnfCatalogArtifact(ArtifactType.VNF_CATALOG_XML, new String(encoded, "utf-8")));
         return artifacts;
     }
 

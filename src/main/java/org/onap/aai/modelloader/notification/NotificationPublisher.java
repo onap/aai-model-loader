@@ -52,7 +52,7 @@ public class NotificationPublisher {
     public NotificationPublisher() {
         Properties configProperties = new Properties();
         try {
-            configProperties.load(Files.newInputStream(Paths.get(ModelLoaderConfig.propertiesFile())));
+            configProperties.load(Files.newInputStream(ModelLoaderConfig.propertiesFile()));
         } catch (IOException e) {
             String errorMsg = "Failed to load configuration: " + e.getMessage();
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);

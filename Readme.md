@@ -1,7 +1,7 @@
 # Introduction
 
 The A&AI Model Loader Service is an application that facilitates the distribution and ingestion of 
-new service and resource models from the SDC to the A&AI.
+new service and resource models and VNF catalogs from the SDC to the A&AI.
 
 ## Features
 
@@ -11,7 +11,18 @@ The Model Loader:
 * polls the UEB/DMaap cluster for notification events
 * downloads artifacts from SDC upon receipt of a distribution event
 * pushes distribution components to A&AI
+		    
+### VNF Catalog loading
 
+The Model Loader supports two methods for supplying VNF Catalog data for loading into A&AI:
+
+* Embedded TOSCA image and vendor data<br/>VNF Catalog data can be embedded within the TOSCA yaml files contained in the CSAR.
+
+
+* VNF Catalog XML files<br/>VNF Catalog data in the form of XML files can be supplied in the CSAR under the path `Artifacts/Deployment/VNF_CATALOG`
+
+**Note: Each CSAR should provide VNF Catalog information using only one of the above methods. If a CSAR contains both TOSCA and XML VNF Catalog information, a deploy failure will be logged and published to SDC, and no VNF Catalog data will be loaded into A&AI** 
+		    
 ## Compiling Model Loader
 
 Model Loader can be compiled by running `mvn clean install`
@@ -35,7 +46,7 @@ You will be mounting these as data volumes when you start the Docker container. 
 
 The following file must be present in this directory on the host machine:
     
-_model-loader.properties_
+_model-loader.properties_  
 
     # Always false.  TLS Auth currently not supported 
     ml.distribution.ACTIVE_SERVER_TLS_AUTH=false
@@ -127,6 +138,6 @@ You can now start the Docker container for the _Model Loader Service_, e.g:
 	    {{your docker repo}}/model-loader
     
 where
- 
+
     {{your docker repo}}
 is the Docker repository you have published your image to.

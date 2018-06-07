@@ -21,6 +21,8 @@
 package org.onap.aai.modelloader.config;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -47,29 +49,29 @@ public class ModelLoaderConfig implements IConfiguration {
     private static final String SUFFIX_TRUSTSTORE_PASS = "TRUSTSTORE_PASSWORD";
 
     // Configuration file properties
-	protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH = PREFIX_DISTRIBUTION_CLIENT
-			+ "ACTIVE_SERVER_TLS_AUTH";
-	protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED = PREFIX_DISTRIBUTION_CLIENT
-			+ "ASDC_CONNECTION_DISABLE";
+    protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH =
+            PREFIX_DISTRIBUTION_CLIENT + "ACTIVE_SERVER_TLS_AUTH";
+    protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED =
+            PREFIX_DISTRIBUTION_CLIENT + "ASDC_CONNECTION_DISABLE";
     protected static final String PROP_ML_DISTRIBUTION_ASDC_ADDRESS = PREFIX_DISTRIBUTION_CLIENT + "ASDC_ADDRESS";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_GROUP = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_GROUP";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_ID = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_ID";
-	protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME = PREFIX_DISTRIBUTION_CLIENT
-			+ "ENVIRONMENT_NAME";
-	protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD = PREFIX_DISTRIBUTION_CLIENT
-			+ SUFFIX_KEYSTORE_PASS;
-	protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE = PREFIX_DISTRIBUTION_CLIENT
-			+ SUFFIX_KEYSTORE_FILE;
+    protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME =
+            PREFIX_DISTRIBUTION_CLIENT + "ENVIRONMENT_NAME";
+    protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD =
+            PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_PASS;
+    protected static final String PROP_ML_DISTRIBUTION_KEYSTORE_FILE =
+            PREFIX_DISTRIBUTION_CLIENT + SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_ML_DISTRIBUTION_PASSWORD = PREFIX_DISTRIBUTION_CLIENT + "PASSWORD";
-	protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL = PREFIX_DISTRIBUTION_CLIENT
-			+ "POLLING_INTERVAL";
+    protected static final String PROP_ML_DISTRIBUTION_POLLING_INTERVAL =
+            PREFIX_DISTRIBUTION_CLIENT + "POLLING_INTERVAL";
     protected static final String PROP_ML_DISTRIBUTION_POLLING_TIMEOUT = PREFIX_DISTRIBUTION_CLIENT + "POLLING_TIMEOUT";
     protected static final String PROP_ML_DISTRIBUTION_USER = PREFIX_DISTRIBUTION_CLIENT + "USER";
     protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT + "ARTIFACT_TYPES";
-	protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES = PREFIX_DISTRIBUTION_CLIENT
-			+ "MSG_BUS_ADDRESSES";
-	protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP = PREFIX_DISTRIBUTION_CLIENT
-			+ "USE_HTTPS_WITH_DMAAP";
+    protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES =
+            PREFIX_DISTRIBUTION_CLIENT + "MSG_BUS_ADDRESSES";
+    protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP =
+            PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
 
     protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
     protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
@@ -88,28 +90,15 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
 
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
+    protected static final String FILESEP =
+            (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
+
     private static String configHome;
-
     private Properties modelLoaderProperties = null;
-
     private String certLocation = ".";
-
     private List<String> artifactTypes = null;
-
     private List<String> msgBusAddrs = null;
-
     private String modelVersion = null;
-
-	protected static final String FILESEP = (System.getProperty("file.separator") == null) ? "/"
-			: System.getProperty("file.separator");
-
-    public static void setConfigHome(String configHome) {
-        ModelLoaderConfig.configHome = configHome;
-    }
-
-    public static String propertiesFile() {
-        return configHome + FILESEP + "model-loader.properties";
-    }
 
     public ModelLoaderConfig(Properties configProperties) {
         this(configProperties, ModelLoaderConfig.configHome + FILESEP + "auth" + FILESEP);
@@ -118,10 +107,8 @@ public class ModelLoaderConfig implements IConfiguration {
     /**
      * Original constructor
      *
-	 * @param modelLoaderProperties
-	 *            properties needed to be configured for the model loader
-	 * @param certLocation
-	 *            location of the certificate
+     * @param modelLoaderProperties properties needed to be configured for the model loader
+     * @param certLocation location of the certificate
      */
     public ModelLoaderConfig(Properties modelLoaderProperties, String certLocation) {
         this.modelLoaderProperties = modelLoaderProperties;
@@ -144,6 +131,14 @@ public class ModelLoaderConfig implements IConfiguration {
                 msgBusAddrs.add(addr);
             }
         }
+    }
+
+    public static void setConfigHome(String configHome) {
+        ModelLoaderConfig.configHome = configHome;
+    }
+
+    public static Path propertiesFile() {
+        return Paths.get(configHome, "model-loader.properties");
     }
 
     @Override

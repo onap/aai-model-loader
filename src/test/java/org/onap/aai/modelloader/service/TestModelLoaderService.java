@@ -56,7 +56,7 @@ public class TestModelLoaderService {
     public void testMissingConfig() {
         new ModelLoaderService().start();
     }
-    
+
     @Test
     public void testLoadModel() {
         Response response = service.loadModel("");
@@ -80,7 +80,7 @@ public class TestModelLoaderService {
     public void testIngestModelMissingName() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
         Response response = service.ingestModel("", "", Base64.getEncoder().encodeToString(csarPayload));
-        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
 }

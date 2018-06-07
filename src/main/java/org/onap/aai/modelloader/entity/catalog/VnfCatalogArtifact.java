@@ -28,6 +28,7 @@ public class VnfCatalogArtifact extends Artifact {
     public VnfCatalogArtifact(String payload) {
         this(ArtifactType.VNF_CATALOG, payload);
     }
+
     public VnfCatalogArtifact(ArtifactType artifactType, String payload) {
         super(artifactType);
         setPayload(payload);

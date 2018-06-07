@@ -42,11 +42,11 @@ public final class JsonXmlConverter {
         try {
             new JSONObject(text);
             isValid = true;
-        } catch (JSONException ex) {
+        } catch (JSONException ex) { // NOSONAR
             try {
                 new JSONArray(text);
                 isValid = true;
-            } catch (JSONException ex1) {
+            } catch (JSONException ex1) { // NOSONAR
                 isValid = false;
             }
         }
