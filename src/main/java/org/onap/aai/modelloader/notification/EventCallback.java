@@ -22,6 +22,7 @@ package org.onap.aai.modelloader.notification;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.cl.mdc.MdcContext;
@@ -36,7 +37,6 @@ import org.onap.sdc.api.consumer.INotificationCallback;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class EventCallback implements INotificationCallback {
     private static Logger logger = LoggerFactory.getInstance().getLogger(EventCallback.class.getName());
@@ -47,12 +47,12 @@ public class EventCallback implements INotificationCallback {
     private NotificationPublisher notificationPublisher;
     private IDistributionClient client;
     private ModelLoaderConfig config;
-    @Autowired
     private BabelServiceClientFactory babelServiceClientFactory;
 
-    public EventCallback(IDistributionClient client, ModelLoaderConfig config) {
+    public EventCallback(IDistributionClient client, ModelLoaderConfig config, BabelServiceClientFactory babelServiceClientFactory) {
         this.client = client;
         this.config = config;
+        this.babelServiceClientFactory = babelServiceClientFactory;
     }
 
     @Override

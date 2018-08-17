@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -107,7 +109,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
         client = DistributionClientFactory.createDistributionClient();
-        EventCallback callback = new EventCallback(client, config);
+        EventCallback callback = new EventCallback(client, config, babelClientFactory);
 
         IDistributionClientResult initResult = client.init(config, callback);
 

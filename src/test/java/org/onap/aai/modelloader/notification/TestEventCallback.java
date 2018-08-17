@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class TestEventCallback {
         mockDistributionClient = mock(IDistributionClient.class);
         mockNotificationPublisher = mock(NotificationPublisher.class);
 
-        eventCallback = new EventCallback(mockDistributionClient, config);
+        eventCallback = new EventCallback(mockDistributionClient, config, null);
 
         Whitebox.setInternalState(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
         Whitebox.setInternalState(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
