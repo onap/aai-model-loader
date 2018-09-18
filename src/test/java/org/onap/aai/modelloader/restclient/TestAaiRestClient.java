@@ -51,8 +51,6 @@ public class TestAaiRestClient {
         props.setProperty("ml.distribution.ARTIFACT_TYPES", "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
         props.setProperty("ml.aai.BASE_URL", "https://localhost:8443");
         props.setProperty("ml.aai.MODEL_URL", "/aai/v9/service-design-and-creation/models/model/");
-        props.setProperty("ml.aai.KEYSTORE_FILE", "aai-client-cert.p12");
-        props.setProperty("ml.aai.KEYSTORE_PASSWORD", "OBF:1i9a1u2a1unz1lr61wn51wn11lss1unz1u301i6o");
 
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
 

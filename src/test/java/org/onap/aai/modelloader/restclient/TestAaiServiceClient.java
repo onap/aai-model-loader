@@ -55,8 +55,6 @@ public class TestAaiServiceClient {
 
         Properties props = new Properties();
         props.put("ml.aai.KEYSTORE_PASSWORD", "2244");
-        props.put("ml.aai.KEYSTORE_FILE", "src/test/resources/auth/aai-client-cert.p12");
-        props.put("ml.aai.KEYSTORE_PASSWORD", "OBF:1i9a1u2a1unz1lr61wn51wn11lss1unz1u301i6o");
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
         aaiClient = new AaiRestClient(config);
     }
