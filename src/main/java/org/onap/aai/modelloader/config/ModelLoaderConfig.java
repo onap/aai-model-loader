@@ -81,6 +81,7 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_AAI_VNF_IMAGE_RESOURCE_URL = PREFIX_AAI + "VNF_IMAGE_URL";
     protected static final String PROP_AAI_AUTHENTICATION_USER = PREFIX_AAI + "AUTH_USER";
     protected static final String PROP_AAI_AUTHENTICATION_PASSWORD = PREFIX_AAI + "AUTH_PASSWORD";
+    protected static final String PROP_AAI_USE_GIZMO = PREFIX_AAI + "USE_GIZMO";
 
     protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
     protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
@@ -287,6 +288,16 @@ public class ModelLoaderConfig implements IConfiguration {
 
     public void setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;
+    }
+
+    public boolean useGizmo() {
+        String useGizmo = modelLoaderProperties.getProperty(PROP_AAI_USE_GIZMO);
+
+        if ( (useGizmo == null) || (!useGizmo.equalsIgnoreCase("true")) ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
