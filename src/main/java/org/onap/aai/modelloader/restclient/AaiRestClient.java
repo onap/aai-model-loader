@@ -161,7 +161,9 @@ public class AaiRestClient {
         restClient.validateServerHostname(false)
                 .validateServerCertChain(false)
                 .clientCertFile(config.getAaiKeyStorePath())
-                .clientCertPassword(config.getAaiKeyStorePassword());
+                .clientCertPassword(config.getAaiKeyStorePassword())
+                .connectTimeoutMs(120000)
+                .readTimeoutMs(120000);
         // @formatter:on
 
         if (useBasicAuth()) {

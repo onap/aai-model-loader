@@ -1,5 +1,5 @@
 /**
- * ============LICENSE_START=======================================================
+ * ﻿============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -23,18 +23,18 @@ package org.onap.aai.modelloader.entity.model;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.onap.aai.cl.api.Logger;
-import org.onap.aai.cl.eelf.LoggerFactory;
+
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+
+import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.restclient.client.OperationResult;
+
 
 public class NamedQueryArtifact extends AbstractModelArtifact {
 
-    private Logger logger = LoggerFactory.getInstance().getLogger(NamedQueryArtifact.class.getName());
+    //private Logger logger = LoggerFactory.getInstance().getLogger(NamedQueryArtifact.class.getName());
 
     private String namedQueryUuid;
 
@@ -56,7 +56,15 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
     }
 
     @Override
-    public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<Artifact> completedArtifacts) {
+        if (config.useGizmo()) {
+            return pushToGizmo(aaiClient, config, distId, completedArtifacts);
+        }
+
+        return pushToResources(aaiClient, config, distId, completedArtifacts);
+    }
+
+    private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
         OperationResult getResponse =
                 aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML_TYPE);
@@ -66,16 +74,14 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
                     MediaType.APPLICATION_XML_TYPE);
             if (putResponse != null && putResponse.getResultCode() == Response.Status.CREATED.getStatusCode()) {
                 completedArtifacts.add(this);
-                logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-                        getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+                logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
             } else {
-                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Ingestion failed for " + getType().toString()
+                logErrorMsg("Ingestion failed for " + getType().toString()
                         + " " + getUniqueIdentifier() + ". Rolling back distribution.");
                 return false;
             }
         } else {
-            logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-                    getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
+            logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
         }
 
         return true;
@@ -83,6 +89,12 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
 
     @Override
     public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+        // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if 
+        // the model is partially loaded.
+        if (config.useGizmo()) {
+            return;
+        }
+        
         // Best effort to delete. Nothing we can do in the event this fails.
         aaiClient.getAndDeleteResource(getNamedQueryUrl(config), distId);
     }

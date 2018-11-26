@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -23,13 +23,25 @@ package org.onap.aai.modelloader.entity.model;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.ws.rs.core.MediaType;
+
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
+import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.onap.aai.modelloader.util.GizmoTranslator;
+import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+
 
 public abstract class AbstractModelArtifact extends Artifact implements IModelArtifact {
 
+    private static Logger logger = LoggerFactory.getInstance().getLogger(AbstractModelArtifact.class.getName());
+    
     private String modelNamespace;
     private String modelNamespaceVersion;
     private Set<String> referencedModelIds = new HashSet<>();
@@ -71,6 +83,32 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
 
     public abstract void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId);
 
+    protected boolean pushToGizmo(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<Artifact> completedArtifacts) { 
+        try {
+            String gizmoPayload = GizmoTranslator.translate(getPayload());
+            OperationResult postResponse =
+                    aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId, MediaType.APPLICATION_JSON_TYPE);
+            
+            if (postResponse.getResultCode() != HttpStatus.OK.value()) {
+                return false;
+            }
+            
+        } catch (Exception e) {
+            logErrorMsg("Ingest failed for " + getType().toString() + " " + getUniqueIdentifier() + ": " + e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+    
+    protected void logInfoMsg(String infoMsg) {
+        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, infoMsg);
+    }
+
+    protected void logErrorMsg(String errorMsg) {
+        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, errorMsg);
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

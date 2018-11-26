@@ -1,5 +1,5 @@
 /**
- * ﻿============LICENSE_START=======================================================
+ * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
@@ -31,15 +31,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.onap.aai.cl.api.Logger;
-import org.onap.aai.cl.eelf.LoggerFactory;
+
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.restclient.client.OperationResult;
+
 import org.w3c.dom.Node;
+
 
 public class ModelArtifact extends AbstractModelArtifact {
 
@@ -48,7 +48,6 @@ public class ModelArtifact extends AbstractModelArtifact {
     private static final String FAILURE_MSG_PREFIX = "Ingestion failed for ";
     private static final String ROLLBACK_MSG_SUFFIX = ". Rolling back distribution.";
 
-    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifact.class.getName());
 
     private String modelVerId;
     private String modelInvariantId;
@@ -119,6 +118,15 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     @Override
     public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+            List<Artifact> completedArtifacts) {        
+        if (config.useGizmo()) {
+            return pushToGizmo(aaiClient, config, distId, completedArtifacts);
+        }
+
+        return pushToResources(aaiClient, config, distId, completedArtifacts);
+    }
+    
+    private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
         boolean success;
 
@@ -145,7 +153,7 @@ public class ModelArtifact extends AbstractModelArtifact {
         }
 
         return success;
-    }
+    }    
 
     /**
      * @param aaiClient
@@ -184,6 +192,12 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     @Override
     public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+        // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if 
+        // the model is partially loaded.
+        if (config.useGizmo()) {
+            return;
+        }
+        
         String url = getModelVerUrl(config);
         if (firstVersionOfModel) {
             // If this was the first version of the model which was added, we want to remove the entire
@@ -193,15 +207,6 @@ public class ModelArtifact extends AbstractModelArtifact {
 
         // Best effort to delete. Nothing we can do in the event this fails.
         aaiClient.getAndDeleteResource(url, distId);
-    }
-
-
-    private void logInfoMsg(String infoMsg) {
-        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, infoMsg);
-    }
-
-    private void logErrorMsg(String errorMsg) {
-        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, errorMsg);
     }
 
     private String getModelUrl(ModelLoaderConfig config) {
