@@ -23,7 +23,6 @@ package org.onap.aai.modelloader.gizmo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +37,8 @@ public class GizmoBulkPayload {
     public static final String OP_KEY = "operation";
 
 
-    private List<JsonElement> objects = new ArrayList<JsonElement>();
-    private List<JsonElement> relationships = new ArrayList<JsonElement>();
+    private List<JsonElement> objects = new ArrayList<>();
+    private List<JsonElement> relationships = new ArrayList<>();
 
     private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -70,42 +69,42 @@ public class GizmoBulkPayload {
     public List<GizmoVertexOperation> getVertexOperations() {
         return getVertexOperations(ALL_OPS);
     }
-    
+
     public List<GizmoVertexOperation> getVertexOperations(String opType) {
-        List<GizmoVertexOperation> ops = new ArrayList<GizmoVertexOperation>();
+        List<GizmoVertexOperation> ops = new ArrayList<>();
         for (JsonElement v : getObjects()) {
             GizmoVertexOperation op = GizmoVertexOperation.fromJsonElement(v);
-                        
-            if ( (opType.equalsIgnoreCase(ALL_OPS)) || (op.getOperation().equalsIgnoreCase(opType)) ) {
+
+            if ((opType.equalsIgnoreCase(ALL_OPS)) || (op.getOperation().equalsIgnoreCase(opType))) {
                 ops.add(op);
             }
         }
-        
+
         return ops;
     }
-    
+
     public void addVertexOperation(GizmoVertexOperation newOp) {
         objects.add(newOp.toJsonElement());
     }
-    
+
     public List<GizmoEdgeOperation> getEdgeOperations() {
         return getEdgeOperations(ALL_OPS);
     }
-    
+
     public List<GizmoEdgeOperation> getEdgeOperations(String opType) {
-        List<GizmoEdgeOperation> ops = new ArrayList<GizmoEdgeOperation>();
+        List<GizmoEdgeOperation> ops = new ArrayList<>();
 
         for (JsonElement v : getRelationships()) {
             GizmoEdgeOperation op = GizmoEdgeOperation.fromJsonElement(v);
-                        
-            if ( (opType.equalsIgnoreCase(ALL_OPS)) || (op.getOperation().equalsIgnoreCase(opType)) ) {
+
+            if ((opType.equalsIgnoreCase(ALL_OPS)) || (op.getOperation().equalsIgnoreCase(opType))) {
                 ops.add(op);
             }
         }
-        
+
         return ops;
     }
-    
+
     public void addEdgeOperation(GizmoEdgeOperation newOp) {
         relationships.add(newOp.toJsonElement());
     }

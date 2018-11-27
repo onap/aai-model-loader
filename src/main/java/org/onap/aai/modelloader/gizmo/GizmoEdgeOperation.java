@@ -20,60 +20,57 @@
  */
 package org.onap.aai.modelloader.gizmo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class GizmoEdgeOperation {
     private String operation;
     private String internalId;
     private GizmoEdge edge;
-    
+
     public GizmoEdgeOperation(String op, String id, GizmoEdge edge) {
         this.operation = op;
         this.internalId = id;
         this.edge = edge;
     }
-    
+
     public JsonElement toJsonElement() {
         JsonObject opObj = new JsonObject();
         JsonParser parser = new JsonParser();
         JsonObject edgeObj = parser.parse(edge.toJson()).getAsJsonObject();
-        
+
         opObj.addProperty(GizmoBulkPayload.OP_KEY, operation);
         opObj.add(internalId, edgeObj);
-        
+
         return opObj;
     }
-    
+
     public static GizmoEdgeOperation fromJsonElement(JsonElement element) {
-        List<Map.Entry<String, JsonElement>> entries = 
-                new ArrayList<Map.Entry<String, JsonElement>>(element.getAsJsonObject().entrySet());
-        
+        List<Map.Entry<String, JsonElement>> entries = new ArrayList<>(element.getAsJsonObject().entrySet());
+
         String op = null;
         String id = null;
         GizmoEdge edge = null;
-        
+
         for (Map.Entry<String, JsonElement> entry : entries) {
             if (entry.getKey().equalsIgnoreCase(GizmoBulkPayload.OP_KEY)) {
                 op = entry.getValue().getAsString();
-            }
-            else {
+            } else {
                 id = entry.getKey();
                 edge = GizmoEdge.fromJson(entry.getValue().getAsJsonObject().toString());
             }
         }
-        
+
         if (op == null) {
             // Use default
             op = GizmoBulkPayload.EXISTS_OP;
         }
-        
-        return new GizmoEdgeOperation(op, id, edge);      
+
+        return new GizmoEdgeOperation(op, id, edge);
     }
 
     public String getOperation() {

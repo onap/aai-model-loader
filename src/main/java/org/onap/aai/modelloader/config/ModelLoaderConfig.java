@@ -108,8 +108,10 @@ public class ModelLoaderConfig implements IConfiguration {
     /**
      * Original constructor
      *
-     * @param modelLoaderProperties properties needed to be configured for the model loader
-     * @param certLocation location of the certificate
+     * @param modelLoaderProperties
+     *        properties needed to be configured for the model loader
+     * @param certLocation
+     *        location of the certificate
      */
     public ModelLoaderConfig(Properties modelLoaderProperties, String certLocation) {
         this.modelLoaderProperties = modelLoaderProperties;
@@ -292,12 +294,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     public boolean useGizmo() {
         String useGizmo = modelLoaderProperties.getProperty(PROP_AAI_USE_GIZMO);
-
-        if ( (useGizmo == null) || (!useGizmo.equalsIgnoreCase("true")) ) {
-            return false;
-        }
-
-        return true;
+        return useGizmo != null && useGizmo.equalsIgnoreCase("true");
     }
 
     /**

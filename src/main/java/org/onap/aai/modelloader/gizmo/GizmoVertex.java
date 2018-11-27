@@ -20,11 +20,10 @@
  */
 package org.onap.aai.modelloader.gizmo;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GizmoVertex {
     private static final Gson gson = new GsonBuilder().create();
@@ -62,7 +61,7 @@ public class GizmoVertex {
 
     public void setProperty(String key, String value) {
         if (properties == null) {
-            properties = new HashMap<String,String>();
+            properties = new HashMap<>();
         }
 
         properties.put(key, value);

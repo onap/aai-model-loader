@@ -120,7 +120,7 @@ public class ModelArtifact extends AbstractModelArtifact {
     public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {        
         if (config.useGizmo()) {
-            return pushToGizmo(aaiClient, config, distId, completedArtifacts);
+            return pushToGizmo(aaiClient, config, distId);
         }
 
         return pushToResources(aaiClient, config, distId, completedArtifacts);

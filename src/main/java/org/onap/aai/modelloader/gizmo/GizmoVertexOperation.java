@@ -20,39 +20,37 @@
  */
 package org.onap.aai.modelloader.gizmo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class GizmoVertexOperation {
     private String operation;
     private String internalId;
     private GizmoVertex vertex;
-    
+
     public GizmoVertexOperation(String op, String id, GizmoVertex vertex) {
         this.operation = op;
         this.internalId = id;
         this.vertex = vertex;
     }
-    
+
     public JsonElement toJsonElement() {
         JsonObject opObj = new JsonObject();
         JsonParser parser = new JsonParser();
         JsonObject vertexObj = parser.parse(vertex.toJson()).getAsJsonObject();
-        
+
         opObj.addProperty(GizmoBulkPayload.OP_KEY, getOperation());
         opObj.add(internalId, vertexObj);
-        
+
         return opObj;
     }
-    
+
     public static GizmoVertexOperation fromJsonElement(JsonElement element) {
-        List<Map.Entry<String, JsonElement>> entries = 
-                new ArrayList<Map.Entry<String, JsonElement>>(element.getAsJsonObject().entrySet());
+        List<Map.Entry<String, JsonElement>> entries = new ArrayList<>(element.getAsJsonObject().entrySet());
 
         String op = null;
         String id = null;
@@ -61,8 +59,7 @@ public class GizmoVertexOperation {
         for (Map.Entry<String, JsonElement> entry : entries) {
             if (entry.getKey().equalsIgnoreCase(GizmoBulkPayload.OP_KEY)) {
                 op = entry.getValue().getAsString();
-            }
-            else {
+            } else {
                 id = entry.getKey();
                 vertex = GizmoVertex.fromJson(entry.getValue().getAsJsonObject().toString());
             }
@@ -79,7 +76,7 @@ public class GizmoVertexOperation {
     public String getOperation() {
         return operation;
     }
-    
+
     public void setOperation(String op) {
         operation = op;
     }

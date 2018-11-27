@@ -34,6 +34,15 @@ public class ArtifactTestUtils {
                 ArtifactTestUtils.loadResourceAsString(resource));
     }
 
+    /**
+     * Finds the resource with the given name and returns it as an array of bytes.
+     *
+     * @param resourceName
+     *        the /-separated path to the resource
+     * @return the requested resource contents as a byte array
+     * @throws IOException
+     *         if the resource could not be found (using current privileges)
+     */
     public byte[] loadResource(String resourceName) throws IOException {
         URL resource = getResource(resourceName);
         if (resource != null) {
