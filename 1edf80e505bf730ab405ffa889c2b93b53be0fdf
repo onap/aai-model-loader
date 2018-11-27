@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9adffdf1_1885b2ac",
+        "filename": "src/main/java/org/onap/aai/modelloader/entity/model/NamedQueryArtifact.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2018-11-27T15:02:15Z",
+      "side": 1,
+      "message": "this is a Sonar violation",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 104
+      },
+      "revId": "1edf80e505bf730ab405ffa889c2b93b53be0fdf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_9bd43c48",
+        "filename": "src/main/java/org/onap/aai/modelloader/gizmo/GizmoBulkPayload.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2018-11-27T15:02:15Z",
+      "side": 1,
+      "message": "Make these public static final to avoid a Sonar violation. Even better would be to use an enum",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 46
+      },
+      "revId": "1edf80e505bf730ab405ffa889c2b93b53be0fdf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_fbc46893",
+        "filename": "src/main/java/org/onap/aai/modelloader/gizmo/GizmoVertexOperation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2018-11-27T15:02:15Z",
+      "side": 1,
+      "message": "This is a Sonar violation",
+      "range": {
+        "startLine": 54,
+        "startChar": 69,
+        "endLine": 54,
+        "endChar": 99
+      },
+      "revId": "1edf80e505bf730ab405ffa889c2b93b53be0fdf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_1bc04c7b",
+        "filename": "src/main/java/org/onap/aai/modelloader/gizmo/GizmoVertexOperation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2018-11-27T15:02:15Z",
+      "side": 1,
+      "message": "lots of unnecessary whitespace",
+      "range": {
+        "startLine": 75,
+        "startChar": 56,
+        "endLine": 75,
+        "endChar": 62
+      },
+      "revId": "1edf80e505bf730ab405ffa889c2b93b53be0fdf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
