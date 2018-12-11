@@ -172,7 +172,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     @Override
     public String getKeyStorePassword() {
-        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
     }
 
     @Override
@@ -182,7 +182,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     @Override
     public String getPassword() {
-        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_PASSWORD));
+        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_PASSWORD));
     }
 
     @Override
@@ -235,11 +235,11 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getAaiKeyStorePassword() {
-        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_PASSWORD));
     }
 
     public String getBabelKeyStorePassword() {
-        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_PASSWORD));
     }
 
     public String getBabelTrustStorePath() {
@@ -252,7 +252,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getBabelTrustStorePassword() {
-        return Password.deobfuscate(modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_PASSWORD));
+        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_PASSWORD));
     }
 
     public String getAaiBaseUrl() {
@@ -301,7 +301,7 @@ public class ModelLoaderConfig implements IConfiguration {
      * @return password for AAI authentication that has been reverse-engineered from its obfuscated form.
      */
     public String getAaiAuthenticationPassword() {
-        String password = Password.deobfuscate(modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_PASSWORD));
+        String password = getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_PASSWORD));
 
         if (password != null && password.isEmpty()) {
             password = null;
@@ -337,4 +337,12 @@ public class ModelLoaderConfig implements IConfiguration {
 
     }
 
+    private String getDeobfuscatedValue(String property) {
+        if (property.startsWith("OBF:")) {
+            return Password.deobfuscate(property);
+        }
+        
+        // Property is not obfuscated
+        return property;
+    }
 }
