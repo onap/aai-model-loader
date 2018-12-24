@@ -2,8 +2,8 @@
  * ============LICENSE_START==========================================
  * org.onap.aai
  * ===================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 Amdocs
+ * Copyright Â© 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Copyright Â© 2017-2018 Amdocs
  * ===================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ public class GizmoTranslator {
     private static Logger logger = LoggerFactory.getInstance().getLogger(GizmoTranslator.class.getName());
 
     public static String translate(String xmlPayload) throws ParserConfigurationException, SAXException, IOException {
+        logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Process XML model artifact: " + xmlPayload);
+        
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -202,6 +204,28 @@ public class GizmoTranslator {
     private static String generateModelElementId(Element node) {
         Set<String> elemSet = new HashSet<>();
 
+        // Get the parent model version / named query version
+        String parentVersion = null;
+        Node parentNode = node.getParentNode();
+        while ( (parentNode != null) && (parentVersion == null) ) {
+            if (getNodeType(parentNode).equals(NodeType.VERTEX)) {
+                NodeList childNodes = ((Element)parentNode).getElementsByTagName("*");
+                for (int ix = 0; ix < childNodes.getLength(); ix++) {
+                    if (childNodes.item(ix).getNodeName().equalsIgnoreCase("named-query-uuid") || 
+                            childNodes.item(ix).getNodeName().equalsIgnoreCase("model-version-id")) {
+                        parentVersion = childNodes.item(ix).getTextContent().trim();
+                        break;
+                    }
+                }
+            }
+            
+            parentNode = parentNode.getParentNode();
+        }
+        
+        if (parentVersion != null) {
+            elemSet.add(parentVersion);
+        }
+        
         NodeList childNodes = node.getElementsByTagName("*");
         for (int ix = 0; ix < childNodes.getLength(); ix++) {
             NodeType nt = getNodeType(childNodes.item(ix));
