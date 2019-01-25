@@ -26,6 +26,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.security.Password;
 import org.onap.sdc.api.consumer.IConfiguration;
 
@@ -119,8 +121,8 @@ public class ModelLoaderConfig implements IConfiguration {
 
         // Get list of artifacts
         artifactTypes = new ArrayList<>();
-        if (modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES) != null) {
-            String[] artTypeList = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES).split(",");
+        if (get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES) != null) {
+            String[] artTypeList = get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES).split(",");
             for (String artType : artTypeList) {
                 artifactTypes.add(artType);
             }
@@ -128,8 +130,8 @@ public class ModelLoaderConfig implements IConfiguration {
 
         // Get list of message bus addresses
         msgBusAddrs = new ArrayList<>();
-        if (modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES) != null) {
-            String[] msgBusList = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES).split(",");
+        if (get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES) != null) {
+            String[] msgBusList = get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES).split(",");
             for (String addr : msgBusList) {
                 msgBusAddrs.add(addr);
             }
@@ -146,53 +148,53 @@ public class ModelLoaderConfig implements IConfiguration {
 
     @Override
     public boolean activateServerTLSAuth() {
-        String value = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH);
+        String value = get(PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH);
         return value != null && Boolean.parseBoolean(value);
     }
 
     @Override
     public String getAsdcAddress() {
-        return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ASDC_ADDRESS);
+        return get(PROP_ML_DISTRIBUTION_ASDC_ADDRESS);
     }
 
     @Override
     public String getConsumerGroup() {
-        return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_CONSUMER_GROUP);
+        return get(PROP_ML_DISTRIBUTION_CONSUMER_GROUP);
     }
 
     @Override
     public String getConsumerID() {
-        return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_CONSUMER_ID);
+        return get(PROP_ML_DISTRIBUTION_CONSUMER_ID);
     }
 
     @Override
     public String getEnvironmentName() {
-        return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME);
+        return get(PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME);
     }
 
     @Override
     public String getKeyStorePassword() {
-        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(get(PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD));
     }
 
     @Override
     public String getKeyStorePath() {
-        return certLocation + modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_KEYSTORE_FILE);
+        return certLocation + get(PROP_ML_DISTRIBUTION_KEYSTORE_FILE);
     }
 
     @Override
     public String getPassword() {
-        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_PASSWORD));
+        return getDeobfuscatedValue(get(PROP_ML_DISTRIBUTION_PASSWORD));
     }
 
     @Override
     public int getPollingInterval() {
-        return Integer.parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_INTERVAL));
+        return Integer.parseInt(get(PROP_ML_DISTRIBUTION_POLLING_INTERVAL));
     }
 
     @Override
     public int getPollingTimeout() {
-        return Integer.parseInt(modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_POLLING_TIMEOUT));
+        return Integer.parseInt(get(PROP_ML_DISTRIBUTION_POLLING_TIMEOUT));
     }
 
     @Override
@@ -202,7 +204,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     @Override
     public String getUser() {
-        return modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_USER);
+        return get(PROP_ML_DISTRIBUTION_USER);
     }
 
     @Override
@@ -212,7 +214,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     @Override
     public Boolean isUseHttpsWithDmaap() {
-        String useHTTPS = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
+        String useHTTPS = get(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
         return useHTTPS != null && Boolean.valueOf(useHTTPS);
     }
 
@@ -226,7 +228,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getBabelKeyStorePath() {
-        String filename = modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_FILE);
+        String filename = get(PROP_BABEL_KEYSTORE_FILE);
         if (filename == null) {
             return null;
         } else {
@@ -235,15 +237,15 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getAaiKeyStorePassword() {
-        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(get(PROP_AAI_KEYSTORE_PASSWORD));
     }
 
     public String getBabelKeyStorePassword() {
-        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_BABEL_KEYSTORE_PASSWORD));
+        return getDeobfuscatedValue(get(PROP_BABEL_KEYSTORE_PASSWORD));
     }
 
     public String getBabelTrustStorePath() {
-        String filename = modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_FILE);
+        String filename = get(PROP_BABEL_TRUSTSTORE_FILE);
         if (filename == null) {
             return null;
         } else {
@@ -252,19 +254,19 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getBabelTrustStorePassword() {
-        return getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_BABEL_TRUSTSTORE_PASSWORD));
+        return getDeobfuscatedValue(get(PROP_BABEL_TRUSTSTORE_PASSWORD));
     }
 
     public String getAaiBaseUrl() {
-        return modelLoaderProperties.getProperty(PROP_AAI_BASE_URL);
+        return get(PROP_AAI_BASE_URL);
     }
 
     public String getBabelBaseUrl() {
-        return modelLoaderProperties.getProperty(PROP_BABEL_BASE_URL);
+        return get(PROP_BABEL_BASE_URL);
     }
 
     public String getBabelGenerateArtifactsUrl() {
-        return modelLoaderProperties.getProperty(PROP_BABEL_GENERATE_RESOURCE_URL);
+        return get(PROP_BABEL_GENERATE_RESOURCE_URL);
     }
 
     public String getAaiModelUrl(String version) {
@@ -281,7 +283,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public String getAaiAuthenticationUser() {
-        return modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_USER);
+        return get(PROP_AAI_AUTHENTICATION_USER);
     }
 
     public String getModelVersion() {
@@ -293,7 +295,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public boolean useGizmo() {
-        String useGizmo = modelLoaderProperties.getProperty(PROP_AAI_USE_GIZMO);
+        String useGizmo = get(PROP_AAI_USE_GIZMO);
         return useGizmo != null && useGizmo.equalsIgnoreCase("true");
     }
 
@@ -301,7 +303,7 @@ public class ModelLoaderConfig implements IConfiguration {
      * @return password for AAI authentication that has been reverse-engineered from its obfuscated form.
      */
     public String getAaiAuthenticationPassword() {
-        String password = getDeobfuscatedValue(modelLoaderProperties.getProperty(PROP_AAI_AUTHENTICATION_PASSWORD));
+        String password = getDeobfuscatedValue(get(PROP_AAI_AUTHENTICATION_PASSWORD));
 
         if (password != null && password.isEmpty()) {
             password = null;
@@ -314,7 +316,7 @@ public class ModelLoaderConfig implements IConfiguration {
      * @return a boolean value indicating whether the simulator is enabled.
      */
     public boolean getIngestSimulatorEnabled() {
-        String propValue = modelLoaderProperties.getProperty(PROP_DEBUG_INGEST_SIMULATOR);
+        String propValue = get(PROP_DEBUG_INGEST_SIMULATOR);
         return propValue != null && "enabled".equalsIgnoreCase(propValue);
     }
 
@@ -323,16 +325,16 @@ public class ModelLoaderConfig implements IConfiguration {
      */
     private String updatePropertyOXMVersion(Properties modelLoaderProperties, String propertyName, String version) {
         if (version != null)
-            return modelLoaderProperties.getProperty(propertyName).replace("v*", version);
+            return get(propertyName).replace("v*", version);
         else
-            return modelLoaderProperties.getProperty(propertyName);
+            return get(propertyName);
     }
 
     /**
      * @return a boolean value indicating whether model loader is connected to ASDC.
      */
     public boolean getASDCConnectionDisabled() {
-        String propValue = modelLoaderProperties.getProperty(PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED);
+        String propValue = get(PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED);
         return propValue != null && "true".equalsIgnoreCase(propValue);
 
     }
@@ -341,8 +343,17 @@ public class ModelLoaderConfig implements IConfiguration {
         if (property.startsWith("OBF:")) {
             return Password.deobfuscate(property);
         }
-        
+
         // Property is not obfuscated
         return property;
+    }
+
+    private String get(String key) {
+        String value = modelLoaderProperties.getProperty(key);
+
+        if(value!= null && value.startsWith("ENV:")) {
+            value = System.getenv(StringUtils.removeStart(value, "ENV:"));
+        }
+        return value;
     }
 }
