@@ -22,6 +22,29 @@
       "revId": "fe62bc94e6576a4d73422a17f47028c15cfd095b",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6423c801_c2ba48f4",
+        "filename": "src/test/java/org/onap/aai/modelloader/notification/TestBasicStatusMsg.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2019-02-19T02:03:05Z",
+      "side": 1,
+      "message": "incorrectly formatted code",
+      "range": {
+        "startLine": 29,
+        "startChar": 20,
+        "endLine": 29,
+        "endChar": 21
+      },
+      "revId": "fe62bc94e6576a4d73422a17f47028c15cfd095b",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
