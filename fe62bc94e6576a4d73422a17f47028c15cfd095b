@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54e50abf_20c56c24",
+        "filename": "src/test/java/org/onap/aai/modelloader/notification/TestBasicStatusMsg.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1313
+      },
+      "writtenOn": "2019-02-19T02:01:37Z",
+      "side": 1,
+      "message": "The current year is 2019. Either set the year correctly, or remove it entirely. See https://wiki.onap.org/download/attachments/25429038/2018-02-08%20ONAP%20VF2F%20-%20Open%20Source%20Licenses%20and%20Copyright%20Notices.pdf?version\u003d1\u0026modificationDate\u003d1518102785000\u0026api\u003dv2",
+      "range": {
+        "startLine": 5,
+        "startChar": 15,
+        "endLine": 5,
+        "endChar": 24
+      },
+      "revId": "fe62bc94e6576a4d73422a17f47028c15cfd095b",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
