@@ -2,8 +2,8 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright © 2017-2019 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017-2019 European Software Marketing Ltd.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
+
 package org.onap.aai.modelloader.restclient;
 
 import com.google.gson.Gson;
@@ -38,6 +39,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +55,12 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.cl.api.LogFields;
+import org.onap.aai.cl.api.LogLine;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
+import org.onap.aai.cl.mdc.MdcContext;
+import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 
@@ -64,6 +71,9 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 public class HttpsBabelServiceClient implements BabelServiceClient {
 
     private static final Logger logger = LoggerFactory.getInstance().getLogger(HttpsBabelServiceClient.class);
+    private static final Logger metricsLogger =
+            LoggerFactory.getInstance().getMetricsLogger(HttpsBabelServiceClient.class);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     private static final String SSL_PROTOCOL = "TLS";
     private static final String KEYSTORE_ALGORITHM = "SunX509";
@@ -156,7 +166,7 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
             public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                 try {
                     finalLocalTm.checkServerTrusted(chain, authType);
-                } catch (CertificateException e) {
+                } catch (CertificateException e) { // NOSONAR
                     defaultTrustManager.checkServerTrusted(chain, authType);
                 }
             }
@@ -209,6 +219,9 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
                     + " Artifact version: " + artifactVersion + " Artifact payload: " + encodedPayload);
         }
 
+        MdcOverride override = new MdcOverride();
+        override.addAttribute(MdcContext.MDC_START_TIME, ZonedDateTime.now().format(formatter));
+
         WebResource webResource = client.resource(config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl());
         ClientResponse response = webResource.type("application/json")
                 .header(AaiRestClient.HEADER_TRANS_ID, Collections.singletonList(transactionId))
@@ -220,6 +233,15 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT,
                     "Babel response " + response.getStatus() + " " + sanitizedJson);
         }
+
+        metricsLogger.info(ModelLoaderMsgs.BABEL_REST_REQUEST, new LogFields() //
+                .setField(LogLine.DefinedFields.TARGET_ENTITY, "Babel")
+                .setField(LogLine.DefinedFields.STATUS_CODE,
+                        Response.Status.fromStatusCode(response.getStatus()).getFamily()
+                                .equals(Response.Status.Family.SUCCESSFUL) ? "COMPLETE" : "ERROR")
+                .setField(LogLine.DefinedFields.RESPONSE_CODE, response.getStatus())
+                .setField(LogLine.DefinedFields.RESPONSE_DESCRIPTION, response.getStatusInfo().toString()), //
+                override, response.toString());
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             throw new BabelServiceClientException(sanitizedJson);

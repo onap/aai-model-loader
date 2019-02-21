@@ -86,7 +86,12 @@ public enum ModelLoaderMsgs implements LogMessageEnum {
     ARTIFACT_PARSE_ERROR,
 
     /**
-     * Arguments: {0} = info request payload.
+     * Arguments: {0} = info request for metrics.
+     **/
+    BABEL_REST_REQUEST,
+
+    /**
+     * Arguments: {0} = info request details.
      **/
     BABEL_REST_REQUEST_PAYLOAD,
 
