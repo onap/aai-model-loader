@@ -1,17 +1,15 @@
-FROM ubuntu:14.04
+FROM alpine:3.8
 
 ARG MICRO_HOME=/opt/app/model-loader
 ARG BIN_HOME=$MICRO_HOME/bin
 ARG JAR_FILE=model-loader.jar
 
-RUN apt-get update
+RUN apk update
 
 # Install and setup java8
-RUN apt-get update && apt-get install -y software-properties-common
-## sudo -E is required to preserve the environment. If you remove that line, it will most likely freeze at this step
-RUN sudo -E add-apt-repository ppa:openjdk-r/ppa && apt-get update && apt-get install -y openjdk-8-jdk
+RUN apk add openjdk8 bash iputils
 ## Set up JAVA_HOME for docker command-line
-ENV JAVA_HOME usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME usr/lib/jvm/default-jvm
 RUN export JAVA_HOME
 
 # Build up the deployment folder structure
