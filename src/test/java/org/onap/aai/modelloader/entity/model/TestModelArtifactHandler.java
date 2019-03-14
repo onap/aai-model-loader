@@ -120,5 +120,50 @@ public class TestModelArtifactHandler {
         assertThat(pushed, is(true));
         handler.rollback(artifacts, "", aaiClient);
     }
+
+    @Test
+    public void testPushNewModelsBadRequest() {
+        when(config.getAaiBaseUrl()).thenReturn("");
+        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
+
+        OperationResult getResult = mock(OperationResult.class);
+        when(aaiClient.getResource(any(), any(), any())).thenReturn(getResult);
+        when(getResult.getResultCode()).thenReturn(Response.Status.NOT_FOUND.getStatusCode());
+
+        OperationResult putResult = mock(OperationResult.class);
+        when(aaiClient.putResource(any(), any(), any(), any())).thenReturn(putResult);
+        when(putResult.getResultCode()).thenReturn(Response.Status.BAD_REQUEST.getStatusCode());
+
+        checkRollback(Collections.singletonList(new ModelArtifact()));
+    }
+
+    @Test
+    public void testBadRequestResourceModelResult() {
+        when(config.getAaiBaseUrl()).thenReturn("");
+        when(config.getAaiModelUrl(any())).thenReturn("");
+
+        OperationResult operationResult = mock(OperationResult.class);
+        when(aaiClient.getResource(any(), any(), any())).thenReturn(operationResult);
+        when(operationResult.getResultCode()).thenReturn(Response.Status.BAD_REQUEST.getStatusCode());
+
+        checkRollback(Collections.singletonList(new ModelArtifact()));
+    }
+
+    @Test
+    public void testNullResourceModelResult() {
+        when(config.getAaiBaseUrl()).thenReturn("");
+        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(aaiClient.getResource(any(), any(), any())).thenReturn(null);
+
+        checkRollback(Collections.singletonList(new ModelArtifact()));
+    }
+
+    private void checkRollback(List<Artifact> artifacts) {
+        ModelArtifactHandler handler = new ModelArtifactHandler(config);
+        boolean pushed = handler.pushArtifacts(artifacts, "", Collections.emptyList(), aaiClient);
+        assertThat(pushed, is(false));
+        handler.rollback(artifacts, "", aaiClient);
+    }
 }
 

@@ -31,13 +31,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.restclient.client.OperationResult;
-
 import org.w3c.dom.Node;
 
 
@@ -90,20 +88,32 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     /**
      * Test whether the specified resource (URL) can be requested successfully
-     * 
+     *
      * @param aaiClient
      * @param distId
      * @param xmlResourceUrl
      * @return true if a request to GET this resource as XML media is successful (status OK)
      */
     private boolean xmlResourceCanBeFetched(AaiRestClient aaiClient, String distId, String xmlResourceUrl) {
-        OperationResult getResponse = aaiClient.getResource(xmlResourceUrl, distId, MediaType.APPLICATION_XML_TYPE);
+        OperationResult getResponse = getResourceModel(aaiClient, distId, xmlResourceUrl);
         return getResponse != null && getResponse.getResultCode() == Response.Status.OK.getStatusCode();
     }
 
     /**
+     * Test whether the specified resource (URL) can be requested successfully
+     *
+     * @param aaiClient
+     * @param distId
+     * @param xmlResourceUrl
+     * @return OperationResult the result of the operation
+     */
+    private OperationResult getResourceModel(AaiRestClient aaiClient, String distId, String xmlResourceUrl) {
+        return aaiClient.getResource(xmlResourceUrl, distId, MediaType.APPLICATION_XML_TYPE);
+    }
+
+    /**
      * PUT the specified XML resource
-     * 
+     *
      * @param aaiClient
      * @param distId
      * @param resourceUrl
@@ -118,42 +128,67 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     @Override
     public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
-            List<Artifact> completedArtifacts) {        
+            List<Artifact> completedArtifacts) {
         if (config.useGizmo()) {
             return pushToGizmo(aaiClient, config, distId);
         }
 
         return pushToResources(aaiClient, config, distId, completedArtifacts);
     }
-    
+
     private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
-        boolean success;
+        boolean success = false;
 
         // See whether the model is already present
         String resourceUrl = getModelUrl(config);
+        OperationResult result = getResourceModel(aaiClient, distId, resourceUrl);
 
-        if (xmlResourceCanBeFetched(aaiClient, distId, resourceUrl)) {
-            logInfoMsg(getType().toString() + " " + getModelInvariantId() + " already exists.  Skipping ingestion.");
-            success = pushModelVersion(aaiClient, config, distId, completedArtifacts);
-        } else {
-            // Assume that the model does not exist and attempt the PUT
-            success = putXmlResource(aaiClient, distId, resourceUrl, getPayload());
-            if (success) {
-                completedArtifacts.add(this);
-
-                // Record state to remember that this is the first version of the model (just added).
-                firstVersionOfModel = true;
-
-                logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+        if (result != null) {
+            if (result.getResultCode() == Response.Status.OK.getStatusCode()) {
+                success = updateExistingModel(aaiClient, config, distId, completedArtifacts);
+            } else if (result.getResultCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+                success = createNewModel(aaiClient, distId, completedArtifacts, resourceUrl);
             } else {
-                logErrorMsg(
-                        FAILURE_MSG_PREFIX + getType().toString() + " " + getUniqueIdentifier() + ROLLBACK_MSG_SUFFIX);
+                logModelUpdateFailure(
+                        "Response code " + result.getResultCode() + " invalid for getting resource model");
             }
+        } else {
+            logModelUpdateFailure("Null response from RestClient");
         }
 
         return success;
-    }    
+    }
+
+    private boolean createNewModel(AaiRestClient aaiClient, String distId, List<Artifact> completedArtifacts,
+            String resourceUrl) {
+        boolean success;
+        // Assume that the model does not exist and attempt the PUT
+        success = putXmlResource(aaiClient, distId, resourceUrl, getPayload());
+        if (success) {
+            completedArtifacts.add(this);
+
+            // Record state to remember that this is the first version of the model (just added).
+            firstVersionOfModel = true;
+
+            logInfoMsg(getType() + " " + getUniqueIdentifier() + " successfully ingested.");
+        } else {
+            logModelUpdateFailure("Error creating model. Skipping ingestion.");
+        }
+        return success;
+    }
+
+    private void logModelUpdateFailure(String message) {
+        logErrorMsg(FAILURE_MSG_PREFIX + getType() + " " + getUniqueIdentifier() + " " + message + ROLLBACK_MSG_SUFFIX);
+    }
+
+    private boolean updateExistingModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+            List<Artifact> completedArtifacts) {
+        boolean success;
+        logInfoMsg(getType() + " " + getModelInvariantId() + " already exists.  Skipping ingestion.");
+        success = pushModelVersion(aaiClient, config, distId, completedArtifacts);
+        return success;
+    }
 
     /**
      * @param aaiClient
@@ -165,7 +200,7 @@ public class ModelArtifact extends AbstractModelArtifact {
     private boolean pushModelVersion(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
         if (xmlResourceCanBeFetched(aaiClient, distId, getModelVerUrl(config))) {
-            logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
+            logInfoMsg(getType() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
             return true;
         }
 
@@ -175,14 +210,12 @@ public class ModelArtifact extends AbstractModelArtifact {
             success = putXmlResource(aaiClient, distId, getModelVerUrl(config), nodeToString(getModelVer()));
             if (success) {
                 completedArtifacts.add(this);
-                logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
+                logInfoMsg(getType() + " " + getUniqueIdentifier() + " successfully ingested.");
             } else {
-                logErrorMsg(
-                        FAILURE_MSG_PREFIX + getType().toString() + " " + getUniqueIdentifier() + ROLLBACK_MSG_SUFFIX);
+                logModelUpdateFailure("Error pushing model");
             }
         } catch (TransformerException e) {
-            logErrorMsg(FAILURE_MSG_PREFIX + getType().toString() + " " + getUniqueIdentifier() + ": " + e.getMessage()
-                    + ROLLBACK_MSG_SUFFIX);
+            logModelUpdateFailure(e.getMessage());
             success = false;
         }
 
@@ -192,12 +225,12 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     @Override
     public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
-        // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if 
+        // Gizmo is resilient and doesn't require a rollback. A redistribution will work fine even if
         // the model is partially loaded.
         if (config.useGizmo()) {
             return;
         }
-        
+
         String url = getModelVerUrl(config);
         if (firstVersionOfModel) {
             // If this was the first version of the model which was added, we want to remove the entire
