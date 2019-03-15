@@ -2,8 +2,8 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Copyright (c) 2017-2019 European Software Marketing Ltd.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
+
 package org.onap.aai.modelloader.config;
 
 import java.io.File;
@@ -26,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.security.Password;
 import org.onap.sdc.api.consumer.IConfiguration;
@@ -99,8 +99,8 @@ public class ModelLoaderConfig implements IConfiguration {
     private static String configHome;
     private Properties modelLoaderProperties = null;
     private String certLocation = ".";
-    private List<String> artifactTypes = null;
-    private List<String> msgBusAddrs = null;
+    private List<String> artifactTypes = new ArrayList<>();
+    private List<String> msgBusAddrs = new ArrayList<>();
     private String modelVersion = null;
 
     public ModelLoaderConfig(Properties configProperties) {
@@ -111,28 +111,26 @@ public class ModelLoaderConfig implements IConfiguration {
      * Original constructor
      *
      * @param modelLoaderProperties
-     *        properties needed to be configured for the model loader
+     *            properties needed to be configured for the model loader
      * @param certLocation
-     *        location of the certificate
+     *            location of the certificate
      */
     public ModelLoaderConfig(Properties modelLoaderProperties, String certLocation) {
         this.modelLoaderProperties = modelLoaderProperties;
         this.certLocation = certLocation;
 
-        // Get list of artifacts
-        artifactTypes = new ArrayList<>();
-        if (get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES) != null) {
-            String[] artTypeList = get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES).split(",");
-            for (String artType : artTypeList) {
+        // Get list of artifact types
+        String types = get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES);
+        if (types != null) {
+            for (String artType : types.split(",")) {
                 artifactTypes.add(artType);
             }
         }
 
         // Get list of message bus addresses
-        msgBusAddrs = new ArrayList<>();
-        if (get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES) != null) {
-            String[] msgBusList = get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES).split(",");
-            for (String addr : msgBusList) {
+        String addresses = get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES);
+        if (addresses != null) {
+            for (String addr : addresses.split(",")) {
                 msgBusAddrs.add(addr);
             }
         }
@@ -271,15 +269,15 @@ public class ModelLoaderConfig implements IConfiguration {
 
     public String getAaiModelUrl(String version) {
         setModelVersion(version);
-        return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_MODEL_RESOURCE_URL, version);
+        return updatePropertyOXMVersion(PROP_AAI_MODEL_RESOURCE_URL, version);
     }
 
     public String getAaiNamedQueryUrl(String version) {
-        return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_NAMED_QUERY_RESOURCE_URL, version);
+        return updatePropertyOXMVersion(PROP_AAI_NAMED_QUERY_RESOURCE_URL, version);
     }
 
     public String getAaiVnfImageUrl() {
-        return updatePropertyOXMVersion(modelLoaderProperties, PROP_AAI_VNF_IMAGE_RESOURCE_URL, getModelVersion());
+        return updatePropertyOXMVersion(PROP_AAI_VNF_IMAGE_RESOURCE_URL, getModelVersion());
     }
 
     public String getAaiAuthenticationUser() {
@@ -321,13 +319,20 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     /**
-     * @return a String value of the defined property with the oxm version
+     * Read the value of the property and replace any wildcard OXM version "v*" with the supplied default OXM version
+     * 
+     * @param propertyName
+     *            the name of the property storing the OXM version (possibly containing v*)
+     * @param version
+     *            the default OXM version
+     * @return the String value of the defined property (with any wildcard OXM version defaulted)
      */
-    private String updatePropertyOXMVersion(Properties modelLoaderProperties, String propertyName, String version) {
-        if (version != null)
-            return get(propertyName).replace("v*", version);
-        else
-            return get(propertyName);
+    private String updatePropertyOXMVersion(String propertyName, String version) {
+        String value = get(propertyName);
+        if (version != null && value != null) {
+            value = value.replace("v*", version);
+        }
+        return value;
     }
 
     /**
@@ -336,22 +341,19 @@ public class ModelLoaderConfig implements IConfiguration {
     public boolean getASDCConnectionDisabled() {
         String propValue = get(PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED);
         return propValue != null && "true".equalsIgnoreCase(propValue);
-
     }
 
     private String getDeobfuscatedValue(String property) {
-        if (property.startsWith("OBF:")) {
+        if (property != null && property.startsWith("OBF:")) {
             return Password.deobfuscate(property);
         }
-
-        // Property is not obfuscated
         return property;
     }
 
     private String get(String key) {
         String value = modelLoaderProperties.getProperty(key);
 
-        if(value!= null && value.startsWith("ENV:")) {
+        if (value != null && value.startsWith("ENV:")) {
             value = System.getenv(StringUtils.removeStart(value, "ENV:"));
         }
         return value;

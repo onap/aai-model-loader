@@ -2,14 +2,14 @@
  * ============LICENSE_START==========================================
  * org.onap.aai
  * ===================================================================
- * Copyright Â© 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright Â© 2017-2018 Amdocs
+ * Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Copyright (c) 2017-2019 European Software Marketing Ltd.
  * ===================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,18 @@
  * limitations under the License.
  * ============LICENSE_END============================================
  */
+
 package org.onap.aai.modelloader.util;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,25 +51,14 @@ import org.xml.sax.SAXException;
 public class GizmoTranslator {
 
     private enum NodeType {
-        VERTEX,
-        ATTRIBUTE,
-        CONTAINER,
-        RELATIONSHIP_LIST,
-        RELATIONSHIP,
-        RELATED_TO,
-        RELATIONSHIP_DATA,
-        RELATIONSHIP_KEY,
-        RELATIONSHIP_VALUE,
-        MODEL_ELEMENT_VERTEX,
-        NQ_ELEMENT_VERTEX,
-        UNKNOWN
+        VERTEX, ATTRIBUTE, CONTAINER, RELATIONSHIP_LIST, RELATIONSHIP, RELATED_TO, RELATIONSHIP_DATA, RELATIONSHIP_KEY, RELATIONSHIP_VALUE, MODEL_ELEMENT_VERTEX, NQ_ELEMENT_VERTEX, UNKNOWN
     }
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(GizmoTranslator.class.getName());
 
     public static String translate(String xmlPayload) throws ParserConfigurationException, SAXException, IOException {
         logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Process XML model artifact: " + xmlPayload);
-        
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -78,7 +72,8 @@ public class GizmoTranslator {
         return gizmoPayload.toJson();
     }
 
-    private static void processNode(Node node, Node parentNode, GizmoVertexOperation parentVertexOp, GizmoBulkPayload gizmoPayload) {
+    private static void processNode(Node node, Node parentNode, GizmoVertexOperation parentVertexOp,
+            GizmoBulkPayload gizmoPayload) {
         if (!(node instanceof Element)) {
             return;
         }
@@ -87,23 +82,23 @@ public class GizmoTranslator {
         NodeType nodeType = getNodeType(node);
 
         switch (nodeType) {
-        case VERTEX:
-        case MODEL_ELEMENT_VERTEX:
-        case NQ_ELEMENT_VERTEX:
-            parentVertexOp = createGizmoVertexOp(node, GizmoBulkPayload.ADD_OP);
-            gizmoPayload.addVertexOperation(parentVertexOp);
-            if (parentNode != null) {
-                gizmoPayload.addEdgeOperation(createGizmoEdgeOp(node, parentNode));
-            }
-            newParent = node;
-            break;
-        case RELATIONSHIP:
-            processRelationship((Element)node, parentVertexOp, gizmoPayload);
-            newParent = parentNode;
-            break;
-        default:
-            newParent = parentNode;
-            break;
+            case VERTEX:
+            case MODEL_ELEMENT_VERTEX:
+            case NQ_ELEMENT_VERTEX:
+                parentVertexOp = createGizmoVertexOp(node, GizmoBulkPayload.ADD_OP);
+                gizmoPayload.addVertexOperation(parentVertexOp);
+                if (parentNode != null) {
+                    gizmoPayload.addEdgeOperation(createGizmoEdgeOp(node, parentNode));
+                }
+                newParent = node;
+                break;
+            case RELATIONSHIP:
+                processRelationship((Element) node, parentVertexOp, gizmoPayload);
+                newParent = parentNode;
+                break;
+            default:
+                newParent = parentNode;
+                break;
         }
 
         NodeList childNodes = node.getChildNodes();
@@ -112,7 +107,8 @@ public class GizmoTranslator {
         }
     }
 
-    private static void processRelationship(Element relationshipNode, GizmoVertexOperation sourceNode, GizmoBulkPayload gizmoPayload) {
+    private static void processRelationship(Element relationshipNode, GizmoVertexOperation sourceNode,
+            GizmoBulkPayload gizmoPayload) {
         NodeList relatedToList = relationshipNode.getElementsByTagName("related-to");
         if (relatedToList.getLength() != 1) {
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Unable to resolve relationship");
@@ -124,12 +120,13 @@ public class GizmoTranslator {
 
         NodeList relationData = relationshipNode.getElementsByTagName("relationship-data");
         for (int ix = 0; ix < relationData.getLength(); ix++) {
-            Element relationNode = (Element)relationData.item(ix);
+            Element relationNode = (Element) relationData.item(ix);
             NodeList keyList = relationNode.getElementsByTagName("relationship-key");
             NodeList valueList = relationNode.getElementsByTagName("relationship-value");
 
-            if ( (keyList.getLength() != 1) || (valueList.getLength() != 1) ) {
-                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, "Unable to resolve relationship.  Missing key/value.");
+            if ((keyList.getLength() != 1) || (valueList.getLength() != 1)) {
+                logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
+                        "Unable to resolve relationship.  Missing key/value.");
                 return;
             }
 
@@ -141,14 +138,16 @@ public class GizmoTranslator {
             }
         }
 
-        gizmoPayload.addVertexOperation(new GizmoVertexOperation(GizmoBulkPayload.EXISTS_OP, getVertexId(targetVertex), targetVertex));
+        gizmoPayload.addVertexOperation(
+                new GizmoVertexOperation(GizmoBulkPayload.EXISTS_OP, getVertexId(targetVertex), targetVertex));
 
         GizmoEdge edge = new GizmoEdge();
 
         edge.setSource("$" + getVertexId(sourceNode.getVertex()));
         edge.setTarget("$" + getVertexId(targetVertex));
 
-        gizmoPayload.addEdgeOperation(new GizmoEdgeOperation(GizmoBulkPayload.ADD_OP, edge.getSource() + "_" + edge.getTarget(), edge));
+        gizmoPayload.addEdgeOperation(
+                new GizmoEdgeOperation(GizmoBulkPayload.ADD_OP, edge.getSource() + "_" + edge.getTarget(), edge));
     }
 
     private static GizmoEdgeOperation createGizmoEdgeOp(Node node, Node parentNode) {
@@ -183,18 +182,19 @@ public class GizmoTranslator {
 
         for (int ix = 0; ix < childNodes.getLength(); ix++) {
             if (getNodeType(childNodes.item(ix)).equals(NodeType.ATTRIBUTE)) {
-                vertex.setProperty(childNodes.item(ix).getNodeName().trim(), childNodes.item(ix).getTextContent().trim());
+                vertex.setProperty(childNodes.item(ix).getNodeName().trim(),
+                        childNodes.item(ix).getTextContent().trim());
             }
         }
 
         // Special case for model-element, where we need to generate an id field
         if (getNodeType(node).equals(NodeType.MODEL_ELEMENT_VERTEX)) {
-            vertex.setProperty("model-element-uuid", generateModelElementId((Element)node));
+            vertex.setProperty("model-element-uuid", generateModelElementId((Element) node));
         }
 
         // Special case for nq-element, where we need to generate an id field
         if (getNodeType(node).equals(NodeType.NQ_ELEMENT_VERTEX)) {
-            vertex.setProperty("named-query-element-uuid", generateModelElementId((Element)node));
+            vertex.setProperty("named-query-element-uuid", generateModelElementId((Element) node));
         }
 
         return vertex;
@@ -202,37 +202,36 @@ public class GizmoTranslator {
 
     // Generate a unique hash to store as the id for this node
     private static String generateModelElementId(Element node) {
-        Set<String> elemSet = new HashSet<>();
-
         // Get the parent model version / named query version
-        String parentVersion = null;
+        Optional<String> parentVersion = Optional.empty();
+
         Node parentNode = node.getParentNode();
-        while ( (parentNode != null) && (parentVersion == null) ) {
-            if (getNodeType(parentNode).equals(NodeType.VERTEX)) {
-                NodeList childNodes = ((Element)parentNode).getElementsByTagName("*");
-                for (int ix = 0; ix < childNodes.getLength(); ix++) {
-                    if (childNodes.item(ix).getNodeName().equalsIgnoreCase("named-query-uuid") || 
-                            childNodes.item(ix).getNodeName().equalsIgnoreCase("model-version-id")) {
-                        parentVersion = childNodes.item(ix).getTextContent().trim();
-                        break;
-                    }
-                }
+        while (parentNode != null && !parentVersion.isPresent()) {
+            if (getNodeType(parentNode) == NodeType.VERTEX) {
+                NodeList childNodes = ((Element) parentNode).getElementsByTagName("*");
+                parentVersion = IntStream.range(0, childNodes.getLength()) //
+                        .mapToObj(childNodes::item) //
+                        .filter(child -> child.getNodeName().equalsIgnoreCase("named-query-uuid")
+                                || child.getNodeName().equalsIgnoreCase("model-version-id")) //
+                        .map(child -> child.getTextContent().trim()) //
+                        .findFirst();
             }
-            
             parentNode = parentNode.getParentNode();
         }
-        
-        if (parentVersion != null) {
-            elemSet.add(parentVersion);
-        }
-        
+
+        Set<String> elemSet = new HashSet<>();
+        parentVersion.ifPresent(elemSet::add);
+
+        Set<NodeType> validNodeTypes = //
+                Stream.of(NodeType.ATTRIBUTE, NodeType.RELATIONSHIP_KEY, NodeType.RELATIONSHIP_VALUE)
+                        .collect(Collectors.toSet());
+
         NodeList childNodes = node.getElementsByTagName("*");
-        for (int ix = 0; ix < childNodes.getLength(); ix++) {
-            NodeType nt = getNodeType(childNodes.item(ix));
-            if ( nt.equals(NodeType.ATTRIBUTE) || nt.equals(NodeType.RELATIONSHIP_KEY) || nt.equals(NodeType.RELATIONSHIP_VALUE) ) {
-                elemSet.add(childNodes.item(ix).getTextContent().trim());
-            }
-        }
+        IntStream.range(0, childNodes.getLength()) //
+                .mapToObj(childNodes::item) //
+                .filter(child -> validNodeTypes.contains(getNodeType(child))) //
+                .map(child -> child.getTextContent().trim()) //
+                .forEachOrdered(elemSet::add);
 
         return Integer.toString(elemSet.hashCode());
     }
@@ -277,7 +276,7 @@ public class GizmoTranslator {
         NodeList childNodes = node.getChildNodes();
         int childElements = countChildElements(childNodes);
 
-        if ( (childElements == 0) && (node.getTextContent() != null) && (!node.getTextContent().trim().isEmpty()) ) {
+        if ((childElements == 0) && (node.getTextContent() != null) && (!node.getTextContent().trim().isEmpty())) {
             return NodeType.ATTRIBUTE;
         }
 
