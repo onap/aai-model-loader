@@ -2,8 +2,8 @@
  * ﻿============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Copyright (c) 2017-2019 European Software Marketing Ltd.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
+
 package org.onap.aai.modelloader.util;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -26,15 +27,18 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.onap.aai.modelloader.gizmo.GizmoBulkPayload;
-import org.xml.sax.SAXException;
 
 public class TestGizmoTranslator {
 
+    @Test(expected = IOException.class)
+    public void translateInvalidXml() throws IOException {
+        GizmoTranslator.translate("not valid XML");
+    }
+
     @Test
-    public void translateXmlModel1() throws Exception {
+    public void translateXmlModel1() throws IOException {
         GizmoBulkPayload request = createBulkRequest("src/test/resources/models/AAI-stellService-service-1.xml");
         assertThat(request.getVertexOperations(GizmoBulkPayload.ADD_OP).size(), is(5));
         assertThat(request.getVertexOperations(GizmoBulkPayload.EXISTS_OP).size(), is(3));
@@ -42,7 +46,7 @@ public class TestGizmoTranslator {
     }
 
     @Test
-    public void translateXmlModel2() throws Exception {
+    public void translateXmlModel2() throws IOException {
         GizmoBulkPayload request = createBulkRequest("src/test/resources/models/l3-network-widget.xml");
         assertThat(request.getVertexOperations(GizmoBulkPayload.ADD_OP).size(), is(2));
         assertThat(request.getVertexOperations(GizmoBulkPayload.EXISTS_OP).size(), is(0));
@@ -50,15 +54,14 @@ public class TestGizmoTranslator {
     }
 
     @Test
-    public void translateXmlNamedQuery() throws Exception {
+    public void translateXmlNamedQuery() throws IOException {
         GizmoBulkPayload request = createBulkRequest("src/test/resources/models/named-query-wan-connector.xml");
         assertThat(request.getVertexOperations(GizmoBulkPayload.ADD_OP).size(), is(5));
         assertThat(request.getVertexOperations(GizmoBulkPayload.EXISTS_OP).size(), is(4));
         assertThat(request.getEdgeOperations(GizmoBulkPayload.ADD_OP).size(), is(8));
     }
 
-    private GizmoBulkPayload createBulkRequest(String filePath)
-            throws IOException, ParserConfigurationException, SAXException {
+    private GizmoBulkPayload createBulkRequest(String filePath) throws IOException {
         final String xmlPayload = new String(Files.readAllBytes(Paths.get(filePath)));
         return GizmoBulkPayload.fromJson(GizmoTranslator.translate(xmlPayload));
     }

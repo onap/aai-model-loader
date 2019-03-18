@@ -2,8 +2,8 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright (c) 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Copyright (c) 2017-2019 European Software Marketing Ltd.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
+
 package org.onap.aai.modelloader.entity.model;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +36,6 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.modelloader.util.GizmoTranslator;
 import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.http.HttpStatus;
-
 
 public abstract class AbstractModelArtifact extends Artifact implements IModelArtifact {
 
@@ -65,7 +66,7 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     public void setModelNamespace(String modelNamespace) {
         this.modelNamespace = modelNamespace;
 
-        // Get the version from the namespace (in format 'http://org.openecomp.aai.inventory/v9')
+        // Get the version from the namespace (in format 'http://org.onap.aai.inventory/v14')
         String[] parts = modelNamespace.split("/");
         modelNamespaceVersion = parts[parts.length - 1].trim();
     }
@@ -90,10 +91,8 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
             if (postResponse.getResultCode() != HttpStatus.OK.value()) {
                 return false;
             }
-
-        } catch (Exception e) {
-            logErrorMsg(
-                    "Ingest failed for " + getType().toString() + " " + getUniqueIdentifier() + ": " + e.getMessage());
+        } catch (IOException e) {
+            logErrorMsg("Ingest failed for " + getType() + " " + getUniqueIdentifier() + ": " + e.getMessage());
             return false;
         }
 
@@ -111,11 +110,12 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\nType=" + getType().toString() + "\nId=" + getUniqueIdentifier() + "\nVersion="
-                + getModelNamespaceVersion() + "\nDependant models: ");
-        for (String dep : referencedModelIds) {
-            sb.append(dep + "  ");
-        }
+        sb.append("\n").append("Type=").append(getType()) //
+                .append("\n").append("Id=").append(getUniqueIdentifier()) //
+                .append("\n").append("Version=").append(getModelNamespaceVersion());
+
+        sb.append("\n").append("Dependant models: ");
+        referencedModelIds.forEach(dep -> sb.append(dep).append("  "));
 
         return sb.toString();
     }

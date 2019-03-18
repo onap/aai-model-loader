@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.onap.aai.cl.api.Logger;
@@ -56,19 +55,20 @@ public class GizmoTranslator {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(GizmoTranslator.class.getName());
 
-    public static String translate(String xmlPayload) throws ParserConfigurationException, SAXException, IOException {
+    public static String translate(String xmlPayload) throws IOException {
         logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Process XML model artifact: " + xmlPayload);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xmlPayload));
-        Document doc = builder.parse(is);
+        Document doc;
+        try {
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(xmlPayload)));
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
+        }
 
         GizmoBulkPayload gizmoPayload = new GizmoBulkPayload();
-
         processNode(doc.getDocumentElement(), null, null, gizmoPayload);
-
         return gizmoPayload.toJson();
     }
 
