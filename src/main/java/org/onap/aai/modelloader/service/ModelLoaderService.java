@@ -83,6 +83,21 @@ public class ModelLoaderService implements ModelLoaderInterface {
         try {
             configProperties.load(Files.newInputStream(Paths.get(configDir, "model-loader.properties")));
             config = new ModelLoaderConfig(configProperties);
+            
+            // Set the truststore for SDC Client to connect to Dmaap central bus if applicable (as in case of TI)
+            if (config.isUseHttpsWithDmaap()) {
+                String trustStorePath = config.getKeyStorePath();
+                String trustStorePassword = config.getKeyStorePassword();
+                if (trustStorePath != null && Paths.get(trustStorePath).toFile().isFile() && trustStorePassword != null
+                        && !trustStorePassword.isEmpty()) {
+                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                } else {
+                    throw new IllegalArgumentException("Model Loader property ml.distribution.KEYSTORE_FILE "
+                    		+ "or ml.distribution.KEYSTORE_PASSWORD not set or invalid");
+                }
+            }
+            
             if (!config.getASDCConnectionDisabled()) {
                 initSdcClient();
             }
