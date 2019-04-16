@@ -20,6 +20,13 @@
 #  ============LICENSE_END============================================
 #*******************************************************************************
 
+# jre-alpine image has $JAVA_HOME set and added to $PATH
+# ubuntu image requires to set $JAVA_HOME and add java to $PATH manually
+if ( uname -v | grep -i "ubuntu" ); then
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-`dpkg --print-architecture | awk -F- '{ print $NF }'`
+    export PATH=${JAVA_HOME}:$PATH
+fi
+
 # AJSC_HOME is required for EELF logging.
 # This path is referenced in the file logback.xml.
 AJSC_HOME="${AJSC_HOME-/opt/app/model-loader}"
@@ -29,8 +36,6 @@ if [ -z "$CONFIG_HOME" ]; then
     echo "The expected value is a folder containing the model-loader.properties file"
     exit 1
 fi
-
-JARFILE="$AJSC_HOME/model-loader.jar"
 
 # Some properties are repeated here for debugging purposes.
 PROPS="-DAJSC_HOME=$AJSC_HOME"
@@ -51,6 +56,8 @@ if [ -z "${java_runtime_arguments}" ]; then
  -Dcom.sun.management.jmxremote.rmi.port=1099 \
  -Djava.rmi.server.hostname=127.0.0.1"
 fi
+
+JARFILE=$(ls ./model-loader*.jar);
 
 echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
 java $java_runtime_arguments $PROPS -jar $JARFILE
