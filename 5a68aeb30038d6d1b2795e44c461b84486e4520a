@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03e7478b_d2570f3e",
+        "filename": "src/main/docker/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-05-01T02:02:37Z",
+      "side": 0,
+      "message": "is there a way to do this portably between alpine and ubuntu so that before-and-after comparison tests can be easily done?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 20
+      },
+      "revId": "5a68aeb30038d6d1b2795e44c461b84486e4520a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
