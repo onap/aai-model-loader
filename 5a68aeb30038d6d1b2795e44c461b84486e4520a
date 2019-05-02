@@ -22,6 +22,30 @@
       "revId": "5a68aeb30038d6d1b2795e44c461b84486e4520a",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a3b518a_f97c5b24",
+        "filename": "src/main/docker/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 5040
+      },
+      "writtenOn": "2019-05-02T14:14:21Z",
+      "side": 0,
+      "message": "The same as for babel image: just build two images and keep them locally for testing.",
+      "parentUuid": "03e7478b_d2570f3e",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 20
+      },
+      "revId": "5a68aeb30038d6d1b2795e44c461b84486e4520a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
