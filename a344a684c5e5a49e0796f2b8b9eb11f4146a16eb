@@ -16,6 +16,24 @@
       "revId": "a344a684c5e5a49e0796f2b8b9eb11f4146a16eb",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81fcf02e_7f1cb1cf",
+        "filename": "src/main/docker/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 5040
+      },
+      "writtenOn": "2019-05-13T09:59:53Z",
+      "side": 1,
+      "message": "Yes, sure.\nFixing.",
+      "parentUuid": "b9173ce8_80fbffb3",
+      "revId": "a344a684c5e5a49e0796f2b8b9eb11f4146a16eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
