@@ -23,6 +23,7 @@ package org.onap.aai.modelloader.notification;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,9 +35,7 @@ import java.util.List;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -56,6 +55,7 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDownloadManager} with VNF Catalog Artifacts.
@@ -86,9 +86,9 @@ public class ArtifactDownloadManagerVnfcTest {
                 new ModelLoaderConfig(configProperties, "."), mockClientFactory);
 
 
-        Whitebox.setInternalState(downloadManager, "notificationPublisher", mockNotificationPublisher);
-        Whitebox.setInternalState(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
-        Whitebox.setInternalState(downloadManager, "vnfCatalogExtractor", mockVnfCatalogExtractor);
+        ReflectionTestUtils.setField(downloadManager, "notificationPublisher", mockNotificationPublisher);
+        ReflectionTestUtils.setField(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
+        ReflectionTestUtils.setField(downloadManager, "vnfCatalogExtractor", mockVnfCatalogExtractor);
     }
 
     @Test
@@ -98,9 +98,8 @@ public class ArtifactDownloadManagerVnfcTest {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         setupValidDownloadCsarMocks(data, artifactInfo);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifacts());
-        when(mockVnfCatalogExtractor.extract(Matchers.any(), Matchers.anyString())).thenReturn(new ArrayList<>());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifacts());
+        when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(new ArrayList<>());
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
@@ -117,10 +116,8 @@ public class ArtifactDownloadManagerVnfcTest {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         setupValidDownloadCsarMocks(data, artifactInfo);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifactsNoVnfc());
-        when(mockVnfCatalogExtractor.extract(Matchers.any(), Matchers.anyString()))
-                .thenReturn(createXmlVnfcArtifacts());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifactsNoVnfc());
+        when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createXmlVnfcArtifacts());
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
@@ -137,9 +134,8 @@ public class ArtifactDownloadManagerVnfcTest {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         setupValidDownloadCsarMocks(data, artifactInfo);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifactsNoVnfc());
-        when(mockVnfCatalogExtractor.extract(Matchers.any(), Matchers.anyString())).thenReturn(new ArrayList<>());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifactsNoVnfc());
+        when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(new ArrayList<>());
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
@@ -156,10 +152,8 @@ public class ArtifactDownloadManagerVnfcTest {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         setupValidDownloadCsarMocks(data, artifactInfo);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifacts());
-        when(mockVnfCatalogExtractor.extract(Matchers.any(), Matchers.anyString()))
-                .thenReturn(createXmlVnfcArtifacts());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifacts());
+        when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createXmlVnfcArtifacts());
         doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
 
         List<Artifact> modelArtifacts = new ArrayList<>();
@@ -184,10 +178,8 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        when(mockBabelArtifactConverter.convertToModel(Mockito.anyListOf(BabelArtifact.class)))
-                .thenReturn(createModelArtifacts());
-        when(mockBabelArtifactConverter.convertToCatalog(Mockito.anyListOf(BabelArtifact.class)))
-                .thenReturn(createToscaVnfcArtifacts());
+        when(mockBabelArtifactConverter.convertToModel(Mockito.anyList())).thenReturn(createModelArtifacts());
+        when(mockBabelArtifactConverter.convertToCatalog(Mockito.anyList())).thenReturn(createToscaVnfcArtifacts());
     }
 
     private List<BabelArtifact> createBabelArtifacts() {

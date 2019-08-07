@@ -24,6 +24,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,9 +43,7 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -59,6 +59,7 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDownloadManager}.
@@ -79,15 +80,15 @@ public class TestArtifactDownloadManager {
         mockNotificationPublisher = mock(NotificationPublisher.class);
         mockBabelArtifactConverter = mock(BabelArtifactConverter.class);
         mockClientFactory = mock(HttpsBabelServiceClientFactory.class);
-        when(mockClientFactory.create(Mockito.any())).thenReturn(mockBabelClient);
+        when(mockClientFactory.create(any())).thenReturn(mockBabelClient);
 
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
         downloadManager = new ArtifactDownloadManager(mockDistributionClient,
                 new ModelLoaderConfig(configProperties, "."), mockClientFactory);
 
-        Whitebox.setInternalState(downloadManager, "notificationPublisher", mockNotificationPublisher);
-        Whitebox.setInternalState(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
+        ReflectionTestUtils.setField(downloadManager, "notificationPublisher", mockNotificationPublisher);
+        ReflectionTestUtils.setField(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
     }
 
     @After
@@ -133,7 +134,7 @@ public class TestArtifactDownloadManager {
 
     @Test
     public void testErrorCreatingBabelClient() throws Exception {
-        when(mockClientFactory.create(Mockito.any())).thenThrow(new BabelServiceClientException(new Exception()));
+        when(mockClientFactory.create(any())).thenThrow(new BabelServiceClientException(new Exception()));
 
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
@@ -156,16 +157,14 @@ public class TestArtifactDownloadManager {
         when(mockDistributionClient.download(artifact)).thenReturn(createDistributionClientDownloadResult(
                 DistributionActionResultEnum.SUCCESS, null, "This is not a valid Tosca CSAR File".getBytes()));
         doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenThrow(new BabelServiceClientException(""));
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenThrow(new BabelServiceClientException(""));
         doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
         assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), null, null), is(false));
 
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
-        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString());
+        Mockito.verify(mockBabelClient).postArtifact(any(), any(), any(), any());
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
         Mockito.verifyZeroInteractions(mockBabelArtifactConverter);
@@ -209,10 +208,9 @@ public class TestArtifactDownloadManager {
 
         Mockito.verify(mockDistributionClient).download(artifactInfo);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifactInfo);
-        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString());
-        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
-        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(Matchers.any());
+        Mockito.verify(mockBabelClient).postArtifact(any(), any(), any(), any());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(any());
+        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(any());
     }
 
     private void setupValidDownloadCsarMocks(INotificationData data, IArtifactInfo artifactInfo,
@@ -220,8 +218,7 @@ public class TestArtifactDownloadManager {
         when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifacts());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifacts());
     }
 
     private List<BabelArtifact> createBabelArtifacts() {
@@ -282,10 +279,9 @@ public class TestArtifactDownloadManager {
 
         Mockito.verify(mockDistributionClient).download(serviceArtifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, serviceArtifact);
-        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString());
-        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
-        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(Matchers.any());
+        Mockito.verify(mockBabelClient).postArtifact(any(), any(), any(), any());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(any());
+        Mockito.verify(mockBabelArtifactConverter).convertToCatalog(any());
 
         Mockito.verify(mockDistributionClient).download(modelSpecArtifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
@@ -295,7 +291,6 @@ public class TestArtifactDownloadManager {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void activateCallback_toscaToModelConverterHasProcessToscaArtifactsException() throws Exception {
         ArtifactTestUtils artifactTestUtils = new ArtifactTestUtils();
         INotificationData data = getNotificationDataWithToscaCsarFile();
@@ -304,11 +299,10 @@ public class TestArtifactDownloadManager {
         when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        when(mockBabelArtifactConverter.convertToModel(Mockito.anyList()))
+        when(mockBabelArtifactConverter.convertToModel(anyList()))
                 .thenThrow(BabelArtifactParsingException.class);
         doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
-        when(mockBabelClient.postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString())).thenReturn(createBabelArtifacts());
+        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifacts());
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
@@ -319,9 +313,8 @@ public class TestArtifactDownloadManager {
 
         Mockito.verify(mockDistributionClient).download(artifactInfo);
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
-        Mockito.verify(mockBabelClient).postArtifact(Matchers.any(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString());
-        Mockito.verify(mockBabelArtifactConverter).convertToModel(Matchers.any());
+        Mockito.verify(mockBabelClient).postArtifact(any(), any(), any(), any());
+        Mockito.verify(mockBabelArtifactConverter).convertToModel(any());
     }
 
     @Test
