@@ -20,7 +20,7 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,18 +28,17 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.INotificationData;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link EventCallback}.
@@ -70,9 +69,9 @@ public class TestEventCallback {
 
         eventCallback = new EventCallback(mockDistributionClient, config, null);
 
-        Whitebox.setInternalState(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
-        Whitebox.setInternalState(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
-        Whitebox.setInternalState(eventCallback, "notificationPublisher", mockNotificationPublisher);
+        ReflectionTestUtils.setField(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
+        ReflectionTestUtils.setField(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
+        ReflectionTestUtils.setField(eventCallback, "notificationPublisher", mockNotificationPublisher);
     }
 
     @After

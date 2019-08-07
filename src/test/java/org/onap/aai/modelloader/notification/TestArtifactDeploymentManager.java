@@ -22,8 +22,8 @@ package org.onap.aai.modelloader.notification;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithCatalogFile;
@@ -37,7 +37,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -50,6 +49,7 @@ import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.INotificationData;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDeploymentManager}.
@@ -75,8 +75,8 @@ public class TestArtifactDeploymentManager {
 
         manager = new ArtifactDeploymentManager(new ModelLoaderConfig(configProperties, null));
 
-        Whitebox.setInternalState(manager, "modelArtifactHandler", mockModelArtifactHandler);
-        Whitebox.setInternalState(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
+        ReflectionTestUtils.setField(manager, "modelArtifactHandler", mockModelArtifactHandler);
+        ReflectionTestUtils.setField(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
     }
 
     @After
