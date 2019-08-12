@@ -1,0 +1,4 @@
+distribution_type: 'maven'
+version: '1.5.0'
+project: 'aai-model-loader'
+log_dir: 'aai-model-loader-release-maven-stage-elalto/28'
