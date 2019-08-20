@@ -53,4 +53,8 @@ if [ -z "${java_runtime_arguments}" ]; then
 fi
 
 echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
+if [ -z "$RUN_MS_AS_ROOT" ] ; then
 java $java_runtime_arguments $PROPS -jar $JARFILE
+else 
+sudo -E java $java_runtime_arguments $PROPS -jar $JARFILE
+fi
