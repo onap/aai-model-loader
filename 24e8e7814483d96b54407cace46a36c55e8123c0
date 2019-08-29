@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc5c956e_9f335aa4",
+        "filename": "pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2019-08-29T00:43:16Z",
+      "side": 1,
+      "message": "Its missing the maven build timestamp format. When building the profile docker, it fails due to that issue.\n\u003cmaven.build.timestamp.format\u003eyyyyMMdd\u0027T\u0027HHmmss\u0027Z\u0027\u003c/maven.build.timestamp.format\u003e",
+      "revId": "24e8e7814483d96b54407cace46a36c55e8123c0",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
