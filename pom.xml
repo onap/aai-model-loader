@@ -68,6 +68,9 @@
 		<aai.base.image.version>1.6.0</aai.base.image.version>
 		<!-- This will be used for the docker images as the default format of maven build has issues -->
 		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
+		<!-- Code coverage enforcement -->
+		<jacoco.report.directory>${project.build.directory}/code-coverage</jacoco.report.directory>
+		<jacoco.line.coverage.limit>0.80</jacoco.line.coverage.limit>
 	</properties>
 
 	<distributionManagement>
@@ -418,6 +421,34 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<dataFile>${jacoco.report.directory}/jacoco-ut.exec</dataFile>
+							<rules>
+                                <!--  implementation is needed only for Maven 2  -->
+								<rule implementation="org.jacoco.maven.RuleConfiguration">
+									<element>BUNDLE</element>
+									<limits>
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.line.coverage.limit}</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
