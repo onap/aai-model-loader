@@ -1,0 +1,4 @@
+distribution_type: maven
+log_dir: aai-model-loader-maven-stage-master/281/
+project: model-loader
+version: 1.6.2
