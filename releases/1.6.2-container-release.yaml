@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.6.2
+project: model-loader
+ref: 9d647391e65ea757ed45e2174a77b654ebc3f767
+containers:
+    - name: aai-model-loader
+      version: 1.6-STAGING-20200401T211248Z
