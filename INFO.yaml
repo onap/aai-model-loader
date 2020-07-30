@@ -2,7 +2,7 @@
 project: 'aai-model-loader'
 project_creation_date: '2017-02-09'
 project_category: ''
-lifecycle_state: 'Incubation'
+lifecycle_state: 'Mature'
 project_lead: &onap_aai_ptl
     name: 'William Reehil'
     email: 'william.reehil@att.com'
