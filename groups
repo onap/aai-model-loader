@@ -1,4 +1,5 @@
 # UUID                                                                           	Group Name
 #
 daebbf523be390041a1a9c0e340a6d833aae5043                                         	GitHub Replication
+e66dd4adda072ef31f44e863f2b0ce81c3760ce5                                         	saml/onap-gerrit-aai-model-loader-committers
 ldap:cn=onap-gerrit-aai-model-loader-committers,ou=Groups,dc=freestandards,dc=org	ldap/onap-gerrit-aai-model-loader-committers
