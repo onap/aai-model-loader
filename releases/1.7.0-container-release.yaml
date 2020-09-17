@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.7.0
+project: model-loader
+ref: 42997fb70a5385cf5eefee557823dd843e5d608a
+containers:
+    - name: model-loader
+      version: 1.7-STAGING-20200910T020806Z
