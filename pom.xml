@@ -57,7 +57,7 @@
 		<hamcrest-all.version>1.3</hamcrest-all.version>
 		<babel.version>1.6.2</babel.version>
 		<aai.rest.client.version>1.2.1</aai.rest.client.version>
-		<sdc-distribution-client.version>1.3.0</sdc-distribution-client.version>
+		<sdc-distribution-client.version>1.4.2</sdc-distribution-client.version>
 		<logback.version>1.2.3</logback.version>
 		<!-- docker related properties -->
 		<docker.fabric.version>0.28.0</docker.fabric.version>
@@ -72,7 +72,7 @@
 		<sonar.jacoco.reportPath />
 		<sonar.jacoco.itReportPath />
 		<sonar.jacoco.reportMissing.force.zero />
-		
+
 		<jacoco.line.coverage.limit>0.75</jacoco.line.coverage.limit>
 		<jacoco.version>0.8.5</jacoco.version>
 		<sonar-jacoco-listeners.version>3.2</sonar-jacoco-listeners.version>
@@ -436,7 +436,7 @@
 				</executions>
 			</plugin>
 
-			<!-- once we connect aai-parent or oparent 3.0+ we can take out this 
+			<!-- once we connect aai-parent or oparent 3.0+ we can take out this
 			     whole section -->
 
 			<plugin>
@@ -444,7 +444,7 @@
 			  <artifactId>jacoco-maven-plugin</artifactId>
 			  <version>${jacoco.version}</version>
 			  <configuration>
-			    <!-- Note: This exclusion list should match <sonar.exclusions> property 
+			    <!-- Note: This exclusion list should match <sonar.exclusions> property
 				 above -->
 			    <excludes>
 			      <exclude>**/gen/**</exclude>
@@ -454,7 +454,7 @@
 			    </excludes>
 			  </configuration>
 			  <executions>
-			    <!-- Prepares the property pointing to the JaCoCo runtime agent which 
+			    <!-- Prepares the property pointing to the JaCoCo runtime agent which
 				 is passed as VM argument when Maven the Surefire plugin is executed. -->
 			    <execution>
 			      <id>pre-unit-test</id>
@@ -462,15 +462,15 @@
 				<goal>prepare-agent</goal>
 			      </goals>
 			      <configuration>
-				<!-- Sets the path to the file which contains the execution data 
+				<!-- Sets the path to the file which contains the execution data
 				     . -->
 				<destFile>${project.build.directory}/code-coverage/jacoco-ut.exec</destFile>
-				<!-- Sets the name of the property containing the settings for JaCoCo 
+				<!-- Sets the name of the property containing the settings for JaCoCo
 				     runtime agent. -->
 				<propertyName>surefireArgLine</propertyName>
 			      </configuration>
 			    </execution>
-			    <!-- Ensures that the code coverage report for unit tests is created 
+			    <!-- Ensures that the code coverage report for unit tests is created
 				 after unit tests have been run. -->
 			    <execution>
 			      <id>post-unit-test</id>
@@ -479,7 +479,7 @@
 				<goal>report</goal>
 			      </goals>
 			      <configuration>
-				<!-- Sets the path to the file which contains the execution data 
+				<!-- Sets the path to the file which contains the execution data
 				     . -->
 				<dataFile>${project.build.directory}/code-coverage/jacoco-ut.exec</dataFile>
 				<!-- Sets the output directory for the code coverage report. -->
@@ -493,15 +493,15 @@
 				<goal>prepare-agent</goal>
 			      </goals>
 			      <configuration>
-				<!-- Sets the path to the file which contains the execution data 
+				<!-- Sets the path to the file which contains the execution data
 				     . -->
 				<destFile>${project.build.directory}/code-coverage/jacoco-it.exec</destFile>
-				<!-- Sets the name of the property containing the settings for JaCoCo 
+				<!-- Sets the name of the property containing the settings for JaCoCo
 				     runtime agent. -->
 				<propertyName>failsafeArgLine</propertyName>
 			      </configuration>
 			    </execution>
-			    <!-- Ensures that the code coverage report for integration tests after 
+			    <!-- Ensures that the code coverage report for integration tests after
 				 integration tests have been run. -->
 			    <execution>
 			      <id>post-integration-test</id>
@@ -510,7 +510,7 @@
 				<goal>report</goal>
 			      </goals>
 			      <configuration>
-				<!-- Sets the path to the file which contains the execution data 
+				<!-- Sets the path to the file which contains the execution data
 				     . -->
 				<dataFile>${project.build.directory}/code-coverage/jacoco-it.exec</dataFile>
 				<!-- Sets the output directory for the code coverage report. -->
@@ -558,7 +558,7 @@
 			  <artifactId>maven-failsafe-plugin</artifactId>
 			  <version>3.0.0-M4</version>
 			  <executions>
-			    <!-- Ensures that both integration-test and verify goals of the Failsafe 
+			    <!-- Ensures that both integration-test and verify goals of the Failsafe
 				 Maven plugin are executed. -->
 			    <execution>
 			      <id>integration-tests</id>
