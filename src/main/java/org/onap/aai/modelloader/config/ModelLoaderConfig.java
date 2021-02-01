@@ -56,6 +56,7 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_ML_DISTRIBUTION_ASDC_CONNECTION_DISABLED =
             PREFIX_DISTRIBUTION_CLIENT + "ASDC_CONNECTION_DISABLE";
     protected static final String PROP_ML_DISTRIBUTION_ASDC_ADDRESS = PREFIX_DISTRIBUTION_CLIENT + "ASDC_ADDRESS";
+    protected static final String PROP_ML_DISTRIBUTION_ASDC_USE_HTTPS = PREFIX_DISTRIBUTION_CLIENT + "ASDC_USE_HTTPS";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_GROUP = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_GROUP";
     protected static final String PROP_ML_DISTRIBUTION_CONSUMER_ID = PREFIX_DISTRIBUTION_CLIENT + "CONSUMER_ID";
     protected static final String PROP_ML_DISTRIBUTION_ENVIRONMENT_NAME =
@@ -153,6 +154,12 @@ public class ModelLoaderConfig implements IConfiguration {
     @Override
     public String getAsdcAddress() {
         return get(PROP_ML_DISTRIBUTION_ASDC_ADDRESS);
+    }
+
+    @Override
+    public String isUseHttpsWithSDC() {
+      /* if PROP_ML_DISTRIBUTION_ASDC_USE_HTTPS is null, https will be used, as before */
+      return get(PROP_ML_DISTRIBUTION_ASDC_USE_HTTPS);
     }
 
     @Override
@@ -320,7 +327,7 @@ public class ModelLoaderConfig implements IConfiguration {
 
     /**
      * Read the value of the property and replace any wildcard OXM version "v*" with the supplied default OXM version
-     * 
+     *
      * @param propertyName
      *            the name of the property storing the OXM version (possibly containing v*)
      * @param version
