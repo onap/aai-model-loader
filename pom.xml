@@ -65,7 +65,7 @@
 		<aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
 		<aai.docker.namespace>onap</aai.docker.namespace>
 		<aai.base.image>alpine</aai.base.image>
-		<aai.base.image.version>1.6.0</aai.base.image.version>
+		<aai.base.image.version>1.8.1</aai.base.image.version>
 		<!-- This will be used for the docker images as the default format of maven build has issues -->
 		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
 
@@ -82,6 +82,12 @@
 
 		<sonar.scanner.version>3.7.0.1746</sonar.scanner.version>
 
+		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-compiler-plugin.source>11</maven-compiler-plugin.source>
+		<maven-compiler-plugin.target>11</maven-compiler-plugin.target>
+		<maven-compiler-plugin.test.source>11</maven-compiler-plugin.test.source>
+		<maven-compiler-plugin.test.target>11</maven-compiler-plugin.test.target>
 	</properties>
 
 	<distributionManagement>
@@ -372,6 +378,18 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<inherited>true</inherited>
+				<configuration>
+					<source>${maven-compiler-plugin.source}</source>
+					<target>${maven-compiler-plugin.target}</target>
+					<testSource>${maven-compiler-plugin.test.source}</testSource>
+					<testTarget>${maven-compiler-plugin.test.target}</testTarget>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
