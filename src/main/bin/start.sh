@@ -20,13 +20,6 @@
 #  ============LICENSE_END============================================
 #*******************************************************************************
 
-# jre-alpine image has $JAVA_HOME set and added to $PATH
-# ubuntu image requires to set $JAVA_HOME and add java to $PATH manually
-if ( uname -v | grep -i "ubuntu" ); then
-    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-`dpkg --print-architecture | awk -F- '{ print $NF }'`
-    export PATH=${JAVA_HOME}:$PATH
-fi
-
 # AJSC_HOME is required for EELF logging.
 # This path is referenced in the file logback.xml.
 AJSC_HOME="${AJSC_HOME-/opt/app/model-loader}"
@@ -37,6 +30,8 @@ if [ -z "$CONFIG_HOME" ]; then
     exit 1
 fi
 
+JARFILE=$(ls ./model-loader*.jar);
+
 # Some properties are repeated here for debugging purposes.
 PROPS="-DAJSC_HOME=$AJSC_HOME"
 PROPS="$PROPS -DCONFIG_HOME=$CONFIG_HOME"
@@ -45,19 +40,6 @@ PROPS="$PROPS -Dcom.att.eelf.logging.file=logback.xml"
 PROPS="$PROPS -Dlogback.configurationFile=$AJSC_HOME/logback.xml"
 PROPS="$PROPS -Dserver.port=9500"
 JVM_MAX_HEAP=${MAX_HEAP:-1024}
-
-if [ -z "${java_runtime_arguments}" ]; then
-  java_runtime_arguments="-Xms75m -Xmx${JVM_MAX_HEAP}m \
- -Dcom.sun.management.jmxremote \
- -Dcom.sun.management.jmxremote.authenticate=false \
- -Dcom.sun.management.jmxremote.ssl=false \
- -Dcom.sun.management.jmxremote.local.only=false \
- -Dcom.sun.management.jmxremote.port=1099 \
- -Dcom.sun.management.jmxremote.rmi.port=1099 \
- -Djava.rmi.server.hostname=127.0.0.1"
-fi
-
-JARFILE=$(ls ./model-loader*.jar);
 
 echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
 java $java_runtime_arguments $PROPS -jar $JARFILE
