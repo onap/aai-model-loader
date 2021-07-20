@@ -287,6 +287,7 @@ public class ModelArtifact extends AbstractModelArtifact {
         StringWriter sw = new StringWriter();
         TransformerFactory transFact = TransformerFactory.newInstance();
         transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         Transformer t = transFact.newTransformer();
         t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         t.transform(new DOMSource(node), new StreamResult(sw));
