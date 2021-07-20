@@ -28,7 +28,7 @@ public abstract class ArtifactHandler {
 
     protected ModelLoaderConfig config;
 
-    public ArtifactHandler(ModelLoaderConfig config) {
+    protected ArtifactHandler(ModelLoaderConfig config) {
         this.config = config;
     }
 

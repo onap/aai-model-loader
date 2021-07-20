@@ -22,8 +22,10 @@ package org.onap.aai.modelloader.entity.model;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -43,21 +45,21 @@ public class TestNamedQueryArtifactParser {
             NamedQueryArtifactParser parser = new NamedQueryArtifactParser();
             List<Artifact> modelList = parser.parse(fileString, "test-artifact");
 
-            assertTrue(modelList.size() == 1);
+            assertEquals(1, modelList.size());
 
             NamedQueryArtifact model = (NamedQueryArtifact) modelList.get(0);
 
             assertThat(model.toString(), not(isEmptyString()));
             assertTrue(model.getNamedQueryUuid().equalsIgnoreCase("94cac189-8d88-4d63-a194-f44214e080ff"));
             assertTrue(model.getType().toString().equalsIgnoreCase("NAMED_QUERY"));
-            assertTrue(model.getDependentModelIds().size() == 4);
+            assertEquals(4, model.getDependentModelIds().size());
             assertTrue(model.getDependentModelIds().contains("d09dd9da-0148-46cd-a947-591afc844d24"));
             assertTrue(model.getDependentModelIds().contains("997fc7-fca1-451f-b953-9a1e6197b4d6"));
             assertTrue(model.getDependentModelIds().contains("897df7ea-8938-42b0-bc57-46e913a4d93b"));
             assertTrue(model.getDependentModelIds().contains("f2b24d95-c582-48d5-b2d6-c5b3a94ce812"));
         } catch (Exception e) {
             e.printStackTrace();
-            assertTrue(false);
+            fail();
         }
     }
 

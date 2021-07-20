@@ -21,6 +21,7 @@
 package org.onap.aai.modelloader.notification;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,8 +51,8 @@ public class NotificationPublisher {
 
     public NotificationPublisher() {
         Properties configProperties = new Properties();
-        try {
-            configProperties.load(Files.newInputStream(ModelLoaderConfig.propertiesFile()));
+        try (InputStream configInputStream = Files.newInputStream(ModelLoaderConfig.propertiesFile())) {
+            configProperties.load(configInputStream);
         } catch (IOException e) {
             String errorMsg = "Failed to load configuration: " + e.getMessage();
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);

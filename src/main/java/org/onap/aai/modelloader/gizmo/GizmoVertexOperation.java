@@ -40,8 +40,7 @@ public class GizmoVertexOperation {
 
     public JsonElement toJsonElement() {
         JsonObject opObj = new JsonObject();
-        JsonParser parser = new JsonParser();
-        JsonObject vertexObj = parser.parse(vertex.toJson()).getAsJsonObject();
+        JsonObject vertexObj = JsonParser.parseString(vertex.toJson()).getAsJsonObject();
 
         opObj.addProperty(GizmoBulkPayload.OP_KEY, getOperation());
         opObj.add(internalId, vertexObj);

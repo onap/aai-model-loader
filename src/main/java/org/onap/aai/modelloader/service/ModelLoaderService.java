@@ -21,6 +21,7 @@
 package org.onap.aai.modelloader.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -80,12 +81,12 @@ public class ModelLoaderService implements ModelLoaderInterface {
         logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
         ModelLoaderConfig.setConfigHome(configDir);
         Properties configProperties = new Properties();
-        try {
-            configProperties.load(Files.newInputStream(Paths.get(configDir, "model-loader.properties")));
+        try (InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"))) {
+            configProperties.load(configInputStream);
             config = new ModelLoaderConfig(configProperties);
             
             // Set the truststore for SDC Client to connect to Dmaap central bus if applicable (as in case of TI)
-            if (config.isUseHttpsWithDmaap()) {
+            if (Boolean.TRUE.equals(config.isUseHttpsWithDmaap())) {
                 String trustStorePath = config.getKeyStorePath();
                 String trustStorePassword = config.getKeyStorePassword();
                 if (trustStorePath != null && Paths.get(trustStorePath).toFile().isFile() && trustStorePassword != null

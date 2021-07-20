@@ -88,7 +88,7 @@ public class TestBabelArtifactConverter {
 
         List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
 
-        assertTrue("There should have been 1 artifact", modelArtifacts.size() == 1);
+        assertEquals("There should have been 1 artifact", 1, modelArtifacts.size());
         assertEquals(new String(xml), modelArtifacts.get(0).getPayload());
         assertEquals(ArtifactType.MODEL, modelArtifacts.get(0).getType());
     }
