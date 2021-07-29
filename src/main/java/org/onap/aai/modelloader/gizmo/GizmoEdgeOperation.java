@@ -40,8 +40,7 @@ public class GizmoEdgeOperation {
 
     public JsonElement toJsonElement() {
         JsonObject opObj = new JsonObject();
-        JsonParser parser = new JsonParser();
-        JsonObject edgeObj = parser.parse(edge.toJson()).getAsJsonObject();
+        JsonObject edgeObj = JsonParser.parseString(edge.toJson()).getAsJsonObject();
 
         opObj.addProperty(GizmoBulkPayload.OP_KEY, operation);
         opObj.add(internalId, edgeObj);

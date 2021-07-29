@@ -21,16 +21,16 @@
 package org.onap.aai.modelloader.service;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/services/model-loader/v1/echo-service")
 public class EchoService {
 
-    @RequestMapping(value = "/echo/{input}", method = RequestMethod.GET)
+    @GetMapping(value = "/echo/{input}")
     public ResponseEntity<String> echo(@PathVariable String input) {
       return ResponseEntity.ok(input);
     }

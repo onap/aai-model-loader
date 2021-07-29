@@ -22,24 +22,22 @@ package org.onap.aai.modelloader.service;
 
 import java.io.IOException;
 import javax.ws.rs.core.Response;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 public interface ModelLoaderInterface {
 
-    @RequestMapping(value = "/loadModel/{modelid}", //
-            method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/loadModel/{modelid}", produces = "application/json")
     @ResponseBody
     Response loadModel(String modelid);
 
-    @RequestMapping(value = "/saveModel/{modelid}/{modelname}", //
-            method = RequestMethod.PUT, produces = "application/json")
+    @PutMapping(value = "/saveModel/{modelid}/{modelname}", produces = "application/json")
     @ResponseBody
     Response saveModel(String modelid, String modelname);
 
-    @RequestMapping(value = "/ingestModel/{modelName}/{modelVersion}", //
-            method = RequestMethod.POST, produces = "application/json")
+    @PostMapping(value = "/ingestModel/{modelName}/{modelVersion}", produces = "application/json")
     @ResponseBody
     Response ingestModel(String modelid, String modelVersion, String payload) throws IOException;
 }

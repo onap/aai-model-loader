@@ -45,7 +45,7 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     private String modelNamespaceVersion;
     private Set<String> referencedModelIds = new HashSet<>();
 
-    public AbstractModelArtifact(ArtifactType type) {
+    protected AbstractModelArtifact(ArtifactType type) {
         super(type);
     }
 

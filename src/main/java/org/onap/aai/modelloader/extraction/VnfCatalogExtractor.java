@@ -49,7 +49,7 @@ public class VnfCatalogExtractor {
     private static final Logger logger = LoggerFactory.getInstance().getLogger(VnfCatalogExtractor.class.getName());
 
     private static final Pattern VNFCFILE_EXTENSION_REGEX =
-            Pattern.compile("(?i)artifacts(\\\\|\\/)deployment(\\\\|\\/)vnf_catalog(\\\\|\\/).*\\.xml$");
+            Pattern.compile("(?i)artifacts([\\\\/])deployment([\\\\/])vnf_catalog([\\\\/]).*\\.xml$");
 
     /**
      * This method is responsible for filtering the contents of the supplied archive and returning a collection of

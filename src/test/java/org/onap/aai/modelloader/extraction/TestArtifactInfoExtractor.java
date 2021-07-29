@@ -79,7 +79,7 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneService());
 
-        assertTrue("One artifact should have been returned", artifacts.size() == 1);
+        assertEquals("One artifact should have been returned", 1, artifacts.size());
         assertEquals("The actual artifact did not match the expected one", expected, artifacts.get(0));
     }
 
@@ -90,7 +90,7 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneResource());
 
-        assertTrue("One artifact should have been returned", artifacts.size() == 1);
+        assertEquals("One artifact should have been returned", 1, artifacts.size());
         assertEquals("The actual artifact did not match the expected one", expectedArtifacts, artifacts);
     }
 
@@ -102,7 +102,7 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneServiceAndResources());
 
-        assertTrue("One artifact should have been returned", artifacts.size() == 2);
+        assertEquals("Two artifact should have been returned", 2, artifacts.size());
         assertEquals("The actual artifact did not match the expected one", expectedArtifacts, artifacts);
     }
 }

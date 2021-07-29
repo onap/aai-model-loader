@@ -25,6 +25,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
@@ -123,17 +124,13 @@ public class ModelLoaderConfig implements IConfiguration {
         // Get list of artifact types
         String types = get(PROP_ML_DISTRIBUTION_ARTIFACT_TYPES);
         if (types != null) {
-            for (String artType : types.split(",")) {
-                artifactTypes.add(artType);
-            }
+            artifactTypes.addAll(Arrays.asList(types.split(",")));
         }
 
         // Get list of message bus addresses
         String addresses = get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES);
         if (addresses != null) {
-            for (String addr : addresses.split(",")) {
-                msgBusAddrs.add(addr);
-            }
+            msgBusAddrs.addAll(Arrays.asList(addresses.split(",")));
         }
     }
 
@@ -148,7 +145,7 @@ public class ModelLoaderConfig implements IConfiguration {
     @Override
     public boolean activateServerTLSAuth() {
         String value = get(PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH);
-        return value != null && Boolean.parseBoolean(value);
+        return Boolean.parseBoolean(value);
     }
 
     @Override

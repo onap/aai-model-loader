@@ -20,8 +20,9 @@
  */
 package org.onap.aai.modelloader;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import org.onap.aai.modelloader.ModelLoaderApplication;
 
 /**
  * Tests for ModelLoaderApplication class.
@@ -37,6 +38,7 @@ public class TestModelLoaderApplication {
     public void testServiceStarts() {
         // The SDC Distribution Client is disabled.
         ModelLoaderApplication.main(new String[0]);
+        assertTrue(true);
     }
 
 }

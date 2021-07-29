@@ -20,6 +20,7 @@
  */
 package org.onap.aai.modelloader.restclient;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -92,16 +93,16 @@ public class TestAaiRestClient {
             // GET model
             OperationResult opResult =
                     aaiClient.getResource(getUrl(model, config), "example-trans-id-0", MediaType.APPLICATION_XML_TYPE);
-            assertTrue(opResult.getResultCode() == Response.Status.NOT_FOUND.getStatusCode());
+            assertEquals(opResult.getResultCode(), Response.Status.NOT_FOUND.getStatusCode());
 
             // PUT the model
             opResult = aaiClient.putResource(getUrl(model, config), model.getPayload(), "example-trans-id-1",
                     MediaType.APPLICATION_XML_TYPE);
-            assertTrue(opResult.getResultCode() == Response.Status.CREATED.getStatusCode());
+            assertEquals(opResult.getResultCode(), Response.Status.CREATED.getStatusCode());
 
             // DELETE the model
             opResult = aaiClient.getAndDeleteResource(getUrl(model, config), "example-trans-id-3");
-            assertTrue(opResult.getResultCode() == Response.Status.NO_CONTENT.getStatusCode());
+            assertEquals(opResult.getResultCode(), Response.Status.NO_CONTENT.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
         }

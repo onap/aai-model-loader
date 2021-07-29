@@ -21,7 +21,11 @@
 package org.onap.aai.modelloader.entity.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,6 +65,7 @@ public class TestModelArtifactHandler {
         ModelArtifactHandler handler = new ModelArtifactHandler(config);
         handler.pushArtifacts(Collections.emptyList(), "", Collections.emptyList(), aaiClient);
         handler.rollback(Collections.emptyList(), "", aaiClient);
+        assertTrue(true);
     }
 
     @Test
@@ -72,6 +77,7 @@ public class TestModelArtifactHandler {
         List<Artifact> artifacts = Collections.singletonList(new ModelArtifact());
         handler.pushArtifacts(artifacts, "", Collections.emptyList(), aaiClient);
         handler.rollback(Collections.emptyList(), "", aaiClient);
+        assertThat(artifacts, hasSize(1));
     }
 
     @Test
@@ -89,7 +95,7 @@ public class TestModelArtifactHandler {
 
         ModelArtifactHandler handler = new ModelArtifactHandler(config);
         boolean pushed = handler.pushArtifacts(artifacts, "", Collections.emptyList(), aaiClient);
-        assertThat(pushed, is(true));
+        assertTrue(pushed);
         handler.rollback(artifacts, "", aaiClient);
     }
 
