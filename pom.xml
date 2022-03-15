@@ -33,7 +33,7 @@
 	<groupId>org.onap.aai.model-loader</groupId>
 	<artifactId>model-loader</artifactId>
 	<name>aai-model-loader</name>
-	<version>1.9.3-SNAPSHOT</version>
+	<version>1.9.3</version>
 
 	<dependencyManagement>
 		<dependencies>
