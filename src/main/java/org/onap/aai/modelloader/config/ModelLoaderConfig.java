@@ -86,14 +86,14 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_AAI_AUTHENTICATION_USER = PREFIX_AAI + "AUTH_USER";
     protected static final String PROP_AAI_AUTHENTICATION_PASSWORD = PREFIX_AAI + "AUTH_PASSWORD";
     protected static final String PROP_AAI_USE_GIZMO = PREFIX_AAI + "USE_GIZMO";
-
+    protected static final String PROP_AAI_USE_HTTPS = PREFIX_AAI + "USE_HTTPS";
     protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
     protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_BABEL_KEYSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_KEYSTORE_PASS;
     protected static final String PROP_BABEL_TRUSTSTORE_FILE = PREFIX_BABEL + SUFFIX_TRUSTSTORE_FILE;
     protected static final String PROP_BABEL_TRUSTSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_TRUSTSTORE_PASS;
     protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
-
+    protected static final String PROP_BABEL_USE_HTTPS = PREFIX_BABEL + "USE_HTTPS";
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
     protected static final String FILESEP =
             (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
@@ -303,6 +303,16 @@ public class ModelLoaderConfig implements IConfiguration {
     public boolean useGizmo() {
         String useGizmo = get(PROP_AAI_USE_GIZMO);
         return useGizmo != null && useGizmo.equalsIgnoreCase("true");
+    }
+
+    public boolean useHttpsWithAAI() {
+        String useHttps = get(PROP_AAI_USE_HTTPS);
+        return useHttps != null && useHttps.equalsIgnoreCase("true");
+    }
+
+    public boolean useHttpsWithBabel() {
+        String useHttps = get(PROP_BABEL_USE_HTTPS);
+        return useHttps != null && useHttps.equalsIgnoreCase("true");
     }
 
     /**

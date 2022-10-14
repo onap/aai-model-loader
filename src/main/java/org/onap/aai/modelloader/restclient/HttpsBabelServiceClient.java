@@ -98,34 +98,36 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         this.config = config;
 
         logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel Service client");
+        //Initialize SSL Context only if SSL is enabled
+        if (config.useHttpsWithBabel()) {
+            SSLContext ctx = SSLContext.getInstance(SSL_PROTOCOL);
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KEYSTORE_ALGORITHM);
+            KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 
-        SSLContext ctx = SSLContext.getInstance(SSL_PROTOCOL);
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KEYSTORE_ALGORITHM);
-        KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            String clientCertPassword = config.getBabelKeyStorePassword();
 
-        String clientCertPassword = config.getBabelKeyStorePassword();
+            char[] pwd = null;
+            if (clientCertPassword != null) {
+                pwd = clientCertPassword.toCharArray();
+            }
 
-        char[] pwd = null;
-        if (clientCertPassword != null) {
-            pwd = clientCertPassword.toCharArray();
+            TrustManager[] trustManagers = getTrustManagers();
+
+            String clientCertFileName = config.getBabelKeyStorePath();
+            if (clientCertFileName == null) {
+                ctx.init(null, trustManagers, null);
+            } else {
+                InputStream fin = Files.newInputStream(Paths.get(clientCertFileName));
+                keyStore.load(fin, pwd);
+                kmf.init(keyStore, pwd);
+                ctx.init(kmf.getKeyManagers(), trustManagers, null);
+            }
+
+            logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Initialised context");
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((host, session) -> true);
         }
-
-        TrustManager[] trustManagers = getTrustManagers();
-
-        String clientCertFileName = config.getBabelKeyStorePath();
-        if (clientCertFileName == null) {
-            ctx.init(null, trustManagers, null);
-        } else {
-            InputStream fin = Files.newInputStream(Paths.get(clientCertFileName));
-            keyStore.load(fin, pwd);
-            kmf.init(keyStore, pwd);
-            ctx.init(kmf.getKeyManagers(), trustManagers, null);
-        }
-
-        logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Initialised context");
-
-        HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier((host, session) -> true);
 
         client = Client.create(new DefaultClientConfig());
 

@@ -93,6 +93,21 @@ public class TestBabelServiceClient {
         assertThat(result.size(), is(equalTo(3)));
     }
 
+    @Test
+    public void testRestClientHttp() throws BabelServiceClientException, IOException, URISyntaxException {
+        Properties configProperties = new Properties();
+        configProperties.put("ml.babel.USE_HTTPS", "false");
+        configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
+        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        BabelServiceClient client =
+                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
+        List<BabelArtifact> result =
+                client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
+                        "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
+        assertThat(result.size(), is(equalTo(3)));
+    }
+
+
     private byte[] readBytesFromFile(String resourceFile) throws IOException, URISyntaxException {
         return Files.readAllBytes(Paths.get(ClassLoader.getSystemResource(resourceFile).toURI()));
     }
