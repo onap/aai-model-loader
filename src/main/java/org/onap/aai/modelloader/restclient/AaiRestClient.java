@@ -157,14 +157,23 @@ public class AaiRestClient {
     private RestClient setupClient() {
         RestClient restClient = new RestClient();
 
-        // @formatter:off
-        restClient.validateServerHostname(false)
-                .validateServerCertChain(false)
-                .clientCertFile(config.getAaiKeyStorePath())
-                .clientCertPassword(config.getAaiKeyStorePassword())
-                .connectTimeoutMs(120000)
-                .readTimeoutMs(120000);
-        // @formatter:on
+        //Use certs only if SSL is enabled
+        if (config.useHttpsWithAAI())
+        {// @formatter:off
+            restClient.validateServerHostname(false)
+                    .validateServerCertChain(false)
+                    .clientCertFile(config.getAaiKeyStorePath())
+                    .clientCertPassword(config.getAaiKeyStorePassword())
+                    .connectTimeoutMs(120000)
+                    .readTimeoutMs(120000);
+            // @formatter:on
+        }
+        else {
+            restClient.validateServerHostname(false)
+                    .validateServerCertChain(false)
+                    .connectTimeoutMs(120000)
+                    .readTimeoutMs(120000);
+        }
 
         if (useBasicAuth()) {
             restClient.authenticationMode(RestAuthenticationMode.SSL_BASIC);
