@@ -1,0 +1,9 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Lukasz Rajewski <lukasz.rajewski@t-mobile.pl>
+Code-Review+1: Andreas Geissler <andreas-geissler@telekom.de>
+Code-Review+2: William Reehil <william.reehil@att.com>
+Submitted-by: William Reehil <william.reehil@att.com>
+Submitted-at: Mon, 17 Oct 2022 13:16:21 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/aai/model-loader/+/131482
+Project: aai/model-loader
+Branch: refs/heads/master
