@@ -63,7 +63,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/services/model-loader/v1/model-service")
 public class ModelLoaderService implements ModelLoaderInterface {
 
-    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelLoaderService.class.getName());
+    private static final Logger logger = LoggerFactory.getInstance().getLogger(ModelLoaderService.class.getName());
 
     @Value("${CONFIG_HOME}")
     private String configDir;
@@ -84,21 +84,6 @@ public class ModelLoaderService implements ModelLoaderInterface {
         try (InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"))) {
             configProperties.load(configInputStream);
             config = new ModelLoaderConfig(configProperties);
-            
-            // Set the truststore for SDC Client to connect to Dmaap central bus if applicable (as in case of TI)
-            if (Boolean.TRUE.equals(config.isUseHttpsWithDmaap())) {
-                String trustStorePath = config.getKeyStorePath();
-                String trustStorePassword = config.getKeyStorePassword();
-                if (trustStorePath != null && Paths.get(trustStorePath).toFile().isFile() && trustStorePassword != null
-                        && !trustStorePassword.isEmpty()) {
-                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-                } else {
-                    throw new IllegalArgumentException("Model Loader property ml.distribution.KEYSTORE_FILE "
-                    		+ "or ml.distribution.KEYSTORE_PASSWORD not set or invalid");
-                }
-            }
-            
             if (!config.getASDCConnectionDisabled()) {
                 initSdcClient();
             }

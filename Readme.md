@@ -54,10 +54,10 @@ _model-loader.properties_
     # Address/port of the SDC
     ml.distribution.ASDC_ADDRESS=<SDC-Hostname>:8443
     
-    # DMaaP consumer group.  
+    # Kafka consumer group.  
     ml.distribution.CONSUMER_GROUP=aai-ml-group
     
-    # DMaaP consumer ID
+    # Kafka consumer ID
     ml.distribution.CONSUMER_ID=aai-ml
     
     # SDC Environment Name.  This must match the environment name configured on the SDC
@@ -73,10 +73,10 @@ _model-loader.properties_
     # obfuscate the cleartext password:  http://www.eclipse.org/jetty/documentation/9.4.x/configuring-security-secure-passwords.html
     ml.distribution.PASSWORD=OBF:<password>
     
-    # How often (in seconds) to poll the DMaaP cluster for new model events
+    # How often (in seconds) to poll the Kafka topic for new model events
     ml.distribution.POLLING_INTERVAL=<integer>
     
-    # Timeout value (in seconds) when polling DMaaP for new model events
+    # Timeout value (in seconds) when polling the Kafka topic for new model events
     ml.distribution.POLLING_TIMEOUT=<integer>
     
     # Username to use when connecting to the SDC
@@ -84,9 +84,6 @@ _model-loader.properties_
     
     # Artifact type we want to download from the SDC (the values below will typically suffice)
     ml.distribution.ARTIFACT_TYPES=MODEL_QUERY_SPEC,TOSCA_CSAR
-    
-    # List of message bus addresses on which to listen for distribution events
-    ml.distribution.MSG_BUS_ADDRESSES=<host1>,<host2>
 
     # URL of the A&AI
     ml.aai.BASE_URL=https://<AAI-Hostname>:8443

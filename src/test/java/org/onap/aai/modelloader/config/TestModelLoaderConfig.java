@@ -60,19 +60,6 @@ public class TestModelLoaderConfig {
     }
 
     @Test
-    public void testMsgBusAddrs() {
-        Properties props = new Properties();
-        props.setProperty("ml.distribution.MSG_BUS_ADDRESSES", "host1.onap.com:3904,host2.onap.com:3904");
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-
-        List<String> addrs = config.getMsgBusAddress();
-
-        assertEquals(2, addrs.size());
-        assertEquals(0, addrs.get(0).compareToIgnoreCase("host1.onap.com:3904"));
-        assertEquals(0, addrs.get(1).compareToIgnoreCase("host2.onap.com:3904"));
-    }
-
-    @Test
     public void testDecryptPassword() {
         String password = "youshallnotpass";
         ModelLoaderConfig config =

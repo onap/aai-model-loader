@@ -41,7 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ModelLoaderService.class, HttpsBabelServiceClientFactory.class})
-@TestPropertySource(properties = {"CONFIG_HOME=src/test/resources/sdc_test",})
+@TestPropertySource(properties = {"CONFIG_HOME=src/test/resources",})
 public class TestModelLoaderServiceWithSdc {
 
     @Autowired

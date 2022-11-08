@@ -31,6 +31,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.security.Password;
 import org.onap.sdc.api.consumer.IConfiguration;
+import org.springframework.core.env.Environment;
 
 /**
  * Properties for the Model Loader
@@ -72,11 +73,10 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_ML_DISTRIBUTION_POLLING_TIMEOUT = PREFIX_DISTRIBUTION_CLIENT + "POLLING_TIMEOUT";
     protected static final String PROP_ML_DISTRIBUTION_USER = PREFIX_DISTRIBUTION_CLIENT + "USER";
     protected static final String PROP_ML_DISTRIBUTION_ARTIFACT_TYPES = PREFIX_DISTRIBUTION_CLIENT + "ARTIFACT_TYPES";
-    protected static final String PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES =
-            PREFIX_DISTRIBUTION_CLIENT + "MSG_BUS_ADDRESSES";
-    protected static final String PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP =
-            PREFIX_DISTRIBUTION_CLIENT + "USE_HTTPS_WITH_DMAAP";
-
+    protected static final String PROP_ML_DISTRIBUTION_HTTP_PROXY_HOST = PREFIX_DISTRIBUTION_CLIENT + "HTTP_PROXY_HOST";
+    protected static final String PROP_ML_DISTRIBUTION_HTTP_PROXY_PORT = PREFIX_DISTRIBUTION_CLIENT + "HTTP_PROXY_PORT";
+    protected static final String PROP_ML_DISTRIBUTION_HTTPS_PROXY_HOST = PREFIX_DISTRIBUTION_CLIENT + "HTTPS_PROXY_HOST";
+    protected static final String PROP_ML_DISTRIBUTION_HTTPS_PROXY_PORT = PREFIX_DISTRIBUTION_CLIENT + "HTTPS_PROXY_PORT";
     protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
     protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_AAI_KEYSTORE_PASSWORD = PREFIX_AAI + SUFFIX_KEYSTORE_PASS;
@@ -101,8 +101,7 @@ public class ModelLoaderConfig implements IConfiguration {
     private static String configHome;
     private Properties modelLoaderProperties = null;
     private String certLocation = ".";
-    private List<String> artifactTypes = new ArrayList<>();
-    private List<String> msgBusAddrs = new ArrayList<>();
+    private final List<String> artifactTypes = new ArrayList<>();
     private String modelVersion = null;
 
     public ModelLoaderConfig(Properties configProperties) {
@@ -126,12 +125,6 @@ public class ModelLoaderConfig implements IConfiguration {
         if (types != null) {
             artifactTypes.addAll(Arrays.asList(types.split(",")));
         }
-
-        // Get list of message bus addresses
-        String addresses = get(PROP_ML_DISTRIBUTION_MSG_BUS_ADDRESSES);
-        if (addresses != null) {
-            msgBusAddrs.addAll(Arrays.asList(addresses.split(",")));
-        }
     }
 
     public static void setConfigHome(String configHome) {
@@ -149,7 +142,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     @Override
-    public String getAsdcAddress() {
+    public String getSdcAddress() {
         return get(PROP_ML_DISTRIBUTION_ASDC_ADDRESS);
     }
 
@@ -219,14 +212,23 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     @Override
-    public Boolean isUseHttpsWithDmaap() {
-        String useHTTPS = get(PROP_ML_DISTRIBUTION_HTTPS_WITH_DMAAP);
-        return useHTTPS != null && Boolean.valueOf(useHTTPS);
+    public String getHttpProxyHost() {
+        return getPropertyOrNull(PROP_ML_DISTRIBUTION_HTTP_PROXY_HOST);
     }
 
     @Override
-    public List<String> getMsgBusAddress() {
-        return msgBusAddrs;
+    public int getHttpProxyPort() {
+        return getIntegerPropertyOrZero(PROP_ML_DISTRIBUTION_HTTP_PROXY_PORT);
+    }
+
+    @Override
+    public String getHttpsProxyHost() {
+        return getPropertyOrNull(PROP_ML_DISTRIBUTION_HTTPS_PROXY_HOST);
+    }
+
+    @Override
+    public int getHttpsProxyPort() {
+        return getIntegerPropertyOrZero(PROP_ML_DISTRIBUTION_HTTPS_PROXY_PORT);
     }
 
     public String getAaiKeyStorePath() {
@@ -376,4 +378,27 @@ public class ModelLoaderConfig implements IConfiguration {
         }
         return value;
     }
+
+    public String getPropertyOrNull(String propertyName) {
+        String value = modelLoaderProperties.getProperty(propertyName);
+        if (value == null || "NULL".equals(value) || value.isEmpty()) {
+            return null;
+        } else {
+            return value;
+        }
+    }
+
+    public int getIntegerPropertyOrZero(String propertyName) {
+        String property = modelLoaderProperties.getProperty(propertyName);
+        if (property == null || "NULL".equals(property) || property.isEmpty()) {
+            return 0;
+        } else {
+            try {
+                return Integer.parseInt(property);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+    }
+
 }
