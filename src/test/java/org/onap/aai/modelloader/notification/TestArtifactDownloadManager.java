@@ -22,8 +22,8 @@ package org.onap.aai.modelloader.notification;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.After;
 import org.junit.Before;
@@ -109,7 +110,7 @@ public class TestArtifactDownloadManager {
                 catalogFiles), is(true));
         assertThat(modelFiles, is(empty()));
         assertThat(catalogFiles, is(empty()));
-        Mockito.verifyZeroInteractions(mockBabelClient, mockDistributionClient, mockNotificationPublisher,
+        Mockito.verifyNoInteractions(mockBabelClient, mockDistributionClient, mockNotificationPublisher,
                 mockBabelArtifactConverter);
     }
 
@@ -129,7 +130,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockNotificationPublisher).publishDownloadFailure(mockDistributionClient, data, artifact,
                 errorMessage);
 
-        Mockito.verifyZeroInteractions(mockBabelClient, mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 
     @Test
@@ -147,7 +148,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifactInfo);
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
 
-        Mockito.verifyZeroInteractions(mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelArtifactConverter);
     }
 
     @Test
@@ -167,7 +168,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockBabelClient).postArtifact(any(), any(), any(), any());
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
-        Mockito.verifyZeroInteractions(mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelArtifactConverter);
 
     }
 
@@ -189,7 +190,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
-        Mockito.verifyZeroInteractions(mockBabelClient, mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 
     @Test
@@ -246,7 +247,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
 
-        Mockito.verifyZeroInteractions(mockBabelClient, mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 
     private void setupValidModelQuerySpecMocks(ArtifactTestUtils artifactTestUtils, INotificationData data,
@@ -332,7 +333,7 @@ public class TestArtifactDownloadManager {
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
-        Mockito.verifyZeroInteractions(mockBabelClient, mockBabelArtifactConverter);
+        Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 
     private IDistributionClientDownloadResult createDistributionClientDownloadResult(

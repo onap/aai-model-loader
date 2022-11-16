@@ -21,7 +21,6 @@
 package org.onap.aai.modelloader.restclient;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +29,11 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;

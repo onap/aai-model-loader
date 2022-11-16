@@ -22,6 +22,8 @@ package org.onap.aai.modelloader.util;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+
 import org.apache.commons.io.IOUtils;
 import org.onap.aai.babel.service.data.BabelArtifact;
 
@@ -53,7 +55,7 @@ public class ArtifactTestUtils {
     }
 
     public static String loadResourceAsString(String resourceName) throws IOException {
-        return IOUtils.toString(getResource(resourceName));
+        return IOUtils.toString(getResource(resourceName), Charset.defaultCharset());
     }
 
     private static URL getResource(String resourceName) {

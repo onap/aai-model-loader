@@ -22,11 +22,12 @@
 package org.onap.aai.modelloader.util;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import org.junit.Test;
 import org.onap.aai.modelloader.gizmo.GizmoBulkPayload;
 

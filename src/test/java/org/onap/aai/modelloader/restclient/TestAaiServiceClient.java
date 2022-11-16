@@ -25,11 +25,14 @@ import static org.apache.commons.io.IOUtils.write;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -99,7 +102,7 @@ public class TestAaiServiceClient {
                     HttpServletResponse response) throws IOException, ServletException {
                 response.setStatus(SC_OK);
                 response.setContentType("text/json;charset=utf-8");
-                write("", response.getOutputStream());
+                write("", response.getOutputStream(), Charset.defaultCharset());
                 request.setHandled(true);
             }
         };

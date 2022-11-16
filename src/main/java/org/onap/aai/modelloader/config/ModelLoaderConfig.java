@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.security.Password;
 import org.onap.sdc.api.consumer.IConfiguration;
-import org.springframework.core.env.Environment;
 
 /**
  * Properties for the Model Loader

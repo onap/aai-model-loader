@@ -24,19 +24,21 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.write;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -47,6 +49,8 @@ import org.junit.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
+
+import com.google.gson.Gson;
 
 /**
  * Local testing of the Babel service client.
@@ -124,7 +128,7 @@ public class TestBabelServiceClient {
                     HttpServletResponse response) throws IOException, ServletException {
                 response.setStatus(SC_OK);
                 response.setContentType("text/xml;charset=utf-8");
-                write(responseBody, response.getOutputStream());
+                write(responseBody, response.getOutputStream(), Charset.defaultCharset());
                 request.setHandled(true);
             }
         };

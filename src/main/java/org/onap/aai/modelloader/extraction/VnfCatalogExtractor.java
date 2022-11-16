@@ -21,10 +21,12 @@
 package org.onap.aai.modelloader.extraction;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
@@ -75,7 +77,7 @@ public class VnfCatalogExtractor {
                 ZipArchiveEntry entry = enumeration.nextElement();
                 if (fileShouldBeExtracted(entry)) {
                     vnfcFiles.add(new VnfCatalogArtifact(ArtifactType.VNF_CATALOG_XML,
-                            IOUtils.toString(zipFile.getInputStream(entry))));
+                            IOUtils.toString(zipFile.getInputStream(entry), Charset.defaultCharset())));
                 }
             }
         } catch (IOException e) {

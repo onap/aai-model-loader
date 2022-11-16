@@ -23,12 +23,13 @@ package org.onap.aai.modelloader.entity.model;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
-import static org.junit.Assert.assertThat;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+
 import org.junit.Test;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.springframework.util.CollectionUtils;

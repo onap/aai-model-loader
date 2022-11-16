@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class TestEventCallback {
 
         verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
                 any(List.class), any(List.class));
-        Mockito.verifyZeroInteractions(mockArtifactDeploymentManager);
+        Mockito.verifyNoInteractions(mockArtifactDeploymentManager);
     }
 
     @SuppressWarnings("unchecked")
