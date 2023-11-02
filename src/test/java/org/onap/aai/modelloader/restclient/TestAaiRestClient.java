@@ -4,6 +4,7 @@
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
  * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright © 2023 Deutsche Telekom AG.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +35,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import java.time.Duration;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
 import org.onap.aai.restclient.client.OperationResult;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -46,15 +54,33 @@ import org.w3c.dom.NodeList;
 public class TestAaiRestClient {
 
     private static final String MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
+    private ModelLoaderConfig config;
+    private AaiRestClient aaiClient;
+    private int containerPort;
 
-    // This test requires a running A&AI system. To test locally, annotate with org.junit.Test
-    public void testRestClient() throws Exception {
+    private final String image = "nexus3.onap.org:10001/onap/aai-resources:1.10.0";
+
+    @Rule
+    public GenericContainer<?> resourcesContainer = new GenericContainer<>(DockerImageName.parse(image))
+            .withExposedPorts(8447)
+            .withStartupTimeout(Duration.ofMinutes(3));
+
+    @Before
+    public void setup() {
+        containerPort = resourcesContainer.getFirstMappedPort();
         Properties props = new Properties();
         props.setProperty("ml.distribution.ARTIFACT_TYPES", "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
-        props.setProperty("ml.aai.BASE_URL", "https://localhost:8443");
-        props.setProperty("ml.aai.MODEL_URL", "/aai/v9/service-design-and-creation/models/model/");
+        props.setProperty("ml.aai.BASE_URL", "https://localhost:" + String.valueOf(containerPort));
+        props.setProperty("ml.aai.MODEL_URL", "aai/v*/service-design-and-creation/models/model/");
+        props.setProperty("ml.aai.AUTH_USER", "ModelLoader");
+        props.setProperty("ml.aai.AUTH_PASSWORD", "OBF:1qvu1v2h1sov1sar1wfw1j7j1wg21saj1sov1v1x1qxw");
 
-        ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
+        config = new ModelLoaderConfig(props, ".");
+        aaiClient = new AaiRestClient(config);
+    }
+
+    @Test
+    public void testRestClient() throws Exception {
 
         File xmlFile = new File(MODEL_FILE);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -64,7 +90,6 @@ public class TestAaiRestClient {
         NodeList nodesList = doc.getDocumentElement().getChildNodes();
 
         // Get the model IDs
-
         // @formatter:off
         String modelInvariantId =
                 getNodesStream(nodesList)
@@ -81,32 +106,27 @@ public class TestAaiRestClient {
                 .orElse(null);
         // @formatter:on
 
-        try {
-            // Build the model artifact
-            ModelArtifact model = new ModelArtifact();
-            model.setModelInvariantId(modelInvariantId);
-            model.setModelVerId(modelId);
-            model.setPayload(readFile(MODEL_FILE));
-            model.setModelNamespace("http://org.openecomp.aai.inventory/v9");
+        // Build the model artifact
+        ModelArtifact model = new ModelArtifact();
+        model.setModelInvariantId(modelInvariantId);
+        model.setModelVerId(modelId);
+        model.setPayload(readFile(MODEL_FILE));
+        model.setModelNamespace("http://org.onap.aai.inventory/v25");
 
-            AaiRestClient aaiClient = new AaiRestClient(config);
 
-            // GET model
-            OperationResult opResult =
-                    aaiClient.getResource(getUrl(model, config), "example-trans-id-0", MediaType.APPLICATION_XML_TYPE);
-            assertEquals(opResult.getResultCode(), Response.Status.NOT_FOUND.getStatusCode());
+        // GET model
+        OperationResult opResult = aaiClient.getResource(getUrl(model, config), "example-trans-id-0",
+                MediaType.APPLICATION_XML_TYPE);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), opResult.getResultCode());
 
-            // PUT the model
-            opResult = aaiClient.putResource(getUrl(model, config), model.getPayload(), "example-trans-id-1",
-                    MediaType.APPLICATION_XML_TYPE);
-            assertEquals(opResult.getResultCode(), Response.Status.CREATED.getStatusCode());
+        // PUT the model
+        opResult = aaiClient.putResource(getUrl(model, config), model.getPayload(), "example-trans-id-1",
+                MediaType.APPLICATION_XML_TYPE);
+        assertEquals(Response.Status.CREATED.getStatusCode(), opResult.getResultCode());
 
-            // DELETE the model
-            opResult = aaiClient.getAndDeleteResource(getUrl(model, config), "example-trans-id-3");
-            assertEquals(opResult.getResultCode(), Response.Status.NO_CONTENT.getStatusCode());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // DELETE the model
+        opResult = aaiClient.getAndDeleteResource(getUrl(model, config), "example-trans-id-3");
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), opResult.getResultCode());
     }
 
     private Stream<Node> getNodesStream(NodeList nodeList) {

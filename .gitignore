@@ -7,3 +7,4 @@ debug-logs/
 .checkstyle
 .idea/
 *.iml
+.vscode

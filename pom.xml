@@ -19,8 +19,9 @@
     limitations under the License.
     ============LICENSE_END=========================================================
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -164,8 +165,10 @@
 										<filter>@</filter>
 										<tags>
 											<tag>latest</tag>
-											<tag>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-latest</tag>
-											<tag>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-${maven.build.timestamp}</tag>
+											<tag>
+												${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-latest</tag>
+											<tag>
+												${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-${maven.build.timestamp}</tag>
 										</tags>
 										<cleanup>try</cleanup>
 										<dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
@@ -322,11 +325,6 @@
 
 		<!-- Test dependencies -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
 			<version>${hamcrest-all.version}</version>
@@ -340,6 +338,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.19.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -600,10 +604,6 @@
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>${sonar.scanner.version}</version>
 			</plugin>
-			<!-- end removable sonar config -->
-
-
-
 		</plugins>
 	</build>
 </project>

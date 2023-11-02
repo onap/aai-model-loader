@@ -54,8 +54,8 @@ public class TestModelArtifactParser {
         assertThat(model.toString(), is(not(nullValue())));
 
         assertThat(model.getModelInvariantId(), equalToIgnoringCase("3d560d81-57d0-438b-a2a1-5334dba0651a"));
-        assertThat(model.getModelNamespace(), equalToIgnoringCase("http://org.openecomp.aai.inventory/v9"));
-        assertThat(model.getModelNamespaceVersion(), equalToIgnoringCase("v9"));
+        assertThat(model.getModelNamespace(), equalToIgnoringCase("http://org.onap.aai.inventory/v25"));
+        assertThat(model.getModelNamespaceVersion(), equalToIgnoringCase("v25"));
         assertThat(model.getType().toString(), equalToIgnoringCase("MODEL"));
         assertThat(model.getDependentModelIds().size(), is(0));
     }
