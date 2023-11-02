@@ -19,8 +19,9 @@
     limitations under the License.
     ============LICENSE_END=========================================================
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -67,6 +68,7 @@
 		<babel.version>1.13.0</babel.version>
 		<sdc-distribution-client.version>2.0.0</sdc-distribution-client.version>
 		<logback.version>1.2.11</logback.version>
+		<testcontainers.version>1.20.1</testcontainers.version>
 		<!-- docker related properties -->
 		<docker.fabric.version>0.39.0</docker.fabric.version>
 		<aai.docker.version>1.0.0</aai.docker.version>
@@ -172,8 +174,10 @@
 										<filter>@</filter>
 										<tags>
 											<tag>latest</tag>
-											<tag>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-latest</tag>
-											<tag>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-${maven.build.timestamp}</tag>
+											<tag>
+												${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-latest</tag>
+											<tag>
+												${parsedVersion.majorVersion}.${parsedVersion.minorVersion}-STAGING-${maven.build.timestamp}</tag>
 										</tags>
 										<cleanup>try</cleanup>
 										<dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
@@ -371,6 +375,18 @@
 			<artifactId>spring-cloud-contract-wiremock</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+	</dependency>
 	</dependencies>
 
 	<!-- Plugins and repositories -->
@@ -629,10 +645,6 @@
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>${sonar.scanner.version}</version>
 			</plugin>
-			<!-- end removable sonar config -->
-
-
-
 		</plugins>
 	</build>
 </project>
