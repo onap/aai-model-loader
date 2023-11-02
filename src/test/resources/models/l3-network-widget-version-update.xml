@@ -1,0 +1,12 @@
+<model-ver xmlns="http://org.onap.aai.inventory/v25">
+	<model-version-id>9111f20f-e680-4001-b83f-19a2fc23bfc1</model-version-id>
+	<model-name>l3-network</model-name>
+	<model-version>2.0</model-version>
+	<resource-version>resourceVersion</resource-version>
+	<model-elements>
+		<model-element>
+			<new-data-del-flag>T</new-data-del-flag>
+			<cardinality>unbounded</cardinality>
+		</model-element>
+	</model-elements>
+</model-ver>
