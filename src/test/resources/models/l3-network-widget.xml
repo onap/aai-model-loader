@@ -1,5 +1,5 @@
-<model xmlns="http://org.openecomp.aai.inventory/v9">
-   <model-invariant-id>3d560d81-57d0-438b-a2a1-5334dba0651a</model-invariant-id>
+<model xmlns="http://org.onap.aai.inventory/v25">
+	<model-invariant-id>3d560d81-57d0-438b-a2a1-5334dba0651a</model-invariant-id>
 	<model-type>widget</model-type>
 	<model-vers>
 		<model-ver>
