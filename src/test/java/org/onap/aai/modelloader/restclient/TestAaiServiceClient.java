@@ -53,12 +53,14 @@ public class TestAaiServiceClient {
 
     @Before
     public void startJetty() throws Exception {
-        server = new Server(8080);
+        server = new Server(0);
         server.setHandler(getMockHandler());
         server.start();
 
         Properties props = new Properties();
         props.put("ml.aai.KEYSTORE_PASSWORD", "2244");
+        props.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "3000");
+        props.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "3000");
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
         aaiClient = new AaiRestClient(config);
     }
@@ -78,11 +80,11 @@ public class TestAaiServiceClient {
 
     @Test
     public void testOperations() {
-        String url = "http://localhost:8080";
+        String url = server.getURI().toString();
         String transId = "";
         MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
         aaiClient.getResource(url, "", mediaType);
-        aaiClient.deleteResource("http://localhost", transId, "");
+        aaiClient.deleteResource(url, "", transId);
         aaiClient.getAndDeleteResource(url, transId);
         aaiClient.postResource(url, "", transId, mediaType);
         aaiClient.putResource(url, "", transId, mediaType);
