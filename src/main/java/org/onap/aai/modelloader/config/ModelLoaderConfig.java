@@ -27,12 +27,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.security.Password;
 import org.onap.sdc.api.consumer.IConfiguration;
-
 /**
  * Properties for the Model Loader
  *
@@ -97,6 +97,8 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
     protected static final String FILESEP =
             (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
+    protected static final String PROP_AAI_CLIENT_CONNECT_TIMEOUT_MS = PREFIX_AAI + "RESTCLIENT_CONNECT_TIMEOUT";
+    protected static final String PROP_AAI_CLIENT_READ_TIMEOUT_MS = PREFIX_AAI + "RESTCLIENT_READ_TIMEOUT";
 
     private static String configHome;
     private Properties modelLoaderProperties = null;
@@ -399,6 +401,16 @@ public class ModelLoaderConfig implements IConfiguration {
                 return 0;
             }
         }
+    }
+
+    public int getClientConnectTimeoutMs() {
+        String connectTimeout = Optional.ofNullable(get(PROP_AAI_CLIENT_CONNECT_TIMEOUT_MS)).orElse("120000");
+        return Integer.parseInt(connectTimeout);
+    }
+
+    public int getClientReadTimeoutMs() {
+        String connectTimeout = Optional.ofNullable(get(PROP_AAI_CLIENT_READ_TIMEOUT_MS)).orElse("120000");
+        return Integer.parseInt(connectTimeout);
     }
 
 }

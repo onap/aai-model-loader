@@ -69,7 +69,7 @@ public class TestBabelServiceClient {
         response.add(new BabelArtifact("", null, ""));
         responseBody = new Gson().toJson(response);
 
-        server = new Server(8080);
+        server = new Server(0);
         server.setHandler(getMockHandler());
         server.start();
     }
@@ -81,13 +81,14 @@ public class TestBabelServiceClient {
 
     @Test
     public void testRestClient() throws BabelServiceClientException, IOException, URISyntaxException {
+        String url = server.getURI().toString();
         Properties configProperties = new Properties();
         configProperties.put("ml.babel.KEYSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
         configProperties.put("ml.babel.KEYSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
         configProperties.put("ml.babel.TRUSTSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
         // In a real deployment this would be a different file (to the client keystore)
         configProperties.put("ml.babel.TRUSTSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
-        configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
+        configProperties.put("ml.babel.BASE_URL", url);
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
         BabelServiceClient client =
                 new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
@@ -99,10 +100,13 @@ public class TestBabelServiceClient {
 
     @Test
     public void testRestClientHttp() throws BabelServiceClientException, IOException, URISyntaxException {
+        String url = server.getURI().toString();
         Properties configProperties = new Properties();
         configProperties.put("ml.babel.USE_HTTPS", "false");
-        configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
+        configProperties.put("ml.babel.BASE_URL", url);
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "3000");
+        configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "3000");
         BabelServiceClient client =
                 new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
         List<BabelArtifact> result =

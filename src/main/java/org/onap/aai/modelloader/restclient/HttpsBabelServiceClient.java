@@ -130,6 +130,8 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         }
 
         client = Client.create(new DefaultClientConfig());
+        client.setConnectTimeout(config.getClientConnectTimeoutMs());
+        client.setReadTimeout(config.getClientReadTimeoutMs());
 
         logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Jersey client created");
     }
