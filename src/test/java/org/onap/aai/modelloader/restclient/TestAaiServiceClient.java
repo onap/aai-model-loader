@@ -22,7 +22,7 @@ package org.onap.aai.modelloader.restclient;
 
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.write;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -37,9 +37,9 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 
 /**
@@ -51,7 +51,7 @@ public class TestAaiServiceClient {
     private Server server;
     private AaiRestClient aaiClient;
 
-    @Before
+    @BeforeEach
     public void startJetty() throws Exception {
         server = new Server(8080);
         server.setHandler(getMockHandler());
@@ -63,7 +63,7 @@ public class TestAaiServiceClient {
         aaiClient = new AaiRestClient(config);
     }
 
-    @After
+    @AfterEach
     public void stopJetty() throws Exception {
         server.stop();
     }

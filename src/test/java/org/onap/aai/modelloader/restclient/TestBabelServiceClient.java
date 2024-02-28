@@ -43,9 +43,9 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
@@ -61,7 +61,7 @@ public class TestBabelServiceClient {
     private Server server;
     private String responseBody;
 
-    @Before
+    @BeforeEach
     public void startJetty() throws Exception {
         List<BabelArtifact> response = new ArrayList<>();
         response.add(new BabelArtifact("", null, ""));
@@ -74,7 +74,7 @@ public class TestBabelServiceClient {
         server.start();
     }
 
-    @After
+    @AfterEach
     public void stopJetty() throws Exception {
         server.stop();
     }

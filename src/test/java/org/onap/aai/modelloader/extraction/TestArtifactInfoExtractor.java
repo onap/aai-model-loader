@@ -20,8 +20,8 @@
  */
 package org.onap.aai.modelloader.extraction;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getEmptyNotificationData;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneResource;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneService;
@@ -29,9 +29,9 @@ import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.ge
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.fixture.ArtifactInfoBuilder;
 import org.onap.aai.modelloader.fixture.MockNotificationDataImpl;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -44,12 +44,12 @@ public class TestArtifactInfoExtractor {
 
     private ArtifactInfoExtractor extractor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         extractor = new ArtifactInfoExtractor();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         extractor = null;
     }
@@ -60,7 +60,7 @@ public class TestArtifactInfoExtractor {
     }
 
     private void doEmptyArtifactsTest(INotificationData notificationData) {
-        assertTrue("The list returned should have been empty", extractor.extract(notificationData).isEmpty());
+        assertTrue(extractor.extract(notificationData).isEmpty(), "The list returned should have been empty");
     }
 
     @Test
@@ -79,8 +79,8 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneService());
 
-        assertEquals("One artifact should have been returned", 1, artifacts.size());
-        assertEquals("The actual artifact did not match the expected one", expected, artifacts.get(0));
+        assertEquals(1, artifacts.size(), "One artifact should have been returned");
+        assertEquals(expected, artifacts.get(0), "The actual artifact did not match the expected one");
     }
 
     @Test
@@ -90,8 +90,8 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneResource());
 
-        assertEquals("One artifact should have been returned", 1, artifacts.size());
-        assertEquals("The actual artifact did not match the expected one", expectedArtifacts, artifacts);
+        assertEquals(1, artifacts.size(), "One artifact should have been returned");
+        assertEquals(expectedArtifacts, artifacts, "The actual artifact did not match the expected one");
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TestArtifactInfoExtractor {
 
         List<IArtifactInfo> artifacts = extractor.extract(getNotificationDataWithOneServiceAndResources());
 
-        assertEquals("Two artifact should have been returned", 2, artifacts.size());
-        assertEquals("The actual artifact did not match the expected one", expectedArtifacts, artifacts);
+        assertEquals(2, artifacts.size(), "Two artifact should have been returned");
+        assertEquals(expectedArtifacts, artifacts, "The actual artifact did not match the expected one");
     }
 }

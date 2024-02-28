@@ -29,9 +29,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
@@ -57,7 +57,7 @@ public class TestEventCallback {
     private IDistributionClient mockDistributionClient;
     private NotificationPublisher mockNotificationPublisher;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
@@ -75,7 +75,7 @@ public class TestEventCallback {
         ReflectionTestUtils.setField(eventCallback, "notificationPublisher", mockNotificationPublisher);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         config = null;
         configProperties = null;

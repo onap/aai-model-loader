@@ -26,13 +26,14 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.entity.Artifact;
 
 public class ModelSorterTest {
@@ -129,12 +130,14 @@ public class ModelSorterTest {
         assertThat(new ModelSorter().sort(Arrays.asList(nq1, nq2, artifact)), is(expected));
     }
 
-    @Test(expected = BabelArtifactParsingException.class)
+    @Test
     public void circularDependency() throws BabelArtifactParsingException {
-        List<Artifact> modelList = new ArrayList<Artifact>();
-        modelList.add(buildTestModel("aaaa", "1111", "bbbb|1111"));
-        modelList.add(buildTestModel("bbbb", "1111", "aaaa|1111"));
-        new ModelSorter().sort(modelList);
+        assertThrows(BabelArtifactParsingException.class, () -> {
+            List<Artifact> modelList = new ArrayList<Artifact>();
+            modelList.add(buildTestModel("aaaa", "1111", "bbbb|1111"));
+            modelList.add(buildTestModel("bbbb", "1111", "aaaa|1111"));
+            new ModelSorter().sort(modelList);
+        });
     }
 
     private ModelArtifact buildTestModel() {

@@ -23,19 +23,22 @@ package org.onap.aai.modelloader.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.gizmo.GizmoBulkPayload;
 
 public class TestGizmoTranslator {
 
-    @Test(expected = IOException.class)
+    @Test
     public void translateInvalidXml() throws IOException {
-        GizmoTranslator.translate("not valid XML");
+        assertThrows(IOException.class, () -> {
+            GizmoTranslator.translate("not valid XML");
+        });
     }
 
     @Test

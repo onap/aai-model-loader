@@ -20,8 +20,8 @@
  */
 package org.onap.aai.modelloader.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import org.eclipse.jetty.util.security.Password;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.sdc.utils.ArtifactTypeEnum;
 
@@ -157,13 +157,13 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config = new ModelLoaderConfig(props, null);
         AaiRestClient aaiClient = new AaiRestClient(config);
 
-        assertFalse("Empty AAI Password should result in no basic authentication", aaiClient.useBasicAuth());
+        assertFalse(aaiClient.useBasicAuth(), "Empty AAI Password should result in no basic authentication");
 
         props.load(new FileInputStream("src/test/resources/model-loader-no-auth-password.properties"));
         config = new ModelLoaderConfig(props, null);
         aaiClient = new AaiRestClient(config);
 
-        assertFalse("No AAI Password should result in no basic authentication", aaiClient.useBasicAuth());
+        assertFalse(aaiClient.useBasicAuth(), "No AAI Password should result in no basic authentication");
     }
 
     @Test

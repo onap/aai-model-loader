@@ -23,7 +23,7 @@ package org.onap.aai.modelloader.entity.model;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,8 +34,8 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -55,7 +55,7 @@ public class TestModelArtifactHandler {
     @Mock
     private AaiRestClient aaiClient;
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
     }

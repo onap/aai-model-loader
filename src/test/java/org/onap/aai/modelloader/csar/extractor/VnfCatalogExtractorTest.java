@@ -22,8 +22,8 @@ package org.onap.aai.modelloader.csar.extractor;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
@@ -86,8 +86,8 @@ public class VnfCatalogExtractorTest {
         List<Artifact> vnfcArtifacts = new VnfCatalogExtractor().extract(
                 new ArtifactTestUtils().loadResource("compressedArtifacts/noVnfcFilesArchive.csar"),
                 "noVnfcFilesArchive.csar");
-        assertTrue("No VNFC files should have been extracted, but " + vnfcArtifacts.size() + " were found.",
-                vnfcArtifacts.isEmpty());
+        assertTrue(vnfcArtifacts.isEmpty(),
+                "No VNFC files should have been extracted, but " + vnfcArtifacts.size() + " were found.");
     }
 
     @Test

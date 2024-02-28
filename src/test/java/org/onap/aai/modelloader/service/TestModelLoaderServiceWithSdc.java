@@ -28,20 +28,17 @@ import java.util.Base64;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Tests for the ModelLoaderService class.
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ModelLoaderService.class, HttpsBabelServiceClientFactory.class})
 @TestPropertySource(properties = {"CONFIG_HOME=src/test/resources",})
 public class TestModelLoaderServiceWithSdc {
@@ -49,7 +46,7 @@ public class TestModelLoaderServiceWithSdc {
     @Autowired
     private ModelLoaderService service;
 
-    @After
+    @AfterEach
     public void shutdown() {
         service.preShutdownOperations();
     }

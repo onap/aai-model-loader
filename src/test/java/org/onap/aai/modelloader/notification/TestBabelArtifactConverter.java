@@ -20,14 +20,16 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
@@ -42,30 +44,34 @@ import org.onap.sdc.api.notification.INotificationData;
  */
 public class TestBabelArtifactConverter {
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void convert_nullToscaFiles() throws BabelArtifactParsingException {
-        new BabelArtifactConverter().convertToModel(null);
-        fail("An instance of ArtifactGenerationException should have been thrown");
+        assertThrows(NullPointerException.class, () -> {
+            new BabelArtifactConverter().convertToModel(null);
+            fail("An instance of ArtifactGenerationException should have been thrown");
+        });
     }
 
     @Test
     public void testEmptyToscaFiles() throws BabelArtifactParsingException {
-        assertTrue("Nothing should have been returned",
-                new BabelArtifactConverter().convertToModel(new ArrayList<>()).isEmpty());
+        assertTrue(new BabelArtifactConverter().convertToModel(new ArrayList<>()).isEmpty(),
+                "Nothing should have been returned");
     }
 
-    @Test(expected = BabelArtifactParsingException.class)
+    @Test
     public void testInvalidXml() throws IOException, BabelArtifactParsingException {
-        byte[] problemXml =
-                "<model xmlns=\"http://org.openecomp.aai.inventory/v10\"><rubbish>This is some xml that should cause the model artifact parser to throw an erorr</rubbish></model>"
-                        .getBytes();
+        assertThrows(BabelArtifactParsingException.class, () -> {
+            byte[] problemXml =
+                    "<model xmlns=\"http://org.openecomp.aai.inventory/v10\"><rubbish>This is some xml that should cause the model artifact parser to throw an erorr</rubbish></model>"
+                            .getBytes();
 
-        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
+            INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        List<BabelArtifact> toscaArtifacts = setupTest(problemXml, data);
+            List<BabelArtifact> toscaArtifacts = setupTest(problemXml, data);
 
-        new BabelArtifactConverter().convertToModel(toscaArtifacts);
-        fail("An instance of ModelArtifactParsingException should have been thrown");
+            new BabelArtifactConverter().convertToModel(toscaArtifacts);
+            fail("An instance of ModelArtifactParsingException should have been thrown");
+        });
     }
 
     private List<BabelArtifact> setupTest(byte[] xml, INotificationData data) throws IOException {
@@ -88,7 +94,7 @@ public class TestBabelArtifactConverter {
 
         List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
 
-        assertEquals("There should have been 1 artifact", 1, modelArtifacts.size());
+        assertEquals(1, modelArtifacts.size(), "There should have been 1 artifact");
         assertEquals(new String(xml), modelArtifacts.get(0).getPayload());
         assertEquals(ArtifactType.MODEL, modelArtifacts.get(0).getType());
     }

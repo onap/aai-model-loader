@@ -22,7 +22,7 @@ package org.onap.aai.modelloader.notification;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -71,7 +71,7 @@ public class ArtifactDownloadManagerVnfcTest {
     private BabelServiceClientFactory mockClientFactory;
     private VnfCatalogExtractor mockVnfCatalogExtractor;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         mockBabelClient = mock(BabelServiceClient.class);
         mockDistributionClient = mock(IDistributionClient.class);
@@ -107,7 +107,7 @@ public class ArtifactDownloadManagerVnfcTest {
         assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
                 is(true));
 
-        assertEquals("There should have been some catalog files", 2, catalogFiles.size());
+        assertEquals(2, catalogFiles.size(), "There should have been some catalog files");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ArtifactDownloadManagerVnfcTest {
         assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
                 is(true));
 
-        assertEquals("There should have been some catalog files", 3, catalogFiles.size());
+        assertEquals(3, catalogFiles.size(), "There should have been some catalog files");
     }
 
     @Test
@@ -143,7 +143,7 @@ public class ArtifactDownloadManagerVnfcTest {
         assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
                 is(true));
 
-        assertEquals("There should not have been any catalog files", 0, catalogFiles.size());
+        assertEquals(0, catalogFiles.size(), "There should not have been any catalog files");
     }
 
     @Test

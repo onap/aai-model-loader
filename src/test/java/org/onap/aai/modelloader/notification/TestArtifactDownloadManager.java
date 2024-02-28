@@ -41,9 +41,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -74,7 +74,7 @@ public class TestArtifactDownloadManager {
     private BabelArtifactConverter mockBabelArtifactConverter;
     private BabelServiceClientFactory mockClientFactory;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         mockBabelClient = mock(BabelServiceClient.class);
         mockDistributionClient = mock(IDistributionClient.class);
@@ -92,7 +92,7 @@ public class TestArtifactDownloadManager {
         ReflectionTestUtils.setField(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         downloadManager = null;
         mockDistributionClient = null;

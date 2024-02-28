@@ -20,13 +20,13 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.sdc.api.IDistributionClient;
@@ -61,7 +61,7 @@ public class TestNotificationPublisher {
         System.setProperty("CONFIG_HOME", "src/test/resources");
     }
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
         when(client.getConfiguration()).thenReturn(config);

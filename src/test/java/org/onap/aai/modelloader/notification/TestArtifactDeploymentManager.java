@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -66,7 +66,7 @@ public class TestArtifactDeploymentManager {
     private ModelArtifactHandler mockModelArtifactHandler;
     private VnfCatalogArtifactHandler mockVnfCatalogArtifactHandler;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
@@ -80,7 +80,7 @@ public class TestArtifactDeploymentManager {
         ReflectionTestUtils.setField(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         configProperties = null;
         mockModelArtifactHandler = null;

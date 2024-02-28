@@ -30,7 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.springframework.util.CollectionUtils;
 
