@@ -85,7 +85,7 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     protected boolean pushToGizmo(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
         try {
             String gizmoPayload = GizmoTranslator.translate(getPayload());
-            OperationResult postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
+            OperationResult postResponse = aaiClient.postResource(config.getAaiProperties().getBaseUrl().trim(), gizmoPayload, distId,
                     MediaType.APPLICATION_JSON_TYPE);
 
             if (postResponse.getResultCode() != HttpStatus.OK.value()) {

@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 
@@ -57,6 +58,8 @@ import com.google.gson.Gson;
  *
  */
 public class TestBabelServiceClient {
+
+    @Autowired private ModelLoaderConfig config;
 
     private Server server;
     private String responseBody;
@@ -90,7 +93,7 @@ public class TestBabelServiceClient {
         configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
         BabelServiceClient client =
-                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
+                new HttpsBabelServiceClientFactory().create(config);
         List<BabelArtifact> result =
                 client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
                         "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
@@ -99,12 +102,9 @@ public class TestBabelServiceClient {
 
     @Test
     public void testRestClientHttp() throws BabelServiceClientException, IOException, URISyntaxException {
-        Properties configProperties = new Properties();
-        configProperties.put("ml.babel.USE_HTTPS", "false");
-        configProperties.put("ml.babel.BASE_URL", "http://localhost:8080/");
-        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        // I'd like to override these properties via some test annotation such that modelLoaderConfig contains these test specific settings
         BabelServiceClient client =
-                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
+                new HttpsBabelServiceClientFactory().create(config);
         List<BabelArtifact> result =
                 client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
                         "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");

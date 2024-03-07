@@ -99,12 +99,12 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
 
         logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel Service client");
         //Initialize SSL Context only if SSL is enabled
-        if (config.useHttpsWithBabel()) {
+        if (config.getBabelProperties().isUseHttps()) {
             SSLContext ctx = SSLContext.getInstance(SSL_PROTOCOL);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KEYSTORE_ALGORITHM);
             KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 
-            String clientCertPassword = config.getBabelKeyStorePassword();
+            String clientCertPassword = config.getBabelProperties().getKeystorePassword();
 
             char[] pwd = null;
             if (clientCertPassword != null) {
@@ -113,7 +113,7 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
 
             TrustManager[] trustManagers = getTrustManagers();
 
-            String clientCertFileName = config.getBabelKeyStorePath();
+            String clientCertFileName = config.getBabelProperties().getKeystoreFile();
             if (clientCertFileName == null) {
                 ctx.init(null, trustManagers, null);
             } else {
@@ -141,13 +141,13 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         tmf.init((KeyStore) null);
 
         // Create a new Trust Manager from the local trust store.
-        String trustStoreFile = config.getBabelTrustStorePath();
+        String trustStoreFile = config.getBabelProperties().getTruststoreFile();
         if (trustStoreFile == null) {
             throw new BabelServiceClientException("No Babel trust store defined");
         }
         try (InputStream myKeys = Files.newInputStream(Paths.get(trustStoreFile))) {
             KeyStore myTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            myTrustStore.load(myKeys, config.getBabelTrustStorePassword().toCharArray());
+            myTrustStore.load(myKeys, config.getBabelProperties().getTruststorePassword().toCharArray());
             tmf.init(myTrustStore);
         }
         X509TrustManager localTm = findX509TrustManager(tmf);
@@ -224,8 +224,7 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         MdcOverride override = new MdcOverride();
         override.addAttribute(MdcContext.MDC_START_TIME, ZonedDateTime.now().format(formatter));
 
-        String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
-        WebResource webResource = client.resource(resourceUrl);
+        WebResource webResource = client.resource(config.getBabelProperties().getBaseUrl() + config.getBabelProperties().getGenerateResourceUrl());
         ClientResponse response = webResource.type("application/json")
                 .header(AaiRestClient.HEADER_TRANS_ID, Collections.singletonList(transactionId))
                 .header(AaiRestClient.HEADER_FROM_APP_ID, Collections.singletonList(AaiRestClient.ML_APP_NAME))

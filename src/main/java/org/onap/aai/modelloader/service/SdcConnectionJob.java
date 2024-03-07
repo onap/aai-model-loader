@@ -47,8 +47,8 @@ public class SdcConnectionJob extends TimerTask {
 
     @Override
     public void run() {
-        if (!config.getASDCConnectionDisabled()) {
-            final IDistributionClientResult initResult = client.init(config, callback);
+        if (!config.getDistributionProperties().isAsdcConnectionDisabled()) {
+            final IDistributionClientResult initResult = client.init(config.getDistributionProperties(), callback);
             if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
                 startClient();
             } else {

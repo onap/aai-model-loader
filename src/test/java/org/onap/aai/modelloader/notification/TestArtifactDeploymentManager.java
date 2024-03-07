@@ -31,7 +31,6 @@ import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.ge
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,17 +50,18 @@ import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.INotificationData;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Tests {@link ArtifactDeploymentManager}.
  */
 public class TestArtifactDeploymentManager {
 
-    private static final String CONFIG_FILE = "model-loader.properties";
     private static final String SHOULD_HAVE_RETURNED_FALSE = "This should have returned false";
 
-    private Properties configProperties;
     private ArtifactDeploymentManager manager;
+
+    @Autowired private ModelLoaderConfig modelLoaderConfig;
 
     @Mock private ModelArtifactHandler modelArtifactHandlerMock;
     @Mock private VnfCatalogArtifactHandler vnfCatalogArtifactHandlerMock;
@@ -69,16 +69,12 @@ public class TestArtifactDeploymentManager {
     @BeforeEach
     public void setup() throws IOException {
         MockitoAnnotations.openMocks(this);
-        configProperties = new Properties();
-        configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-
-        ModelLoaderConfig modelLoaderConfig = new ModelLoaderConfig(configProperties, null);
+        
         manager = new ArtifactDeploymentManager(modelLoaderConfig, modelArtifactHandlerMock, vnfCatalogArtifactHandlerMock);
     }
 
     @AfterEach
     public void tearDown() {
-        configProperties = null;
         modelArtifactHandlerMock = null;
         vnfCatalogArtifactHandlerMock = null;
         manager = null;

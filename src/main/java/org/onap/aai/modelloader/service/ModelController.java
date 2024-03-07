@@ -62,13 +62,15 @@ public class ModelController implements ModelLoaderInterface {
     private final EventCallback eventCallback;
     private final ArtifactDeploymentManager artifactDeploymentManager;
     private final ArtifactDownloadManager artifactDownloadManager;
+    private final NotificationPublisher notificationPublisher;
 
-    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager) {
+    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher) {
         this.client = client;
         this.config = config;
         this.eventCallback = eventCallback;
         this.artifactDeploymentManager = artifactDeploymentManager;
         this.artifactDownloadManager = artifactDownloadManager;
+        this.notificationPublisher = notificationPublisher;
     }
 
     /**
@@ -87,7 +89,7 @@ public class ModelController implements ModelLoaderInterface {
     protected void initSdcClient() {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
-        IDistributionClientResult initResult = client.init(config, eventCallback);
+        IDistributionClientResult initResult = client.init(config.getDistributionProperties(), eventCallback);
 
         if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
             // Start distribution client
@@ -142,7 +144,7 @@ public class ModelController implements ModelLoaderInterface {
             @RequestBody String payload) throws IOException {
         Response response;
 
-        if (config.getIngestSimulatorEnabled()) {
+        if (config.getDebugProperties().isIngestSimulatorEnabled()) {
             response = processTestArtifact(modelName, modelVersion, payload);
         } else {
             logger.debug("Simulation interface disabled");
@@ -183,9 +185,9 @@ public class ModelController implements ModelLoaderInterface {
         } catch (Exception e) {
             String responseMessage = e.getMessage();
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Exception handled: " + responseMessage);
-            if (config.getASDCConnectionDisabled()) {
+            if (config.getDistributionProperties().isAsdcConnectionDisabled()) {
                 // Make sure the NotificationPublisher logger is invoked as per the standard processing flow.
-                new NotificationPublisher().publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
+                notificationPublisher.publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
             } else {
                 responseMessage += "\nSDC publishing is enabled but has been bypassed";
             }

@@ -39,22 +39,26 @@ import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
 import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+@SpringBootTest
 public class TestAaiRestClient {
+
+    @Autowired ModelLoaderConfig config;
 
     private static final String MODEL_FILE = "src/test/resources/models/l3-network-widget.xml";
 
     // This test requires a running A&AI system. To test locally, annotate with org.junit.Test
     public void testRestClient() throws Exception {
+        // TODO: Accomodate these properties in the spring application.properties for this test
         Properties props = new Properties();
         props.setProperty("ml.distribution.ARTIFACT_TYPES", "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
         props.setProperty("ml.aai.BASE_URL", "https://localhost:8443");
         props.setProperty("ml.aai.MODEL_URL", "/aai/v9/service-design-and-creation/models/model/");
-
-        ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
 
         File xmlFile = new File(MODEL_FILE);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -121,12 +125,12 @@ public class TestAaiRestClient {
     private String getUrl(ModelArtifact model, ModelLoaderConfig config) {
         String subUrl;
         if (model.getType().equals(ArtifactType.MODEL)) {
-            subUrl = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = config.getAaiProperties().getModelResourceUrl(model.getModelNamespaceVersion()).trim();
         } else {
-            subUrl = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = config.getAaiProperties().getNamedQueryUrl(model.getModelNamespaceVersion()).trim();
         }
 
-        String baseUrl = config.getAaiBaseUrl().trim();
+        String baseUrl = config.getAaiProperties().getBaseUrl().trim();
         if (!baseUrl.endsWith("/") && !subUrl.startsWith("/")) {
             baseUrl = baseUrl + "/";
         }

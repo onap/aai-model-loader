@@ -27,7 +27,6 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithInvalidType;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithModelQuerySpec;
@@ -62,12 +61,16 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Tests {@link ArtifactDownloadManager}.
  */
+@SpringBootTest
 public class TestArtifactDownloadManager {
 
+    @Autowired private ModelLoaderConfig config;
     private ArtifactDownloadManager downloadManager;
     @Mock private BabelServiceClient mockBabelClient;
     @Mock private IDistributionClient mockDistributionClient;
@@ -85,7 +88,7 @@ public class TestArtifactDownloadManager {
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
         downloadManager = new ArtifactDownloadManager(mockDistributionClient,
-                new ModelLoaderConfig(configProperties, "."), mockClientFactory, mockBabelArtifactConverter, mockNotificationPublisher, vnfCatalogExtractor);
+                config, mockClientFactory, mockBabelArtifactConverter, mockNotificationPublisher, vnfCatalogExtractor);
     }
 
     @AfterEach

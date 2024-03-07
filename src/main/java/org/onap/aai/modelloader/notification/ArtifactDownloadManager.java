@@ -216,7 +216,7 @@ public class ArtifactDownloadManager {
             throw new ProcessToscaArtifactsException(
                     "An error occurred while trying to parse the Babel artifacts: " + e.getLocalizedMessage());
         } catch (Exception e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
+            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelProperties().getBaseUrl(),
                     "Error posting artifact " + artifactInfo.getArtifactName() + " " + serviceVersion + " to Babel: "
                             + e.getLocalizedMessage());
             throw new ProcessToscaArtifactsException(
@@ -231,7 +231,7 @@ public class ArtifactDownloadManager {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel client");
             babelClient = clientFactory.create(config);
         } catch (BabelServiceClientException e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
+            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelProperties().getBaseUrl(),
                     "Error posting artifact " + artifact.getArtifactName() + " " + serviceVersion + " to Babel: "
                             + e.getLocalizedMessage());
             throw new ProcessToscaArtifactsException(

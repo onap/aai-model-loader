@@ -35,12 +35,17 @@ import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Test the Notification Publisher using Mocks
  *
  */
+@SpringBootTest
 public class TestNotificationPublisher {
+
+    @Autowired NotificationPublisher publisher;
 
     @Mock
     private IDistributionClient client;
@@ -74,7 +79,6 @@ public class TestNotificationPublisher {
 
     @Test
     public void testPublisher() {
-        NotificationPublisher publisher = new NotificationPublisher();
         publisher.publishDownloadSuccess(client, data, artifact);
         publisher.publishDownloadFailure(client, data, artifact, "");
         publisher.publishComponentSuccess(client, data);

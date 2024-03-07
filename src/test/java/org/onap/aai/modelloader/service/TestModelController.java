@@ -23,7 +23,6 @@ package org.onap.aai.modelloader.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -76,7 +75,7 @@ public class TestModelController {
         when(clientFactory.create(any())).thenReturn(babelServiceClient);
         when(babelServiceClient.postArtifact(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, modelLoaderConfig, clientFactory, babelArtifactConverter, notificationPublisher, vnfCatalogExtractor);
-        this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, eventCallback, artifactDeploymentManager, artifactDownloadManager);
+        this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, eventCallback, artifactDeploymentManager, artifactDownloadManager, notificationPublisher);
     }
 
     @AfterEach

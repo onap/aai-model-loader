@@ -41,15 +41,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Local testing of the A&AI Service client.
  *
  */
+@SpringBootTest
 public class TestAaiServiceClient {
 
     private Server server;
     private AaiRestClient aaiClient;
+    @Autowired private ModelLoaderConfig config;
 
     @BeforeEach
     public void startJetty() throws Exception {
@@ -59,7 +63,6 @@ public class TestAaiServiceClient {
 
         Properties props = new Properties();
         props.put("ml.aai.KEYSTORE_PASSWORD", "2244");
-        ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
         aaiClient = new AaiRestClient(config);
     }
 
@@ -70,8 +73,6 @@ public class TestAaiServiceClient {
 
     @Test
     public void testBuildAaiRestClient() {
-        Properties props = new Properties();
-        ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
         new AaiRestClient(config);
         assertTrue(true);
     }

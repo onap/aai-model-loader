@@ -19,15 +19,6 @@
  */
 package org.onap.aai.modelloader.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Properties;
-
-import org.onap.aai.cl.api.Logger;
-import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.impl.DistributionClientFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,22 +28,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-    private static final Logger logger = LoggerFactory.getInstance().getLogger(BeanConfig.class);
-
-
     @Value("${CONFIG_HOME}")
     private String configDir;
-
-    @Bean
-    public ModelLoaderConfig modelLoaderConfig() throws IOException {
-        // Load model loader system configuration
-        logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
-        ModelLoaderConfig.setConfigHome(configDir);
-        Properties configProperties = new Properties();
-        InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"));
-        configProperties.load(configInputStream);
-        return new ModelLoaderConfig(configProperties);
-    }
     
     @Bean
     public IDistributionClient iDistributionClient() {
