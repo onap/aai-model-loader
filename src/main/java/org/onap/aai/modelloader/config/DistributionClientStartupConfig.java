@@ -58,7 +58,7 @@ public class DistributionClientStartupConfig {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
         IDistributionClientResult initResult = null;
-        initResult = client.init(config, eventCallback);
+        initResult = client.init(config.getDistributionProperties(), eventCallback);
 
         if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
             // Start distribution client

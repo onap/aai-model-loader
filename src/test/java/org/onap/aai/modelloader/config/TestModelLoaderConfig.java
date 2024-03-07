@@ -28,20 +28,24 @@ import java.util.Properties;
 import org.eclipse.jetty.util.security.Password;
 import org.junit.jupiter.api.Test;
 import org.onap.sdc.utils.ArtifactTypeEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Tests for ModelLoaderConfig class.
  *
  */
+@SpringBootTest
+@TestPropertySource(
+    properties = "model-loader.distribution.artifact-types=MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG")
 public class TestModelLoaderConfig {
+
+    @Autowired ModelLoaderConfig config;
 
     @Test
     public void testYangModelArtifactType() {
-        Properties props = new Properties();
-        props.setProperty("ml.distribution.ARTIFACT_TYPES", "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-
-        List<String> types = config.getRelevantArtifactTypes();
+        List<String> types = config.getDistributionProperties().getArtifactTypes();
 
         System.out.println("ArtifactType: " + types.get(0));
         assertEquals(0, types.get(0).compareToIgnoreCase(ArtifactTypeEnum.MODEL_INVENTORY_PROFILE.toString()));
@@ -82,20 +86,20 @@ public class TestModelLoaderConfig {
         String password = "myvoiceismypassword";
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
-        assertEquals(password, config.getAaiAuthenticationPassword());
+        assertEquals(password, config.getAaiProperties().getAuthenticationPassword());
         
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
-        assertEquals(password, config.getAaiAuthenticationPassword());
+        assertEquals(password, config.getAaiProperties().getAuthenticationPassword());
     }
 
     @Test
     public void testDecryptAaiKeystorePassword() {
         String password = "myvoiceismypassword";
         ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getAaiKeyStorePassword());
+        assertEquals(password, config.getAaiProperties().getKeyStorePassword());
         
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getAaiKeyStorePassword());
+        assertEquals(password, config.getAaiProperties().getKeyStorePassword());
     }
 
     @Test
@@ -104,7 +108,7 @@ public class TestModelLoaderConfig {
         Properties props = new Properties();
         props.put(ModelLoaderConfig.PROP_AAI_BASE_URL, url);
         ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getAaiBaseUrl());
+        assertEquals(url, config.getAaiProperties().getBaseUrl());
     }
 
     @Test
@@ -153,9 +157,9 @@ public class TestModelLoaderConfig {
                 "/aai/v*/service-design-and-creation/named-queries/named-query/");
         ModelLoaderConfig config = new ModelLoaderConfig(props, null);
 
-        assertEquals("/aai/v9/service-design-and-creation/models/model/", config.getAaiModelUrl("v9"));
+        assertEquals("/aai/v9/service-design-and-creation/models/model/", config.getAaiProperties().getModelUrl("v9"));
         assertEquals("/aai/v10/service-design-and-creation/named-queries/named-query/",
-                config.getAaiNamedQueryUrl("v10"));
+                config.getAaiProperties().getNamedQueryUrl("v10"));
     }
 
 

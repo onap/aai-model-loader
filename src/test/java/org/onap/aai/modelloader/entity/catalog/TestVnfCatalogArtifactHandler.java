@@ -24,7 +24,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -43,12 +41,16 @@ import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+@SpringBootTest
 public class TestVnfCatalogArtifactHandler {
 
+    @Autowired private ModelLoaderConfig config;
     protected static String CONFIG_FILE = "model-loader.properties";
 
     private AaiRestClient mockRestClient = mock(AaiRestClient.class);
@@ -76,7 +78,7 @@ public class TestVnfCatalogArtifactHandler {
         mockPutOperations();
 
         // Example VNF Catalog XML
-        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(config);
         assertTrue(handler.pushArtifacts(createVnfCatalogArtifact(), "test", new ArrayList<Artifact>(), mockRestClient));
 
         assertPutOperationsSucceeded();
@@ -100,7 +102,7 @@ public class TestVnfCatalogArtifactHandler {
         mockPutOperations();
 
         // Example VNF Catalog XML
-        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(config);
         assertThat(
                 handler.pushArtifacts(createVnfCatalogXmlArtifact(), "test", new ArrayList<Artifact>(), mockRestClient),
                 is(true));
@@ -114,17 +116,6 @@ public class TestVnfCatalogArtifactHandler {
         assertThat(argument.getAllValues().get(0), containsString("VM00"));
         assertThat(argument.getAllValues().get(1), containsString("5.2.4"));
         assertThat(argument.getAllValues().get(1), containsString("VM00"));
-    }
-
-    private ModelLoaderConfig createConfig() {
-        Properties configProperties = new Properties();
-        try {
-            configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        } catch (IOException e) {
-            fail();
-        }
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
-        return config;
     }
 
     /**

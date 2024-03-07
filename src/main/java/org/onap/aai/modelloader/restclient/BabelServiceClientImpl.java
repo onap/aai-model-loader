@@ -62,7 +62,7 @@ public class BabelServiceClientImpl implements BabelServiceClient {
                     + " Artifact version: " + babelRequest.getArtifactVersion() + " Artifact payload: " + babelRequest.getCsar());
         }
 
-        String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
+        String resourceUrl = config.getBabelProperties().getBaseUrl() + config.getBabelProperties().getGenerateResourceUrl();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

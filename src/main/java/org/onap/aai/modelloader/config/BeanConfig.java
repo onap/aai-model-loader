@@ -40,7 +40,6 @@ public class BeanConfig {
 
     private static final Logger logger = LoggerFactory.getInstance().getLogger(BeanConfig.class);
 
-
     @Value("${CONFIG_HOME}")
     private String configDir;
 
@@ -52,12 +51,6 @@ public class BeanConfig {
         Properties configProperties = new Properties();
         configProperties.load(configInputStream);
         return configProperties;
-    }
-
-    @Bean
-    public ModelLoaderConfig modelLoaderConfig(Properties configProperties) {
-        ModelLoaderConfig.setConfigHome(configDir);
-        return new ModelLoaderConfig(configProperties);
     }
     
     @Bean

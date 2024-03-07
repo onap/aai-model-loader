@@ -101,7 +101,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
         for (Artifact completedArtifact : completedArtifacts) {
             Map<String, String> data = new Gson().fromJson(completedArtifact.getPayload(),
                     new TypeToken<Map<String, String>>() {}.getType());
-            String url = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + data.get(ATTR_UUID);
+            String url = config.getAaiProperties().getBaseUrl() + config.getAaiProperties().getVnfImageUrl() + "/vnf-image/" + data.get(ATTR_UUID);
             // Try to delete the image. If something goes wrong we can't really do anything here
             aaiClient.getAndDeleteResource(url, distributionId);
         }
@@ -169,7 +169,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
     private int getVnfImage(AaiRestClient restClient, String distributionId, String imageId,
             Map<String, String> dataItem) throws VnfImageException {
         try {
-            URIBuilder b = new URIBuilder(config.getAaiBaseUrl() + config.getAaiVnfImageUrl());
+            URIBuilder b = new URIBuilder(config.getAaiProperties().getBaseUrl() + config.getAaiProperties().getVnfImageUrl());
             for (Entry<String, String> entry : dataItem.entrySet()) {
                 b.addParameter(entry.getKey(), entry.getValue());
             }
@@ -191,7 +191,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
 
         // TODO: Get rid of the dataItem map and replace it with the VnfImage object
         String payload = new Gson().toJson(dataItem);
-        String putUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + uuid;
+        String putUrl = config.getAaiProperties().getBaseUrl() + config.getAaiProperties().getVnfImageUrl() + "/vnf-image/" + uuid;
         ResponseEntity<String> putResp =
                 restClient.putResource(putUrl, payload, distributionId, MediaType.APPLICATION_JSON, String.class);
         return putResp != null && putResp.getStatusCode() == HttpStatus.CREATED;

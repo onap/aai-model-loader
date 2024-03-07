@@ -86,7 +86,7 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
         try {
             String gizmoPayload = GizmoTranslator.translate(getPayload());
             // TODO: Use correct responseType here
-            ResponseEntity<String> postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
+            ResponseEntity<String> postResponse = aaiClient.postResource(config.getAaiProperties().getBaseUrl().trim(), gizmoPayload, distId,
                     MediaType.APPLICATION_JSON, String.class);
 
             if (postResponse.getStatusCode() != HttpStatus.OK) {

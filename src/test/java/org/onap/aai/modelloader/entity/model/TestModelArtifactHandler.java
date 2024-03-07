@@ -68,8 +68,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushExistingModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
 
         ResponseEntity operationResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);
@@ -87,9 +87,9 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getNamedQueryUrl(any())).thenReturn("");
 
         ResponseEntity getResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
@@ -115,9 +115,9 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsBadRequest() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getNamedQueryUrl(any())).thenReturn("");
 
         ResponseEntity getResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
@@ -132,8 +132,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testBadRequestResourceModelResult() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
 
         ResponseEntity operationResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);

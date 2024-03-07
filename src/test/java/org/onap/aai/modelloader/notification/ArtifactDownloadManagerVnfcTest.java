@@ -58,12 +58,14 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Tests {@link ArtifactDownloadManager} with VNF Catalog Artifacts.
  */
 public class ArtifactDownloadManagerVnfcTest {
 
+    @Autowired private ModelLoaderConfig config;
     @Mock private ArtifactDownloadManager downloadManager;
     @Mock private BabelServiceClient mockBabelClient;
     @Mock private IDistributionClient mockDistributionClient;

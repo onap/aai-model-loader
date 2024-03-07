@@ -135,7 +135,7 @@ public class AaiRestClient {
 
 
     private boolean useBasicAuth() {
-        return config.getAaiAuthenticationUser() != null && config.getAaiAuthenticationPassword() != null;
+        return config.getAaiProperties().getAuthenticationUser() != null && config.getAaiProperties().getAuthenticationPassword() != null;
     }
 
     /**
@@ -149,7 +149,7 @@ public class AaiRestClient {
         headers.set(AaiRestClient.HEADER_TRANS_ID, transId);
         headers.set(AaiRestClient.HEADER_FROM_APP_ID, AaiRestClient.ML_APP_NAME);
         if (useBasicAuth()) {
-            headers.setBasicAuth(config.getAaiAuthenticationUser(), config.getAaiAuthenticationPassword());
+            headers.setBasicAuth(config.getAaiProperties().getAuthenticationUser(), config.getAaiProperties().getAuthenticationPassword());
         }
         return headers;
     }
