@@ -62,10 +62,11 @@
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
 		<apache.commons-text.version>1.10.0</apache.commons-text.version>
 		<commons-compress.version>1.22</commons-compress.version>
+		<gson.version>2.10.1</gson.version>
 		<hamcrest-all.version>1.3</hamcrest-all.version>
 		<babel.version>1.9.5</babel.version>
 		<aai.rest.client.version>1.2.1</aai.rest.client.version>
-		<sdc-distribution-client.version>2.0.0</sdc-distribution-client.version>
+		<sdc-distribution-client.version>2.1.1</sdc-distribution-client.version>
 		<logback.version>1.2.11</logback.version>
 		<!-- docker related properties -->
 		<docker.fabric.version>0.39.0</docker.fabric.version>
@@ -268,6 +269,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -275,7 +277,7 @@
 		<dependency>
 			<groupId>com.mikesamuel</groupId>
 			<artifactId>json-sanitizer</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.3</version>
 		</dependency>
 
 		<!-- Common logging framework -->
