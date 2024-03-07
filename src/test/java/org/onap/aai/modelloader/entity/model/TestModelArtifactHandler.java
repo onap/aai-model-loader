@@ -70,8 +70,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testSingleItemList() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
 
         ModelArtifactHandler handler = new ModelArtifactHandler(config);
         List<Artifact> artifacts = Collections.singletonList(new ModelArtifact());
@@ -82,8 +82,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushExistingModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
 
         OperationResult operationResult = mock(OperationResult.class);
         when(aaiClient.getResource(any(), any(), any())).thenReturn(operationResult);
@@ -101,9 +101,9 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getNamedQueryUrl(any())).thenReturn("");
 
         OperationResult getResult = mock(OperationResult.class);
         when(aaiClient.getResource(any(), any(), any())).thenReturn(getResult);
@@ -129,9 +129,9 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsBadRequest() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getNamedQueryUrl(any())).thenReturn("");
 
         OperationResult getResult = mock(OperationResult.class);
         when(aaiClient.getResource(any(), any(), any())).thenReturn(getResult);
@@ -146,8 +146,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testBadRequestResourceModelResult() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
 
         OperationResult operationResult = mock(OperationResult.class);
         when(aaiClient.getResource(any(), any(), any())).thenReturn(operationResult);
@@ -158,8 +158,8 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testNullResourceModelResult() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
+        when(config.getAaiProperties().getBaseUrl()).thenReturn("");
+        when(config.getAaiProperties().getModelUrl(any())).thenReturn("");
         when(aaiClient.getResource(any(), any(), any())).thenReturn(null);
 
         checkRollback(Collections.singletonList(new ModelArtifact()));

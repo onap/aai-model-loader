@@ -49,6 +49,7 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.utils.ArtifactTypeEnum;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is responsible for downloading the artifacts from the ASDC.
@@ -60,22 +61,24 @@ import org.onap.sdc.utils.DistributionActionResultEnum;
  *
  * TOSCA_CSAR file artifacts will be converted into XML and returned as model artifacts.
  */
+@Component
 public class ArtifactDownloadManager {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(ArtifactDownloadManager.class);
 
     private IDistributionClient client;
-    private NotificationPublisher notificationPublisher;
+    private final NotificationPublisher notificationPublisher;
     private BabelArtifactConverter babelArtifactConverter;
     private ModelLoaderConfig config;
     private BabelServiceClientFactory clientFactory;
     private VnfCatalogExtractor vnfCatalogExtractor;
 
     public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config,
-            BabelServiceClientFactory clientFactory) {
+            BabelServiceClientFactory clientFactory, NotificationPublisher notificationPublisher) {
         this.client = client;
         this.config = config;
         this.clientFactory = clientFactory;
+        this.notificationPublisher = notificationPublisher;
     }
 
     /**
@@ -96,10 +99,10 @@ public class ArtifactDownloadManager {
                 IDistributionClientDownloadResult downloadResult = downloadIndividualArtifacts(data, artifact);
                 processDownloadedArtifacts(modelArtifacts, catalogArtifacts, artifact, downloadResult, data);
             } catch (DownloadFailureException e) {
-                getNotificationPublisher().publishDownloadFailure(client, data, artifact, e.getMessage());
+                notificationPublisher.publishDownloadFailure(client, data, artifact, e.getMessage());
                 success = false;
             } catch (Exception e) {
-                getNotificationPublisher().publishDeployFailure(client, data, artifact);
+                notificationPublisher.publishDeployFailure(client, data, artifact);
                 success = false;
             }
 
@@ -126,7 +129,7 @@ public class ArtifactDownloadManager {
 
         if (DistributionActionResultEnum.SUCCESS.equals(downloadResult.getDistributionActionResult())) {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Downloaded artifact: " + artifact.getArtifactName());
-            getNotificationPublisher().publishDownloadSuccess(client, data, artifact);
+            notificationPublisher.publishDownloadSuccess(client, data, artifact);
         } else {
             throw new DownloadFailureException(downloadResult.getDistributionMessageResult());
         }
@@ -211,7 +214,7 @@ public class ArtifactDownloadManager {
             throw new ProcessToscaArtifactsException(
                     "An error occurred while trying to parse the Babel artifacts: " + e.getLocalizedMessage());
         } catch (Exception e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
+            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelProperties().getBaseUrl(),
                     "Error posting artifact " + artifactInfo.getArtifactName() + " " + serviceVersion + " to Babel: "
                             + e.getLocalizedMessage());
             throw new ProcessToscaArtifactsException(
@@ -226,7 +229,7 @@ public class ArtifactDownloadManager {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel client");
             babelClient = clientFactory.create(config);
         } catch (BabelServiceClientException e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
+            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelProperties().getBaseUrl(),
                     "Error posting artifact " + artifact.getArtifactName() + " " + serviceVersion + " to Babel: "
                             + e.getLocalizedMessage());
             throw new ProcessToscaArtifactsException(
@@ -256,14 +259,6 @@ public class ArtifactDownloadManager {
 
     private boolean parsedArtifactsExist(List<Artifact> parsedArtifacts) {
         return parsedArtifacts != null && !parsedArtifacts.isEmpty();
-    }
-
-    private NotificationPublisher getNotificationPublisher() {
-        if (notificationPublisher == null) {
-            notificationPublisher = new NotificationPublisher();
-        }
-
-        return notificationPublisher;
     }
 
     private BabelArtifactConverter getBabelArtifactConverter() {

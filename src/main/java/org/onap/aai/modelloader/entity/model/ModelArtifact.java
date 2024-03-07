@@ -129,7 +129,7 @@ public class ModelArtifact extends AbstractModelArtifact {
     @Override
     public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
-        if (config.useGizmo()) {
+        if (config.getAaiProperties().isUseGizmo()) {
             return pushToGizmo(aaiClient, config, distId);
         }
 
@@ -227,7 +227,7 @@ public class ModelArtifact extends AbstractModelArtifact {
     public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
         // Gizmo is resilient and doesn't require a rollback. A redistribution will work fine even if
         // the model is partially loaded.
-        if (config.useGizmo()) {
+        if (config.getAaiProperties().isUseGizmo()) {
             return;
         }
 
@@ -243,8 +243,8 @@ public class ModelArtifact extends AbstractModelArtifact {
     }
 
     private String getModelUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim();
+        String baseURL = config.getAaiProperties().getBaseUrl().trim();
+        String subURL = config.getAaiProperties().getModelResourceUrl().trim();
         String instance = getModelInvariantId();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {
@@ -263,8 +263,8 @@ public class ModelArtifact extends AbstractModelArtifact {
     }
 
     private String getModelVerUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim() + getModelInvariantId()
+        String baseURL = config.getAaiProperties().getBaseUrl().trim();
+        String subURL = config.getAaiProperties().getModelResourceUrl().trim() + getModelInvariantId()
                 + AAI_MODEL_VER_SUB_URL;
         String instance = getModelVerId();
 

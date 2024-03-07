@@ -55,7 +55,7 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
 
     @Override
     public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<Artifact> completedArtifacts) {
-        if (config.useGizmo()) {
+        if (config.getAaiProperties().isUseGizmo()) {
             return pushToGizmo(aaiClient, config, distId);
         }
 
@@ -89,7 +89,7 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
     public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
         // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if 
         // the model is partially loaded.
-        if (config.useGizmo()) {
+        if (config.getAaiProperties().isUseGizmo()) {
             return;
         }
         
@@ -98,8 +98,8 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
     }
 
     private String getNamedQueryUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiNamedQueryUrl(getModelNamespaceVersion()).trim();
+        String baseURL = config.getAaiProperties().getBaseUrl().trim();
+        String subURL = config.getAaiProperties().getNamedQueryResourceUrl().trim();
         String instance = this.getNamedQueryUuid();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {

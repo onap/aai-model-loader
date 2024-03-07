@@ -151,19 +151,19 @@ public class AaiRestClient {
 
 
     public boolean useBasicAuth() {
-        return config.getAaiAuthenticationUser() != null && config.getAaiAuthenticationPassword() != null;
+        return config.getAaiProperties().getAuthenticationUser() != null && config.getAaiProperties().getAuthenticationPassword() != null;
     }
 
     private RestClient setupClient() {
         RestClient restClient = new RestClient();
 
         //Use certs only if SSL is enabled
-        if (config.useHttpsWithAAI())
+        if (config.getAaiProperties().isUseHttps())
         {// @formatter:off
             restClient.validateServerHostname(false)
                     .validateServerCertChain(false)
-                    .clientCertFile(config.getAaiKeyStorePath())
-                    .clientCertPassword(config.getAaiKeyStorePassword())
+                    .clientCertFile(config.getAaiProperties().getKeystoreFile())
+                    .clientCertPassword(config.getAaiProperties().getKeystorePassword())
                     .connectTimeoutMs(120000)
                     .readTimeoutMs(120000);
             // @formatter:on
@@ -177,8 +177,8 @@ public class AaiRestClient {
 
         if (useBasicAuth()) {
             restClient.authenticationMode(RestAuthenticationMode.SSL_BASIC);
-            restClient.basicAuthUsername(config.getAaiAuthenticationUser());
-            restClient.basicAuthPassword(config.getAaiAuthenticationPassword());
+            restClient.basicAuthUsername(config.getAaiProperties().getAuthenticationUser());
+            restClient.basicAuthPassword(config.getAaiProperties().getAuthenticationPassword());
         }
 
         return restClient;

@@ -117,17 +117,6 @@ public class TestVnfCatalogArtifactHandler {
         assertThat(argument.getAllValues().get(1), containsString("VM00"));
     }
 
-    private ModelLoaderConfig createConfig() {
-        Properties configProperties = new Properties();
-        try {
-            configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        } catch (IOException e) {
-            fail();
-        }
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
-        return config;
-    }
-
     /**
      * Example VNF Catalog based on JSON data (returned by Babel)
      * 

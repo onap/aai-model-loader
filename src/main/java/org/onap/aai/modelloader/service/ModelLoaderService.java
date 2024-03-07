@@ -68,28 +68,25 @@ public class ModelLoaderService implements ModelLoaderInterface {
     @Value("${CONFIG_HOME}")
     private String configDir;
     private IDistributionClient client;
-    private ModelLoaderConfig config;
-    @Autowired
-    private BabelServiceClientFactory babelClientFactory;
+    private final ModelLoaderConfig config;
+    private final BabelServiceClientFactory babelClientFactory;
+    private final ArtifactDownloadManager artifactDownloadManager;
+    private final NotificationPublisher notificationPublisher;
+
+    ModelLoaderService(ModelLoaderConfig config, BabelServiceClientFactory babelClientFactory, ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher) {
+        this.config = config;
+        this.babelClientFactory = babelClientFactory;
+        this.artifactDownloadManager = artifactDownloadManager;
+        this.notificationPublisher = notificationPublisher;
+    }
 
     /**
      * Responsible for loading configuration files and calling initialization.
      */
     @PostConstruct
     protected void start() {
-        // Load model loader system configuration
-        logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
-        ModelLoaderConfig.setConfigHome(configDir);
-        Properties configProperties = new Properties();
-        try (InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"))) {
-            configProperties.load(configInputStream);
-            config = new ModelLoaderConfig(configProperties);
-            if (!config.getASDCConnectionDisabled()) {
-                initSdcClient();
-            }
-        } catch (IOException e) {
-            String errorMsg = "Failed to load configuration: " + e.getMessage();
-            logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
+        if (!config.getAaiProperties().getIsAsdcConnectionDisabled()) {
+            initSdcClient();
         }
     }
 
@@ -110,7 +107,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
         client = DistributionClientFactory.createDistributionClient();
-        EventCallback callback = new EventCallback(client, config, babelClientFactory);
+        EventCallback callback = new EventCallback(client, config, babelClientFactory, artifactDownloadManager, notificationPublisher);
 
         IDistributionClientResult initResult = client.init(config, callback);
 
@@ -167,7 +164,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
             @RequestBody String payload) throws IOException {
         Response response;
 
-        if (config.getIngestSimulatorEnabled()) {
+        if (config.getDebugProperties().isIngestSimulatorEnabled()) {
             response = processTestArtifact(modelName, modelVersion, payload);
         } else {
             logger.debug("Simulation interface disabled");
@@ -193,7 +190,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
             List<Artifact> modelArtifacts = new ArrayList<>();
             List<Artifact> catalogArtifacts = new ArrayList<>();
 
-            new ArtifactDownloadManager(client, config, babelClientFactory).processToscaArtifacts(modelArtifacts,
+            artifactDownloadManager.processToscaArtifacts(modelArtifacts,
                     catalogArtifacts, csarFile, artifactInfo, "test-transaction-id", modelVersion);
 
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Loading xml models from test artifacts: "
@@ -210,7 +207,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Exception handled: " + responseMessage);
             if (config.getASDCConnectionDisabled()) {
                 // Make sure the NotificationPublisher logger is invoked as per the standard processing flow.
-                new NotificationPublisher().publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
+                notificationPublisher.publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
             } else {
                 responseMessage += "\nSDC publishing is enabled but has been bypassed";
             }

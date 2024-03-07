@@ -43,16 +43,18 @@ public class EventCallback implements INotificationCallback {
     private static Logger auditLogger = LoggerFactory.getInstance().getAuditLogger(EventCallback.class.getName());
 
     private ArtifactDeploymentManager artifactDeploymentManager;
-    private ArtifactDownloadManager artifactDownloadManager;
-    private NotificationPublisher notificationPublisher;
+    private final ArtifactDownloadManager artifactDownloadManager;
+    private final NotificationPublisher notificationPublisher;
     private IDistributionClient client;
     private ModelLoaderConfig config;
     private BabelServiceClientFactory babelServiceClientFactory;
 
-    public EventCallback(IDistributionClient client, ModelLoaderConfig config, BabelServiceClientFactory babelServiceClientFactory) {
+    public EventCallback(IDistributionClient client, ModelLoaderConfig config, BabelServiceClientFactory babelServiceClientFactory, ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher) {
         this.client = client;
         this.config = config;
         this.babelServiceClientFactory = babelServiceClientFactory;
+        this.artifactDownloadManager = artifactDownloadManager;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class EventCallback implements INotificationCallback {
         List<Artifact> modelArtifacts = new ArrayList<>();
 
         boolean success =
-                getArtifactDownloadManager().downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
+                artifactDownloadManager.downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
 
         if (success) {
             success = getArtifactDeploymentManager().deploy(data, modelArtifacts, catalogArtifacts);
@@ -85,12 +87,12 @@ public class EventCallback implements INotificationCallback {
             boolean deploymentSuccess) {
         if (deploymentSuccess) {
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeploySuccess(client, data, a));
-            getNotificationPublisher().publishComponentSuccess(client, data);
+                    .forEach(a -> notificationPublisher.publishDeploySuccess(client, data, a));
+            notificationPublisher.publishComponentSuccess(client, data);
         } else {
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeployFailure(client, data, a));
-            getNotificationPublisher().publishComponentFailure(client, data, "deploy failure");
+                    .forEach(a -> notificationPublisher.publishDeployFailure(client, data, a));
+            notificationPublisher.publishComponentFailure(client, data, "deploy failure");
         }
     }
 
@@ -100,22 +102,5 @@ public class EventCallback implements INotificationCallback {
         }
 
         return artifactDeploymentManager;
-    }
-
-    private ArtifactDownloadManager getArtifactDownloadManager() {
-        if (artifactDownloadManager == null) {
-            artifactDownloadManager = new ArtifactDownloadManager(client, config, babelServiceClientFactory);
-        }
-
-        return artifactDownloadManager;
-    }
-
-
-    private NotificationPublisher getNotificationPublisher() {
-        if (notificationPublisher == null) {
-            notificationPublisher = new NotificationPublisher();
-        }
-
-        return notificationPublisher;
     }
 }

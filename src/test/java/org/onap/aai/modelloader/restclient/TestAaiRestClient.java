@@ -121,12 +121,12 @@ public class TestAaiRestClient {
     private String getUrl(ModelArtifact model, ModelLoaderConfig config) {
         String subUrl;
         if (model.getType().equals(ArtifactType.MODEL)) {
-            subUrl = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = config.getAaiProperties().getModelUrl(model.getModelNamespaceVersion()).trim();
         } else {
-            subUrl = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = config.getAaiProperties().getNamedQueryUrl(model.getModelNamespaceVersion()).trim();
         }
 
-        String baseUrl = config.getAaiBaseUrl().trim();
+        String baseUrl = config.getAaiProperties().getBaseUrl().trim();
         if (!baseUrl.endsWith("/") && !subUrl.startsWith("/")) {
             baseUrl = baseUrl + "/";
         }

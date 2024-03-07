@@ -49,18 +49,9 @@ public class NotificationPublisher {
 
     private boolean publishingEnabled;
 
-    public NotificationPublisher() {
-        Properties configProperties = new Properties();
-        try (InputStream configInputStream = Files.newInputStream(ModelLoaderConfig.propertiesFile())) {
-            configProperties.load(configInputStream);
-        } catch (IOException e) {
-            String errorMsg = "Failed to load configuration: " + e.getMessage();
-            logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);
-        }
+    public NotificationPublisher(ModelLoaderConfig config) {
 
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties);
-
-        publishingEnabled = !config.getASDCConnectionDisabled();
+        publishingEnabled = !config.getDistributionProperties().getAsdcConnectionDisabled();
     }
 
     /**
