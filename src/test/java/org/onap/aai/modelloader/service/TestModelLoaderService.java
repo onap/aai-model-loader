@@ -22,7 +22,6 @@ package org.onap.aai.modelloader.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -31,6 +30,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.onap.aai.modelloader.config.BeanConfig;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,22 +40,16 @@ import org.springframework.test.context.TestPropertySource;
  * Tests for the ModelLoaderService class.
  *
  */
-@SpringBootTest(classes = {ModelLoaderService.class, MockBabelServiceClientFactory.class})
+@SpringBootTest(classes = {BeanConfig.class, ModelController.class, MockBabelServiceClientFactory.class})
 @TestPropertySource(properties = {"CONFIG_HOME=src/test/resources",})
 public class TestModelLoaderService {
 
     @Autowired
-    private ModelLoaderService service;
+    private ModelController service;
 
     @AfterEach
     public void shutdown() {
         service.preShutdownOperations();
-    }
-
-    @Test
-    public void testMissingConfig() {
-        new ModelLoaderService().start();
-        assertTrue(true);
     }
 
     @Test

@@ -21,18 +21,13 @@
 package org.onap.aai.modelloader.service;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -47,10 +42,7 @@ import org.onap.aai.modelloader.notification.NotificationPublisher;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.results.IDistributionClientResult;
-import org.onap.sdc.impl.DistributionClientFactory;
 import org.onap.sdc.utils.DistributionActionResultEnum;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,36 +53,21 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/services/model-loader/v1/model-service")
-public class ModelLoaderService implements ModelLoaderInterface {
+public class ModelController implements ModelLoaderInterface {
 
-    private static final Logger logger = LoggerFactory.getInstance().getLogger(ModelLoaderService.class.getName());
+    private static final Logger logger = LoggerFactory.getInstance().getLogger(ModelController.class.getName());
 
-    @Value("${CONFIG_HOME}")
-    private String configDir;
-    private IDistributionClient client;
-    private ModelLoaderConfig config;
-    @Autowired
-    private BabelServiceClientFactory babelClientFactory;
+    private final IDistributionClient client;
+    private final ModelLoaderConfig config;
+    private final EventCallback eventCallback;
+    private final BabelServiceClientFactory babelClientFactory;
 
-    /**
-     * Responsible for loading configuration files and calling initialization.
-     */
-    @PostConstruct
-    protected void start() {
-        // Load model loader system configuration
-        logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
-        ModelLoaderConfig.setConfigHome(configDir);
-        Properties configProperties = new Properties();
-        try (InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"))) {
-            configProperties.load(configInputStream);
-            config = new ModelLoaderConfig(configProperties);
-            if (!config.getASDCConnectionDisabled()) {
-                initSdcClient();
-            }
-        } catch (IOException e) {
-            String errorMsg = "Failed to load configuration: " + e.getMessage();
-            logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-        }
+    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback,
+            BabelServiceClientFactory babelClientFactory) {
+        this.client = client;
+        this.config = config;
+        this.eventCallback = eventCallback;
+        this.babelClientFactory = babelClientFactory;
     }
 
     /**
@@ -109,10 +86,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
     protected void initSdcClient() {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
-        client = DistributionClientFactory.createDistributionClient();
-        EventCallback callback = new EventCallback(client, config, babelClientFactory);
-
-        IDistributionClientResult initResult = client.init(config, callback);
+        IDistributionClientResult initResult = client.init(config, eventCallback);
 
         if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
             // Start distribution client
@@ -126,7 +100,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
 
                 // Kick off a timer to retry the SDC connection
                 Timer timer = new Timer();
-                TimerTask task = new SdcConnectionJob(client, config, callback, timer);
+                TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
                 timer.schedule(task, new Date(), 60000);
             }
         } else {
@@ -135,7 +109,7 @@ public class ModelLoaderService implements ModelLoaderInterface {
 
             // Kick off a timer to retry the SDC connection
             Timer timer = new Timer();
-            TimerTask task = new SdcConnectionJob(client, config, callback, timer);
+            TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
             timer.schedule(task, new Date(), 60000);
         }
 
