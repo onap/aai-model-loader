@@ -24,7 +24,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithCatalogFile;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneOfEach;
@@ -37,7 +36,9 @@ import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -50,7 +51,6 @@ import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.INotificationData;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDeploymentManager}.
@@ -63,28 +63,24 @@ public class TestArtifactDeploymentManager {
     private Properties configProperties;
     private ArtifactDeploymentManager manager;
 
-    private ModelArtifactHandler mockModelArtifactHandler;
-    private VnfCatalogArtifactHandler mockVnfCatalogArtifactHandler;
+    @Mock private ModelArtifactHandler modelArtifactHandlerMock;
+    @Mock private VnfCatalogArtifactHandler vnfCatalogArtifactHandlerMock;
 
     @BeforeEach
     public void setup() throws IOException {
+        MockitoAnnotations.openMocks(this);
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
 
-        mockModelArtifactHandler = mock(ModelArtifactHandler.class);
-        mockVnfCatalogArtifactHandler = mock(VnfCatalogArtifactHandler.class);
-
-        manager = new ArtifactDeploymentManager(new ModelLoaderConfig(configProperties, null));
-
-        ReflectionTestUtils.setField(manager, "modelArtifactHandler", mockModelArtifactHandler);
-        ReflectionTestUtils.setField(manager, "vnfCatalogArtifactHandler", mockVnfCatalogArtifactHandler);
+        ModelLoaderConfig modelLoaderConfig = new ModelLoaderConfig(configProperties, null);
+        manager = new ArtifactDeploymentManager(modelLoaderConfig, modelArtifactHandlerMock, vnfCatalogArtifactHandlerMock);
     }
 
     @AfterEach
     public void tearDown() {
         configProperties = null;
-        mockModelArtifactHandler = null;
-        mockVnfCatalogArtifactHandler = null;
+        modelArtifactHandlerMock = null;
+        vnfCatalogArtifactHandlerMock = null;
         manager = null;
     }
 
@@ -95,18 +91,18 @@ public class TestArtifactDeploymentManager {
         List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
         List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
 
-        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+        when(modelArtifactHandlerMock.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(false);
 
         assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, modelArtifacts, new ArrayList<>()), is(false));
 
-        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
+        Mockito.verify(modelArtifactHandlerMock).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
                 any());
-        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).pushArtifacts(eq(modelArtifacts),
+        Mockito.verify(vnfCatalogArtifactHandlerMock, Mockito.never()).pushArtifacts(eq(modelArtifacts),
                 eq(data.getDistributionID()), any(), any());
-        Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()), eq(data.getDistributionID()),
+        Mockito.verify(modelArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()), eq(data.getDistributionID()),
                 any());
-        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(eq(new ArrayList<Artifact>()),
+        Mockito.verify(vnfCatalogArtifactHandlerMock, Mockito.never()).rollback(eq(new ArrayList<Artifact>()),
                 eq(data.getDistributionID()), any());
     }
 
@@ -129,19 +125,19 @@ public class TestArtifactDeploymentManager {
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
-        when(mockModelArtifactHandler.pushArtifacts(any(), any(), any(), any())).thenReturn(true);
-        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+        when(modelArtifactHandlerMock.pushArtifacts(any(), any(), any(), any())).thenReturn(true);
+        when(vnfCatalogArtifactHandlerMock.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(false);
 
         assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, new ArrayList<>(), catalogFiles), is(false));
 
-        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(new ArrayList<Artifact>()),
+        Mockito.verify(modelArtifactHandlerMock).pushArtifacts(eq(new ArrayList<Artifact>()),
                 eq(data.getDistributionID()), any(), any());
-        Mockito.verify(mockVnfCatalogArtifactHandler).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
+        Mockito.verify(vnfCatalogArtifactHandlerMock).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
                 any(), any());
-        Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()), eq(data.getDistributionID()),
+        Mockito.verify(modelArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()), eq(data.getDistributionID()),
                 any());
-        Mockito.verify(mockVnfCatalogArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
+        Mockito.verify(vnfCatalogArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()),
                 eq(data.getDistributionID()), any());
     }
 
@@ -170,34 +166,34 @@ public class TestArtifactDeploymentManager {
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
-        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+        when(vnfCatalogArtifactHandlerMock.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(catalogsDeployed);
-        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+        when(modelArtifactHandlerMock.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(modelsDeployed);
 
         assertThat(SHOULD_HAVE_RETURNED_FALSE, manager.deploy(data, modelArtifacts, catalogFiles), is(false));
 
         // Catalog artifacts are only pushed if models are successful.
-        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
+        Mockito.verify(modelArtifactHandlerMock).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
                 any());
         if (modelsDeployed) {
-            Mockito.verify(mockVnfCatalogArtifactHandler).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
+            Mockito.verify(vnfCatalogArtifactHandlerMock).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
                     any(), any());
         }
 
         if (modelsDeployed && catalogsDeployed) {
-            Mockito.verify(mockModelArtifactHandler, Mockito.never()).rollback(any(), any(), any());
-            Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(any(), any(), any());
+            Mockito.verify(modelArtifactHandlerMock, Mockito.never()).rollback(any(), any(), any());
+            Mockito.verify(vnfCatalogArtifactHandlerMock, Mockito.never()).rollback(any(), any(), any());
         } else {
             if (modelsDeployed) {
-                Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
+                Mockito.verify(modelArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()),
                         eq(data.getDistributionID()), any());
-                Mockito.verify(mockVnfCatalogArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
+                Mockito.verify(vnfCatalogArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()),
                         eq(data.getDistributionID()), any());
             } else {
-                Mockito.verify(mockModelArtifactHandler).rollback(eq(new ArrayList<Artifact>()),
+                Mockito.verify(modelArtifactHandlerMock).rollback(eq(new ArrayList<Artifact>()),
                         eq(data.getDistributionID()), any());
-                Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(any(), any(), any());
+                Mockito.verify(vnfCatalogArtifactHandlerMock, Mockito.never()).rollback(any(), any(), any());
             }
         }
     }
@@ -219,18 +215,18 @@ public class TestArtifactDeploymentManager {
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
         catalogFiles.add(new VnfCatalogArtifact("Some catalog content"));
 
-        when(mockVnfCatalogArtifactHandler.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
+        when(vnfCatalogArtifactHandlerMock.pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(true);
-        when(mockModelArtifactHandler.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
+        when(modelArtifactHandlerMock.pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(), any()))
                 .thenReturn(true);
 
         assertThat(manager.deploy(data, modelArtifacts, catalogFiles), is(true));
 
-        Mockito.verify(mockVnfCatalogArtifactHandler).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
+        Mockito.verify(vnfCatalogArtifactHandlerMock).pushArtifacts(eq(catalogFiles), eq(data.getDistributionID()),
                 any(), any());
-        Mockito.verify(mockModelArtifactHandler).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
+        Mockito.verify(modelArtifactHandlerMock).pushArtifacts(eq(modelArtifacts), eq(data.getDistributionID()), any(),
                 any());
-        Mockito.verify(mockModelArtifactHandler, Mockito.never()).rollback(any(), any(), any());
-        Mockito.verify(mockVnfCatalogArtifactHandler, Mockito.never()).rollback(any(), any(), any());
+        Mockito.verify(modelArtifactHandlerMock, Mockito.never()).rollback(any(), any(), any());
+        Mockito.verify(vnfCatalogArtifactHandlerMock, Mockito.never()).rollback(any(), any(), any());
     }
 }

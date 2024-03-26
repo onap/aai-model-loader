@@ -44,6 +44,7 @@ import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,6 +54,7 @@ import org.xml.sax.InputSource;
 /**
  * VNF Catalog specific handling
  */
+@Component
 public class VnfCatalogArtifactHandler extends ArtifactHandler {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(VnfCatalogArtifactHandler.class.getName());

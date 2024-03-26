@@ -55,19 +55,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/services/model-loader/v1/model-service")
 public class ModelController implements ModelLoaderInterface {
 
-    private static final Logger logger = LoggerFactory.getInstance().getLogger(ModelController.class.getName());
+    private static final Logger logger = LoggerFactory.getInstance().getLogger(ModelController.class);
 
     private final IDistributionClient client;
     private final ModelLoaderConfig config;
     private final EventCallback eventCallback;
-    private final BabelServiceClientFactory babelClientFactory;
+    private final ArtifactDeploymentManager artifactDeploymentManager;
+    private final ArtifactDownloadManager artifactDownloadManager;
 
-    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback,
-            BabelServiceClientFactory babelClientFactory) {
+    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager) {
         this.client = client;
         this.config = config;
         this.eventCallback = eventCallback;
-        this.babelClientFactory = babelClientFactory;
+        this.artifactDeploymentManager = artifactDeploymentManager;
+        this.artifactDownloadManager = artifactDownloadManager;
     }
 
     /**
@@ -167,7 +168,7 @@ public class ModelController implements ModelLoaderInterface {
             List<Artifact> modelArtifacts = new ArrayList<>();
             List<Artifact> catalogArtifacts = new ArrayList<>();
 
-            new ArtifactDownloadManager(client, config, babelClientFactory).processToscaArtifacts(modelArtifacts,
+            artifactDownloadManager.processToscaArtifacts(modelArtifacts,
                     catalogArtifacts, csarFile, artifactInfo, "test-transaction-id", modelVersion);
 
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Loading xml models from test artifacts: "
@@ -176,7 +177,7 @@ public class ModelController implements ModelLoaderInterface {
             NotificationDataImpl notificationData = new NotificationDataImpl();
             notificationData.setDistributionID("TestDistributionID");
             boolean success =
-                    new ArtifactDeploymentManager(config).deploy(notificationData, modelArtifacts, catalogArtifacts);
+                    artifactDeploymentManager.deploy(notificationData, modelArtifacts, catalogArtifacts);
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Deployment success was " + success);
             response = success ? Response.ok().build() : Response.serverError().build();
         } catch (Exception e) {

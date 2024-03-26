@@ -34,12 +34,11 @@ public class SdcConnectionJob extends TimerTask {
     private static final Logger logger = LoggerFactory.getInstance().getLogger(SdcConnectionJob.class.getName());
 
     private final IDistributionClient client;
-    private ModelLoaderConfig config;
-    private EventCallback callback;
-    private Timer timer;
+    private final ModelLoaderConfig config;
+    private final EventCallback callback;
+    private final Timer timer;
 
     public SdcConnectionJob(IDistributionClient client, ModelLoaderConfig config, EventCallback callback, Timer timer) {
-        super();
         this.client = client;
         this.timer = timer;
         this.callback = callback;

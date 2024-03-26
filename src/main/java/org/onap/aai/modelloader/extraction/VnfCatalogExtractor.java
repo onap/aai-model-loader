@@ -38,6 +38,7 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -47,6 +48,7 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
  * A .csar file is a compressed archive like a zip file and this class will treat the byte array as it if were a zip
  * file.
  */
+@Component
 public class VnfCatalogExtractor {
     private static final Logger logger = LoggerFactory.getInstance().getLogger(VnfCatalogExtractor.class.getName());
 

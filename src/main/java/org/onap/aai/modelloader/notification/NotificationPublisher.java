@@ -38,10 +38,12 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
 import org.onap.sdc.utils.DistributionActionResultEnum;
 import org.onap.sdc.utils.DistributionStatusEnum;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is responsible for publishing the status of actions performed working with artifacts.
  */
+@Component
 public class NotificationPublisher {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(NotificationPublisher.class);

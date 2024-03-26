@@ -49,6 +49,7 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.utils.ArtifactTypeEnum;
 import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is responsible for downloading the artifacts from the ASDC.
@@ -60,22 +61,26 @@ import org.onap.sdc.utils.DistributionActionResultEnum;
  *
  * TOSCA_CSAR file artifacts will be converted into XML and returned as model artifacts.
  */
+@Component
 public class ArtifactDownloadManager {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(ArtifactDownloadManager.class);
 
-    private IDistributionClient client;
-    private NotificationPublisher notificationPublisher;
-    private BabelArtifactConverter babelArtifactConverter;
-    private ModelLoaderConfig config;
-    private BabelServiceClientFactory clientFactory;
-    private VnfCatalogExtractor vnfCatalogExtractor;
+    private final IDistributionClient client;
+    private final NotificationPublisher notificationPublisher;
+    private final BabelArtifactConverter babelArtifactConverter;
+    private final ModelLoaderConfig config;
+    private final BabelServiceClientFactory clientFactory;
+    private final VnfCatalogExtractor vnfCatalogExtractor;
 
     public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config,
-            BabelServiceClientFactory clientFactory) {
+            BabelServiceClientFactory clientFactory, BabelArtifactConverter babelArtifactConverter, NotificationPublisher notificationPublisher, VnfCatalogExtractor vnfCatalogExtractor) {
         this.client = client;
+        this.notificationPublisher = notificationPublisher;
+        this.babelArtifactConverter = babelArtifactConverter;
         this.config = config;
         this.clientFactory = clientFactory;
+        this.vnfCatalogExtractor = vnfCatalogExtractor;
     }
 
     /**
@@ -96,10 +101,10 @@ public class ArtifactDownloadManager {
                 IDistributionClientDownloadResult downloadResult = downloadIndividualArtifacts(data, artifact);
                 processDownloadedArtifacts(modelArtifacts, catalogArtifacts, artifact, downloadResult, data);
             } catch (DownloadFailureException e) {
-                getNotificationPublisher().publishDownloadFailure(client, data, artifact, e.getMessage());
+                notificationPublisher.publishDownloadFailure(client, data, artifact, e.getMessage());
                 success = false;
             } catch (Exception e) {
-                getNotificationPublisher().publishDeployFailure(client, data, artifact);
+                notificationPublisher.publishDeployFailure(client, data, artifact);
                 success = false;
             }
 
@@ -126,7 +131,7 @@ public class ArtifactDownloadManager {
 
         if (DistributionActionResultEnum.SUCCESS.equals(downloadResult.getDistributionActionResult())) {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Downloaded artifact: " + artifact.getArtifactName());
-            getNotificationPublisher().publishDownloadSuccess(client, data, artifact);
+            notificationPublisher.publishDownloadSuccess(client, data, artifact);
         } else {
             throw new DownloadFailureException(downloadResult.getDistributionMessageResult());
         }
@@ -156,7 +161,7 @@ public class ArtifactDownloadManager {
         invokeBabelService(modelArtifacts, catalogArtifacts, payload, artifactInfo, distributionId, serviceVersion);
 
         // Get VNF Catalog artifacts directly from CSAR
-        List<Artifact> csarCatalogArtifacts = getVnfCatalogExtractor().extract(payload, artifactInfo.getArtifactName());
+        List<Artifact> csarCatalogArtifacts = vnfCatalogExtractor.extract(payload, artifactInfo.getArtifactName());
 
         // Throw an error if VNF Catalog data is present in the Babel payload and directly in the CSAR
         if (!catalogArtifacts.isEmpty() && !csarCatalogArtifacts.isEmpty()) {
@@ -187,12 +192,12 @@ public class ArtifactDownloadManager {
 
             if (artifactMap.containsKey(BabelArtifact.ArtifactType.MODEL)) {
                 modelArtifacts.addAll(
-                        getBabelArtifactConverter().convertToModel(artifactMap.get(BabelArtifact.ArtifactType.MODEL)));
+                        babelArtifactConverter.convertToModel(artifactMap.get(BabelArtifact.ArtifactType.MODEL)));
                 artifactMap.remove(BabelArtifact.ArtifactType.MODEL);
             }
 
             if (artifactMap.containsKey(BabelArtifact.ArtifactType.VNFCATALOG)) {
-                catalogArtifacts.addAll(getBabelArtifactConverter()
+                catalogArtifacts.addAll(babelArtifactConverter
                         .convertToCatalog(artifactMap.get(BabelArtifact.ArtifactType.VNFCATALOG)));
                 artifactMap.remove(BabelArtifact.ArtifactType.VNFCATALOG);
             }
@@ -256,29 +261,5 @@ public class ArtifactDownloadManager {
 
     private boolean parsedArtifactsExist(List<Artifact> parsedArtifacts) {
         return parsedArtifacts != null && !parsedArtifacts.isEmpty();
-    }
-
-    private NotificationPublisher getNotificationPublisher() {
-        if (notificationPublisher == null) {
-            notificationPublisher = new NotificationPublisher();
-        }
-
-        return notificationPublisher;
-    }
-
-    private BabelArtifactConverter getBabelArtifactConverter() {
-        if (babelArtifactConverter == null) {
-            babelArtifactConverter = new BabelArtifactConverter();
-        }
-
-        return babelArtifactConverter;
-    }
-
-    private VnfCatalogExtractor getVnfCatalogExtractor() {
-        if (vnfCatalogExtractor == null) {
-            vnfCatalogExtractor = new VnfCatalogExtractor();
-        }
-
-        return vnfCatalogExtractor;
     }
 }

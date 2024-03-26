@@ -44,15 +44,17 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
+import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 import org.onap.aai.modelloader.service.BabelServiceClientFactory;
-import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -60,7 +62,6 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDownloadManager}.
@@ -68,28 +69,23 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class TestArtifactDownloadManager {
 
     private ArtifactDownloadManager downloadManager;
-    private BabelServiceClient mockBabelClient;
-    private IDistributionClient mockDistributionClient;
-    private NotificationPublisher mockNotificationPublisher;
-    private BabelArtifactConverter mockBabelArtifactConverter;
-    private BabelServiceClientFactory mockClientFactory;
+    @Mock private BabelServiceClient mockBabelClient;
+    @Mock private IDistributionClient mockDistributionClient;
+    @Mock private NotificationPublisher mockNotificationPublisher;
+    @Mock private BabelArtifactConverter mockBabelArtifactConverter;
+    @Mock private BabelServiceClientFactory mockClientFactory;
+    private VnfCatalogExtractor vnfCatalogExtractor;
 
     @BeforeEach
     public void setup() throws Exception {
-        mockBabelClient = mock(BabelServiceClient.class);
-        mockDistributionClient = mock(IDistributionClient.class);
-        mockNotificationPublisher = mock(NotificationPublisher.class);
-        mockBabelArtifactConverter = mock(BabelArtifactConverter.class);
-        mockClientFactory = mock(HttpsBabelServiceClientFactory.class);
+        MockitoAnnotations.openMocks(this);
+        vnfCatalogExtractor = new VnfCatalogExtractor();
         when(mockClientFactory.create(any())).thenReturn(mockBabelClient);
 
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
         downloadManager = new ArtifactDownloadManager(mockDistributionClient,
-                new ModelLoaderConfig(configProperties, "."), mockClientFactory);
-
-        ReflectionTestUtils.setField(downloadManager, "notificationPublisher", mockNotificationPublisher);
-        ReflectionTestUtils.setField(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
+                new ModelLoaderConfig(configProperties, "."), mockClientFactory, mockBabelArtifactConverter, mockNotificationPublisher, vnfCatalogExtractor);
     }
 
     @AfterEach

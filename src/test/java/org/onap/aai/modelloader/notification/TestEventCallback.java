@@ -21,7 +21,6 @@
 package org.onap.aai.modelloader.notification;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,14 +31,14 @@ import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.mockito.MockitoAnnotations;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.INotificationData;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link EventCallback}.
@@ -48,36 +47,25 @@ public class TestEventCallback {
 
     private static final String CONFIG_FILE = "model-loader.properties";
 
-    private ModelLoaderConfig config;
     private Properties configProperties;
     private EventCallback eventCallback;
 
-    private ArtifactDeploymentManager mockArtifactDeploymentManager;
-    private ArtifactDownloadManager mockArtifactDownloadManager;
-    private IDistributionClient mockDistributionClient;
-    private NotificationPublisher mockNotificationPublisher;
+    @Mock private ArtifactDeploymentManager mockArtifactDeploymentManager;
+    @Mock private ArtifactDownloadManager mockArtifactDownloadManager;
+    @Mock private IDistributionClient mockDistributionClient;
+    @Mock private NotificationPublisher mockNotificationPublisher;
 
     @BeforeEach
     public void setup() throws IOException {
+        MockitoAnnotations.openMocks(this);
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        config = new ModelLoaderConfig(configProperties, null);
 
-        mockArtifactDeploymentManager = mock(ArtifactDeploymentManager.class);
-        mockArtifactDownloadManager = mock(ArtifactDownloadManager.class);
-        mockDistributionClient = mock(IDistributionClient.class);
-        mockNotificationPublisher = mock(NotificationPublisher.class);
-
-        eventCallback = new EventCallback(mockDistributionClient, config, null);
-
-        ReflectionTestUtils.setField(eventCallback, "artifactDeploymentManager", mockArtifactDeploymentManager);
-        ReflectionTestUtils.setField(eventCallback, "artifactDownloadManager", mockArtifactDownloadManager);
-        ReflectionTestUtils.setField(eventCallback, "notificationPublisher", mockNotificationPublisher);
+        eventCallback = new EventCallback(mockDistributionClient, mockArtifactDeploymentManager, mockArtifactDownloadManager, mockNotificationPublisher);
     }
 
     @AfterEach
     public void tearDown() {
-        config = null;
         configProperties = null;
         eventCallback = null;
         mockArtifactDeploymentManager = null;

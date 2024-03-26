@@ -26,33 +26,32 @@ import java.util.List;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.cl.mdc.MdcContext;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.extraction.ArtifactInfoExtractor;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
-import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.consumer.INotificationCallback;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EventCallback implements INotificationCallback {
     private static Logger logger = LoggerFactory.getInstance().getLogger(EventCallback.class.getName());
     private static Logger auditLogger = LoggerFactory.getInstance().getAuditLogger(EventCallback.class.getName());
 
-    private ArtifactDeploymentManager artifactDeploymentManager;
-    private ArtifactDownloadManager artifactDownloadManager;
-    private NotificationPublisher notificationPublisher;
-    private IDistributionClient client;
-    private ModelLoaderConfig config;
-    private BabelServiceClientFactory babelServiceClientFactory;
+    private final ArtifactDeploymentManager artifactDeploymentManager;
+    private final ArtifactDownloadManager artifactDownloadManager;
+    private final NotificationPublisher notificationPublisher;
+    private final IDistributionClient client;
 
-    public EventCallback(IDistributionClient client, ModelLoaderConfig config, BabelServiceClientFactory babelServiceClientFactory) {
+    public EventCallback(IDistributionClient client, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher) {
+        this.artifactDeploymentManager = artifactDeploymentManager;
+        this.artifactDownloadManager = artifactDownloadManager;
+        this.notificationPublisher = notificationPublisher;
         this.client = client;
-        this.config = config;
-        this.babelServiceClientFactory = babelServiceClientFactory;
     }
 
     @Override
@@ -65,10 +64,10 @@ public class EventCallback implements INotificationCallback {
         List<Artifact> modelArtifacts = new ArrayList<>();
 
         boolean success =
-                getArtifactDownloadManager().downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
+                artifactDownloadManager.downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
 
         if (success) {
-            success = getArtifactDeploymentManager().deploy(data, modelArtifacts, catalogArtifacts);
+            success = artifactDeploymentManager.deploy(data, modelArtifacts, catalogArtifacts);
         }
 
         String statusString = success ? "SUCCESS" : "FAILURE";
@@ -85,37 +84,12 @@ public class EventCallback implements INotificationCallback {
             boolean deploymentSuccess) {
         if (deploymentSuccess) {
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeploySuccess(client, data, a));
-            getNotificationPublisher().publishComponentSuccess(client, data);
+                    .forEach(a -> notificationPublisher.publishDeploySuccess(client, data, a));
+            notificationPublisher.publishComponentSuccess(client, data);
         } else {
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> getNotificationPublisher().publishDeployFailure(client, data, a));
-            getNotificationPublisher().publishComponentFailure(client, data, "deploy failure");
+                    .forEach(a -> notificationPublisher.publishDeployFailure(client, data, a));
+            notificationPublisher.publishComponentFailure(client, data, "deploy failure");
         }
-    }
-
-    private ArtifactDeploymentManager getArtifactDeploymentManager() {
-        if (artifactDeploymentManager == null) {
-            artifactDeploymentManager = new ArtifactDeploymentManager(config);
-        }
-
-        return artifactDeploymentManager;
-    }
-
-    private ArtifactDownloadManager getArtifactDownloadManager() {
-        if (artifactDownloadManager == null) {
-            artifactDownloadManager = new ArtifactDownloadManager(client, config, babelServiceClientFactory);
-        }
-
-        return artifactDownloadManager;
-    }
-
-
-    private NotificationPublisher getNotificationPublisher() {
-        if (notificationPublisher == null) {
-            notificationPublisher = new NotificationPublisher();
-        }
-
-        return notificationPublisher;
     }
 }

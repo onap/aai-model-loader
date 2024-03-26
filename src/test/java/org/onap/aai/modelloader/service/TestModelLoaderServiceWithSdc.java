@@ -30,7 +30,6 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.onap.aai.modelloader.config.BeanConfig;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +39,7 @@ import org.springframework.test.context.TestPropertySource;
  * Tests for the ModelLoaderService class.
  *
  */
-@SpringBootTest(classes = {BeanConfig.class, ModelController.class, HttpsBabelServiceClientFactory.class})
+@SpringBootTest
 @TestPropertySource(properties = {"CONFIG_HOME=src/test/resources",})
 public class TestModelLoaderServiceWithSdc {
 

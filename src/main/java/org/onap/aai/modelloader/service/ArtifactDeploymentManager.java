@@ -28,18 +28,22 @@ import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.sdc.api.notification.INotificationData;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is responsible for deploying model and catalog artifacts.
  */
+@Component
 public class ArtifactDeploymentManager {
 
-    private ModelLoaderConfig config;
-    private ModelArtifactHandler modelArtifactHandler;
-    private VnfCatalogArtifactHandler vnfCatalogArtifactHandler;
+    private final ModelLoaderConfig config;
+    private final ModelArtifactHandler modelArtifactHandler;
+    private final VnfCatalogArtifactHandler vnfCatalogArtifactHandler;
 
-    public ArtifactDeploymentManager(ModelLoaderConfig config) {
+    public ArtifactDeploymentManager(ModelLoaderConfig config, ModelArtifactHandler modelArtifactHandler, VnfCatalogArtifactHandler vnfCatalogArtifactHandler) {
         this.config = config;
+        this.modelArtifactHandler = modelArtifactHandler;
+        this.vnfCatalogArtifactHandler = vnfCatalogArtifactHandler;
     }
 
     /**
@@ -59,36 +63,20 @@ public class ArtifactDeploymentManager {
 
         List<Artifact> completedArtifacts = new ArrayList<>();
         boolean deploySuccess =
-                getModelArtifactHandler().pushArtifacts(modelArtifacts, distributionId, completedArtifacts, aaiClient);
+                modelArtifactHandler.pushArtifacts(modelArtifacts, distributionId, completedArtifacts, aaiClient);
 
         if (!deploySuccess) {
-            getModelArtifactHandler().rollback(completedArtifacts, distributionId, aaiClient);
+            modelArtifactHandler.rollback(completedArtifacts, distributionId, aaiClient);
         } else {
             List<Artifact> completedImageData = new ArrayList<>();
-            deploySuccess = getVnfCatalogArtifactHandler().pushArtifacts(catalogArtifacts, distributionId,
+            deploySuccess = vnfCatalogArtifactHandler.pushArtifacts(catalogArtifacts, distributionId,
                     completedImageData, aaiClient);
             if (!deploySuccess) {
-                getModelArtifactHandler().rollback(completedArtifacts, distributionId, aaiClient);
-                getVnfCatalogArtifactHandler().rollback(completedImageData, distributionId, aaiClient);
+                modelArtifactHandler.rollback(completedArtifacts, distributionId, aaiClient);
+                vnfCatalogArtifactHandler.rollback(completedImageData, distributionId, aaiClient);
             }
         }
 
         return deploySuccess;
-    }
-
-    private ModelArtifactHandler getModelArtifactHandler() {
-        if (modelArtifactHandler == null) {
-            modelArtifactHandler = new ModelArtifactHandler(config);
-        }
-
-        return modelArtifactHandler;
-    }
-
-    private VnfCatalogArtifactHandler getVnfCatalogArtifactHandler() {
-        if (vnfCatalogArtifactHandler == null) {
-            this.vnfCatalogArtifactHandler = new VnfCatalogArtifactHandler(config);
-        }
-
-        return vnfCatalogArtifactHandler;
     }
 }

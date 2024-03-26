@@ -22,16 +22,30 @@ package org.onap.aai.modelloader.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Collections;
 
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onap.aai.modelloader.config.BeanConfig;
+import org.mockito.Mock;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
+import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
+import org.onap.aai.modelloader.notification.BabelArtifactConverter;
+import org.onap.aai.modelloader.notification.EventCallback;
+import org.onap.aai.modelloader.notification.NotificationPublisher;
+import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
+import org.onap.sdc.api.IDistributionClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -40,41 +54,59 @@ import org.springframework.test.context.TestPropertySource;
  * Tests for the ModelLoaderService class.
  *
  */
-@SpringBootTest(classes = {BeanConfig.class, ModelController.class, MockBabelServiceClientFactory.class})
+@SpringBootTest
 @TestPropertySource(properties = {"CONFIG_HOME=src/test/resources",})
-public class TestModelLoaderService {
+public class TestModelController {
 
-    @Autowired
-    private ModelController service;
+    @Autowired IDistributionClient iDistributionClient;
+    @Autowired ModelLoaderConfig modelLoaderConfig;
+    @Autowired EventCallback eventCallback;
+    @Autowired ArtifactDeploymentManager artifactDeploymentManager;
+    @Autowired BabelArtifactConverter babelArtifactConverter;
+    @Autowired NotificationPublisher notificationPublisher;
+    @Autowired VnfCatalogExtractor vnfCatalogExtractor;
+
+    @Mock BabelServiceClientFactory clientFactory;
+    @Mock BabelServiceClient babelServiceClient;
+    
+    private ModelController modelController;
+
+    @BeforeEach
+    public void init() throws BabelServiceClientException {
+        when(clientFactory.create(any())).thenReturn(babelServiceClient);
+        when(babelServiceClient.postArtifact(any(), any(), any(), any())).thenReturn(Collections.emptyList());
+        ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, modelLoaderConfig, clientFactory, babelArtifactConverter, notificationPublisher, vnfCatalogExtractor);
+        this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, eventCallback, artifactDeploymentManager, artifactDownloadManager);
+    }
 
     @AfterEach
     public void shutdown() {
-        service.preShutdownOperations();
+        modelController.preShutdownOperations();
     }
 
     @Test
     public void testLoadModel() {
-        Response response = service.loadModel("");
+        Response response = modelController.loadModel("");
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
     }
 
     @Test
     public void testSaveModel() {
-        Response response = service.saveModel("", "");
+        Response response = modelController.saveModel("", "");
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
     }
 
     @Test
     public void testIngestModel() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = service.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
+        Response response = modelController.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
     }
 
     @Test
     public void testIngestModelMissingName() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = service.ingestModel("", "", Base64.getEncoder().encodeToString(csarPayload));
+        Response response = modelController.ingestModel("", "", Base64.getEncoder().encodeToString(csarPayload));
         assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 

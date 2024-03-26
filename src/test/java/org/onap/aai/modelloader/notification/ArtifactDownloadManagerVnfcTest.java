@@ -25,7 +25,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile;
 
@@ -36,7 +35,9 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -56,40 +57,29 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
 import org.onap.sdc.utils.DistributionActionResultEnum;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Tests {@link ArtifactDownloadManager} with VNF Catalog Artifacts.
  */
 public class ArtifactDownloadManagerVnfcTest {
 
-    private ArtifactDownloadManager downloadManager;
-    private BabelServiceClient mockBabelClient;
-    private IDistributionClient mockDistributionClient;
-    private NotificationPublisher mockNotificationPublisher;
-    private BabelArtifactConverter mockBabelArtifactConverter;
-    private BabelServiceClientFactory mockClientFactory;
-    private VnfCatalogExtractor mockVnfCatalogExtractor;
+    @Mock private ArtifactDownloadManager downloadManager;
+    @Mock private BabelServiceClient mockBabelClient;
+    @Mock private IDistributionClient mockDistributionClient;
+    @Mock private NotificationPublisher mockNotificationPublisher;
+    @Mock private BabelArtifactConverter mockBabelArtifactConverter;
+    @Mock private BabelServiceClientFactory mockClientFactory;
+    @Mock private VnfCatalogExtractor mockVnfCatalogExtractor;
 
     @BeforeEach
     public void setup() throws Exception {
-        mockBabelClient = mock(BabelServiceClient.class);
-        mockDistributionClient = mock(IDistributionClient.class);
-        mockNotificationPublisher = mock(NotificationPublisher.class);
-        mockBabelArtifactConverter = mock(BabelArtifactConverter.class);
-        mockClientFactory = mock(BabelServiceClientFactory.class);
+        MockitoAnnotations.openMocks(this);
         when(mockClientFactory.create(Mockito.any())).thenReturn(mockBabelClient);
-        mockVnfCatalogExtractor = mock(VnfCatalogExtractor.class);
 
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
         downloadManager = new ArtifactDownloadManager(mockDistributionClient,
-                new ModelLoaderConfig(configProperties, "."), mockClientFactory);
-
-
-        ReflectionTestUtils.setField(downloadManager, "notificationPublisher", mockNotificationPublisher);
-        ReflectionTestUtils.setField(downloadManager, "babelArtifactConverter", mockBabelArtifactConverter);
-        ReflectionTestUtils.setField(downloadManager, "vnfCatalogExtractor", mockVnfCatalogExtractor);
+                new ModelLoaderConfig(configProperties, "."), mockClientFactory, mockBabelArtifactConverter, mockNotificationPublisher, mockVnfCatalogExtractor);
     }
 
     @Test

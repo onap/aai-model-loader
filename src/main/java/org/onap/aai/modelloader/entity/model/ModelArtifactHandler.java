@@ -28,7 +28,9 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ModelArtifactHandler extends ArtifactHandler {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactHandler.class.getName());

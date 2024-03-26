@@ -27,8 +27,6 @@ import java.util.Properties;
 
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.notification.EventCallback;
-import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.impl.DistributionClientFactory;
@@ -59,10 +57,5 @@ public class BeanConfig {
     @Bean
     public IDistributionClient iDistributionClient() {
         return DistributionClientFactory.createDistributionClient();
-    }
-
-    @Bean
-    public EventCallback eventCallback(IDistributionClient client, ModelLoaderConfig config, BabelServiceClientFactory babelClientFactory) {
-        return new EventCallback(client, config, babelClientFactory);
     }
 }

@@ -63,7 +63,7 @@ public class TestNotificationPublisher {
 
     @BeforeEach
     public void setupMocks() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(client.getConfiguration()).thenReturn(config);
         when(client.sendDownloadStatus(any())).thenReturn(clientResult);
         when(client.sendComponentDoneStatus(any())).thenReturn(clientResult);

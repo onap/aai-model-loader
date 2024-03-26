@@ -29,12 +29,14 @@ import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is responsible for converting TOSCA artifacts into instances of {@link ModelArtifact} ready for pushing
  * the converted artifacts .
  */
-class BabelArtifactConverter {
+@Component
+public class BabelArtifactConverter {
 
     /**
      * This method converts BabelArtifacts into instances of {@link ModelArtifact}.

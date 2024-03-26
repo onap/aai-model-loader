@@ -224,7 +224,8 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         MdcOverride override = new MdcOverride();
         override.addAttribute(MdcContext.MDC_START_TIME, ZonedDateTime.now().format(formatter));
 
-        WebResource webResource = client.resource(config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl());
+        String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
+        WebResource webResource = client.resource(resourceUrl);
         ClientResponse response = webResource.type("application/json")
                 .header(AaiRestClient.HEADER_TRANS_ID, Collections.singletonList(transactionId))
                 .header(AaiRestClient.HEADER_FROM_APP_ID, Collections.singletonList(AaiRestClient.ML_APP_NAME))
