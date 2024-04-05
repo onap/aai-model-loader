@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -69,6 +70,13 @@ public class ModelController implements ModelLoaderInterface {
         this.eventCallback = eventCallback;
         this.artifactDeploymentManager = artifactDeploymentManager;
         this.artifactDownloadManager = artifactDownloadManager;
+    }
+
+    @PostConstruct
+    protected void start() {
+        if (!config.getASDCConnectionDisabled()) {
+            initSdcClient();
+        }
     }
 
     /**

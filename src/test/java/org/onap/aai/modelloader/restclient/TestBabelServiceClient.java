@@ -90,6 +90,8 @@ public class TestBabelServiceClient {
         configProperties.put("ml.babel.TRUSTSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
         configProperties.put("ml.babel.BASE_URL", url);
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "12000");
+        configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "12000");
         BabelServiceClient client =
                 new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
         List<BabelArtifact> result =
