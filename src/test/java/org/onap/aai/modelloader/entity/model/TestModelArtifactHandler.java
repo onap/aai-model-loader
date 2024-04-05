@@ -57,7 +57,7 @@ public class TestModelArtifactHandler {
 
     @BeforeEach
     public void setupMocks() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
