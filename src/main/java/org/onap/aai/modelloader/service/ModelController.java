@@ -72,13 +72,6 @@ public class ModelController implements ModelLoaderInterface {
         this.artifactDownloadManager = artifactDownloadManager;
     }
 
-    @PostConstruct
-    protected void start() {
-        if (!config.getASDCConnectionDisabled()) {
-            initSdcClient();
-        }
-    }
-
     /**
      * Responsible for stopping the connection to the distribution client before the resource is destroyed.
      */

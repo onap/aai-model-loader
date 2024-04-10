@@ -21,13 +21,6 @@
 
 package org.onap.aai.modelloader.restclient;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.json.JsonSanitizer;
-import com.sun.jersey.api.client.Client; // NOSONAR
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -45,13 +38,20 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.onap.aai.babel.service.data.BabelArtifact;
@@ -63,6 +63,10 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.json.JsonSanitizer;
 
 /**
  * HTTPS Client for interfacing with Babel.
@@ -129,9 +133,10 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
             HttpsURLConnection.setDefaultHostnameVerifier((host, session) -> true);
         }
 
-        client = Client.create(new DefaultClientConfig());
-        client.setConnectTimeout(config.getClientConnectTimeoutMs());
-        client.setReadTimeout(config.getClientReadTimeoutMs());
+        client = ClientBuilder.newBuilder()
+            .connectTimeout(config.getClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
+            .readTimeout(config.getClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .build();
 
         logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Jersey client created");
     }
@@ -226,13 +231,13 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         MdcOverride override = new MdcOverride();
         override.addAttribute(MdcContext.MDC_START_TIME, ZonedDateTime.now().format(formatter));
 
-        String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
-        WebResource webResource = client.resource(resourceUrl);
-        ClientResponse response = webResource.type("application/json")
+        String resourceUrl =config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
+        WebTarget target = client.target(resourceUrl);
+        Response response = target.request("application/json")
                 .header(AaiRestClient.HEADER_TRANS_ID, Collections.singletonList(transactionId))
                 .header(AaiRestClient.HEADER_FROM_APP_ID, Collections.singletonList(AaiRestClient.ML_APP_NAME))
-                .post(ClientResponse.class, obj.toString());
-        String sanitizedJson = JsonSanitizer.sanitize(response.getEntity(String.class));
+                .post(Entity.text(obj.toString()));
+        String sanitizedJson = JsonSanitizer.sanitize(response.readEntity(String.class));
 
         if (logger.isDebugEnabled()) {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT,

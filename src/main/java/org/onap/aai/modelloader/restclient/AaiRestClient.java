@@ -20,21 +20,23 @@
  */
 package org.onap.aai.modelloader.restclient;
 
-import com.sun.jersey.core.util.MultivaluedMapImpl; // NOSONAR
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -186,7 +188,7 @@ public class AaiRestClient {
      * @return map of headers
      */
     private Map<String, List<String>> buildHeaders(String transId) {
-        MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
+        Map<String, List<String>> headers = new HashMap<>();
         headers.put(HEADER_TRANS_ID, Collections.singletonList(transId));
         headers.put(HEADER_FROM_APP_ID, Collections.singletonList(ML_APP_NAME));
         return headers;

@@ -29,7 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import jline.internal.Log;
+
+import org.jline.utils.Log;
 import org.onap.aai.modelloader.entity.Artifact;
 
 /**
