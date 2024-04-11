@@ -33,10 +33,10 @@ import org.onap.sdc.api.results.IDistributionClientResult;
 import org.onap.sdc.utils.DistributionActionResultEnum;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
-@Component
+@Configuration
 @ConditionalOnProperty(value = "ml.distribution.connection.enabled", havingValue = "true", matchIfMissing = true)
 public class DistributionClientStartupConfig {
 
@@ -57,7 +57,13 @@ public class DistributionClientStartupConfig {
     protected void initSdcClient() {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
-        IDistributionClientResult initResult = client.init(config, eventCallback);
+        IDistributionClientResult initResult = null;
+        try {
+            
+            initResult = client.init(config, eventCallback);
+        } catch (Exception e) {
+            logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, e);
+        }
 
         if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
             // Start distribution client

@@ -30,9 +30,11 @@ import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.impl.DistributionClientFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class BeanConfig {
@@ -44,18 +46,28 @@ public class BeanConfig {
     private String configDir;
 
     @Bean
-    public ModelLoaderConfig modelLoaderConfig() throws IOException {
+    public Properties configProperties() throws IOException {
         // Load model loader system configuration
         logger.info(ModelLoaderMsgs.LOADING_CONFIGURATION);
-        ModelLoaderConfig.setConfigHome(configDir);
-        Properties configProperties = new Properties();
         InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"));
+        Properties configProperties = new Properties();
         configProperties.load(configInputStream);
+        return configProperties;
+    }
+
+    @Bean
+    public ModelLoaderConfig modelLoaderConfig(Properties configProperties) {
+        ModelLoaderConfig.setConfigHome(configDir);
         return new ModelLoaderConfig(configProperties);
     }
     
     @Bean
     public IDistributionClient iDistributionClient() {
         return DistributionClientFactory.createDistributionClient();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

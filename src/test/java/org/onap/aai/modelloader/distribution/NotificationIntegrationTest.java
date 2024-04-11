@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.onap.aai.modelloader.notification.NotificationDataImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,25 +36,26 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext
 @SpringBootTest(properties = { "model-loader.sdc.connection.enabled=true"})
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@EmbeddedKafka(partitions = 1, ports = 9092, topics = {"${topics.distribution.notification}"})
 public class NotificationIntegrationTest {
 
     @Autowired EventCallbackAspect eventCallbackAspect;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, NotificationDataImpl> kafkaTemplate;
 
-    @Value("${test.topic}")
+    @Value("${topics.distribution.notification}")
     private String topic;
 
     @Test
     @Disabled("This test is not yet implemented")
     public void thatActivateCallbackIsCalled()
       throws Exception {
-        String data = "Smth";
-
+        NotificationDataImpl notificationData = new NotificationDataImpl();
+        notificationData.setDistributionID("distributionID");
+    
         // TODO: send distribution event here
-        kafkaTemplate.send(topic, data);
+        kafkaTemplate.send(topic, notificationData);
 
         // TODO: mock distribution client requests to /sdc/v1/artifactTypes
         // TODO: mock distribution client requests to /sdc/v1/distributionKafkaData

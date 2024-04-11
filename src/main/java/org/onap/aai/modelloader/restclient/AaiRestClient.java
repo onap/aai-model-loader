@@ -42,6 +42,7 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.restclient.client.OperationResult;
 import org.onap.aai.restclient.client.RestClient;
 import org.onap.aai.restclient.enums.RestAuthenticationMode;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,6 +53,7 @@ import org.xml.sax.SAXException;
  * Wrapper around the standard A&AI Rest Client interface. This currently uses Jersey client 1.x
  *
  */
+@Component
 public class AaiRestClient {
 
     public static final String HEADER_TRANS_ID = "X-TransactionId";
