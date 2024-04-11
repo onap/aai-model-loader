@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://org.onap.aai.inventory/v28">
+  <model-invariant-id>3a40ab73-6694-4e75-bb6d-9a4a86ce35b3</model-invariant-id>
+  <model-type>service</model-type>
+  <model-role>Network Service</model-role>
+  <resource-version>1710523260974</resource-version>
+</model>

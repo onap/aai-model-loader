@@ -229,8 +229,8 @@ public class HttpsBabelServiceClient implements BabelServiceClient {
         String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
         WebResource webResource = client.resource(resourceUrl);
         ClientResponse response = webResource.type("application/json")
-                .header(AaiRestClient.HEADER_TRANS_ID, Collections.singletonList(transactionId))
-                .header(AaiRestClient.HEADER_FROM_APP_ID, Collections.singletonList(AaiRestClient.ML_APP_NAME))
+                .header(AaiRestClient.HEADER_TRANS_ID, transactionId)
+                .header(AaiRestClient.HEADER_FROM_APP_ID, AaiRestClient.ML_APP_NAME)
                 .post(ClientResponse.class, obj.toString());
         String sanitizedJson = JsonSanitizer.sanitize(response.getEntity(String.class));
 
