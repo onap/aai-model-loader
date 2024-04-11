@@ -23,12 +23,8 @@ package org.onap.aai.modelloader.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -37,13 +33,10 @@ import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
-import org.onap.aai.modelloader.notification.EventCallback;
 import org.onap.aai.modelloader.notification.NotificationDataImpl;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
-import org.onap.sdc.api.results.IDistributionClientResult;
-import org.onap.sdc.utils.DistributionActionResultEnum;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,69 +53,14 @@ public class ModelController implements ModelLoaderInterface {
 
     private final IDistributionClient client;
     private final ModelLoaderConfig config;
-    private final EventCallback eventCallback;
     private final ArtifactDeploymentManager artifactDeploymentManager;
     private final ArtifactDownloadManager artifactDownloadManager;
 
-    public ModelController(IDistributionClient client, ModelLoaderConfig config, EventCallback eventCallback, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager) {
+    public ModelController(IDistributionClient client, ModelLoaderConfig config, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager) {
         this.client = client;
         this.config = config;
-        this.eventCallback = eventCallback;
         this.artifactDeploymentManager = artifactDeploymentManager;
         this.artifactDownloadManager = artifactDownloadManager;
-    }
-
-    @PostConstruct
-    protected void start() {
-        if (!config.getASDCConnectionDisabled()) {
-            initSdcClient();
-        }
-    }
-
-    /**
-     * Responsible for stopping the connection to the distribution client before the resource is destroyed.
-     */
-    public void preShutdownOperations() {
-        logger.info(ModelLoaderMsgs.STOPPING_CLIENT);
-        if (client != null) {
-            client.stop();
-        }
-    }
-
-    /**
-     * Responsible for loading configuration files, initializing model distribution clients, and starting them.
-     */
-    protected void initSdcClient() {
-        // Initialize distribution client
-        logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
-        IDistributionClientResult initResult = client.init(config, eventCallback);
-
-        if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
-            // Start distribution client
-            logger.debug(ModelLoaderMsgs.INITIALIZING, "Starting distribution client...");
-            IDistributionClientResult startResult = client.start();
-            if (startResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
-                logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
-            } else {
-                String errorMsg = "Failed to start distribution client: " + startResult.getDistributionMessageResult();
-                logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-
-                // Kick off a timer to retry the SDC connection
-                Timer timer = new Timer();
-                TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
-                timer.schedule(task, new Date(), 60000);
-            }
-        } else {
-            String errorMsg = "Failed to initialize distribution client: " + initResult.getDistributionMessageResult();
-            logger.error(ModelLoaderMsgs.ASDC_CONNECTION_ERROR, errorMsg);
-
-            // Kick off a timer to retry the SDC connection
-            Timer timer = new Timer();
-            TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
-            timer.schedule(task, new Date(), 60000);
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(this::preShutdownOperations));
     }
 
     /**

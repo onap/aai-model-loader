@@ -31,7 +31,6 @@ import java.util.Collections;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -39,7 +38,6 @@ import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
 import org.onap.aai.modelloader.notification.BabelArtifactConverter;
-import org.onap.aai.modelloader.notification.EventCallback;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
@@ -59,7 +57,6 @@ public class TestModelController {
 
     @Autowired IDistributionClient iDistributionClient;
     @Autowired ModelLoaderConfig modelLoaderConfig;
-    @Autowired EventCallback eventCallback;
     @Autowired ArtifactDeploymentManager artifactDeploymentManager;
     @Autowired BabelArtifactConverter babelArtifactConverter;
     @Autowired NotificationPublisher notificationPublisher;
@@ -75,12 +72,7 @@ public class TestModelController {
         when(clientFactory.create(any())).thenReturn(babelServiceClient);
         when(babelServiceClient.postArtifact(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, modelLoaderConfig, clientFactory, babelArtifactConverter, notificationPublisher, vnfCatalogExtractor);
-        this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, eventCallback, artifactDeploymentManager, artifactDownloadManager);
-    }
-
-    @AfterEach
-    public void shutdown() {
-        modelController.preShutdownOperations();
+        this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, artifactDeploymentManager, artifactDownloadManager);
     }
 
     @Test

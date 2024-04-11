@@ -28,7 +28,6 @@ import java.util.Base64;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,17 +43,12 @@ import org.springframework.test.context.TestPropertySource;
 public class TestModelLoaderServiceWithSdc {
 
     @Autowired
-    private ModelController service;
-
-    @AfterEach
-    public void shutdown() {
-        service.preShutdownOperations();
-    }
+    private ModelController controller;
 
     @Test
     public void testIngestModel() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = service.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
+        Response response = controller.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
         assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
