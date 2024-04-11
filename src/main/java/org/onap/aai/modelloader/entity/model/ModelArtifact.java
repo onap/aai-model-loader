@@ -291,7 +291,9 @@ public class ModelArtifact extends AbstractModelArtifact {
         transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         Transformer t = transFact.newTransformer();
         t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        t.transform(new DOMSource(node), new StreamResult(sw));
+        DOMSource domSource = new DOMSource(node);
+        StreamResult sr = new StreamResult(sw);
+        t.transform(domSource, sr);
         return sw.toString();
     }
 }

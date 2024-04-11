@@ -413,4 +413,9 @@ public class ModelLoaderConfig implements IConfiguration {
         return Integer.parseInt(connectTimeout);
     }
 
+    @Override
+    public String getKafkaSaslJaasConfig() {
+        return "";
+    }
+
 }
