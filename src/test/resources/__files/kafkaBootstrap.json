@@ -1,0 +1,5 @@
+{
+  "kafkaBootStrapServer": "localhost:9092",
+  "distrNotificationTopicName": "SDC-DISTR-NOTIF-TOPIC-AUTO",
+  "distrStatusTopicName": "SDC-DISTR-STATUS-TOPIC-AUTO"
+}

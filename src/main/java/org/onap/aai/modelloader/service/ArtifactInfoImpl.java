@@ -20,116 +20,25 @@
  */
 package org.onap.aai.modelloader.service;
 
-import java.util.Collections;
 import java.util.List;
 import org.onap.sdc.api.notification.IArtifactInfo;
+
+import lombok.Data;
 
 /**
  * This class is an implementation of IArtifactInfo for test purposes.
  */
+@Data
 public class ArtifactInfoImpl implements IArtifactInfo {
 
     private String artifactName;
     private String artifactType;
     private String artifactDescription;
     private String artifactVersion;
-
-    @Override
-    public String getArtifactName() {
-        return artifactName;
-    }
-
-    public void setArtifactName(String artifactName) {
-        this.artifactName = artifactName;
-    }
-
-    @Override
-    public String getArtifactType() {
-        return artifactType;
-    }
-
-    public void setArtifactType(String artifactType) {
-        this.artifactType = artifactType;
-    }
-
-    @Override
-    public String getArtifactURL() {
-        return null;
-    }
-
-    @Override
-    public String getArtifactChecksum() {
-        return null;
-    }
-
-    @Override
-    public String getArtifactDescription() {
-        return artifactDescription;
-    }
-
-    public void setArtifactDescription(String artifactDescription) {
-        this.artifactDescription = artifactDescription;
-    }
-
-    @Override
-    public Integer getArtifactTimeout() {
-        return null;
-    }
-
-    @Override
-    public String getArtifactVersion() {
-        return artifactVersion;
-    }
-
-    public void setArtifactVersion(String artifactVersion) {
-        this.artifactVersion = artifactVersion;
-    }
-
-    @Override
-    public String getArtifactUUID() {
-        return null;
-    }
-
-    @Override
-    public IArtifactInfo getGeneratedArtifact() {
-        return null;
-    }
-
-    @Override
-    public List<IArtifactInfo> getRelatedArtifacts() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ArtifactInfoImpl that = (ArtifactInfoImpl) o;
-
-        if (artifactName != null ? !artifactName.equals(that.artifactName) : that.artifactName != null) {
-            return false;
-        }
-        if (artifactType != null ? !artifactType.equals(that.artifactType) : that.artifactType != null) {
-            return false;
-        }
-        if (artifactDescription != null ? !artifactDescription.equals(that.artifactDescription)
-                : that.artifactDescription != null) {
-            return false;
-        }
-        return artifactVersion != null ? artifactVersion.equals(that.artifactVersion) : that.artifactVersion == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = artifactName != null ? artifactName.hashCode() : 0;
-        result = 31 * result + (artifactType != null ? artifactType.hashCode() : 0);
-        result = 31 * result + (artifactDescription != null ? artifactDescription.hashCode() : 0);
-        result = 31 * result + (artifactVersion != null ? artifactVersion.hashCode() : 0);
-        return result;
-    }
+    private String artifactURL;
+    private String artifactChecksum;
+    private Integer artifactTimeout;
+    private String artifactUUID;
+    private IArtifactInfo generatedArtifact;
+    private List<IArtifactInfo> relatedArtifacts;
 }
