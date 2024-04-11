@@ -77,6 +77,9 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_ML_DISTRIBUTION_HTTP_PROXY_PORT = PREFIX_DISTRIBUTION_CLIENT + "HTTP_PROXY_PORT";
     protected static final String PROP_ML_DISTRIBUTION_HTTPS_PROXY_HOST = PREFIX_DISTRIBUTION_CLIENT + "HTTPS_PROXY_HOST";
     protected static final String PROP_ML_DISTRIBUTION_HTTPS_PROXY_PORT = PREFIX_DISTRIBUTION_CLIENT + "HTTPS_PROXY_PORT";
+    protected static final String PROP_ML_DISTRIBUTION_SASL_JAAS_CONFIG = PREFIX_DISTRIBUTION_CLIENT + "SASL_JAAS_CONFIG";
+    protected static final String PROP_ML_DISTRIBUTION_SASL_MECHANISM = PREFIX_DISTRIBUTION_CLIENT + "SASL_MECHANISM";
+    protected static final String PROP_ML_DISTRIBUTION_SECURITY_PROTOCOL = PREFIX_DISTRIBUTION_CLIENT + "SECURITY_PROTOCOL";
     protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
     protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
     protected static final String PROP_AAI_KEYSTORE_PASSWORD = PREFIX_AAI + SUFFIX_KEYSTORE_PASS;
@@ -411,6 +414,37 @@ public class ModelLoaderConfig implements IConfiguration {
     public int getClientReadTimeoutMs() {
         String connectTimeout = Optional.ofNullable(get(PROP_AAI_CLIENT_READ_TIMEOUT_MS)).orElse("120000");
         return Integer.parseInt(connectTimeout);
+    }
+
+    @Override
+    public String getKafkaSaslJaasConfig() {
+        String saslJaasConfFromEnv = System.getenv("SASL_JAAS_CONFIG");
+        if(saslJaasConfFromEnv != null) {
+            return saslJaasConfFromEnv;
+        }
+        if(get(PROP_ML_DISTRIBUTION_SASL_JAAS_CONFIG) != null) {
+            return get(PROP_ML_DISTRIBUTION_SASL_JAAS_CONFIG);
+        }
+        return null;
+    }
+
+    @Override
+    public String getKafkaSaslMechanism() {
+        if(get(PROP_ML_DISTRIBUTION_SASL_MECHANISM) != null) {
+            return get(PROP_ML_DISTRIBUTION_SASL_MECHANISM);
+        }
+        return System.getenv().getOrDefault("SASL_MECHANISM", "SCRAM-SHA-512");
+    }
+
+    /**
+     * One of PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+     */
+    @Override
+    public String getKafkaSecurityProtocolConfig() {
+        if(get(PROP_ML_DISTRIBUTION_SECURITY_PROTOCOL) != null) {
+            return get(PROP_ML_DISTRIBUTION_SECURITY_PROTOCOL);
+        }
+        return System.getenv().getOrDefault("SECURITY_PROTOCOL", "SASL_PLAINTEXT");
     }
 
 }

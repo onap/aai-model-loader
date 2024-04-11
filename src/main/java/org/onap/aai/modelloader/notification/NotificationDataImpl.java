@@ -20,98 +20,28 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import java.util.Collections;
 import java.util.List;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.notification.IResourceInstance;
 
+import lombok.Data;
+
+@Data
 public class NotificationDataImpl implements INotificationData {
 
     private String distributionID;
+    private String serviceName;
+    private String serviceVersion;
+    private String serviceUUID;
+    private String serviceDescription;
+    private List<IResourceInstance> resources;
+    private List<IArtifactInfo> serviceArtifacts;
+    private String serviceInvariantUUID;
+    private String workloadContext;
 
     @Override
-    public IArtifactInfo getArtifactMetadataByUUID(String arg0) {
+    public IArtifactInfo getArtifactMetadataByUUID(String uuid) {
         return null;
     }
-
-    @Override
-    public String getDistributionID() {
-        return distributionID;
-    }
-
-    public void setDistributionID(String distributionID) {
-        this.distributionID = distributionID;
-    }
-
-    @Override
-    public List<IResourceInstance> getResources() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<IArtifactInfo> getServiceArtifacts() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String getServiceDescription() {
-        return null;
-    }
-
-    @Override
-    public String getServiceInvariantUUID() {
-        return null;
-    }
-
-    @Override
-    public String getServiceName() {
-        return null;
-    }
-
-    @Override
-    public String getServiceUUID() {
-        return null;
-    }
-
-    @Override
-    public String getServiceVersion() {
-        return null;
-    }
-
-    @Override
-    public String getWorkloadContext() {
-        return null;
-    }
-
-    @Override
-    public void setWorkloadContext(String arg0) {
-        // Unsupported method - not expected to be called
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((distributionID == null) ? 0 : distributionID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        NotificationDataImpl other = (NotificationDataImpl) obj;
-        if (distributionID == null) {
-            if (other.distributionID != null)
-                return false;
-        } else if (!distributionID.equals(other.distributionID))
-            return false;
-        return true;
-    }
-
 }
