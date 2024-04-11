@@ -20,68 +20,61 @@
  */
 package org.onap.aai.modelloader.restclient;
 
-import static javax.servlet.http.HttpServletResponse.SC_OK;
-import static org.apache.commons.io.IOUtils.write;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 
 /**
  * Local testing of the Babel service client.
  *
  */
+@SpringBootTest
+@AutoConfigureWireMock(port = 0)
 public class TestBabelServiceClient {
 
-    private Server server;
-    private String responseBody;
+    @Value("${wiremock.server.port}")
+    private int wiremockPort;
 
-    @BeforeEach
-    public void startJetty() throws Exception {
-        List<BabelArtifact> response = new ArrayList<>();
-        response.add(new BabelArtifact("", null, ""));
-        response.add(new BabelArtifact("", null, ""));
-        response.add(new BabelArtifact("", null, ""));
-        responseBody = new Gson().toJson(response);
-
-        server = new Server(0);
-        server.setHandler(getMockHandler());
-        server.start();
-    }
-
-    @AfterEach
-    public void stopJetty() throws Exception {
-        server.stop();
+    @BeforeAll
+    public static void setup() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<BabelArtifact> artifacts = List.of(
+            new BabelArtifact("art1", null, ""),
+            new BabelArtifact("art2", null, ""),
+            new BabelArtifact("art3", null, ""));
+        WireMock.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/generate"))
+                // .withHeader("some", new EqualToPattern("header"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(artifacts))));
     }
 
     @Test
     public void testRestClient() throws BabelServiceClientException, IOException, URISyntaxException {
-        String url = server.getURI().toString();
+        String url = "http://localhost:" + wiremockPort;
         Properties configProperties = new Properties();
         configProperties.put("ml.babel.KEYSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
         configProperties.put("ml.babel.KEYSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
@@ -89,7 +82,7 @@ public class TestBabelServiceClient {
         // In a real deployment this would be a different file (to the client keystore)
         configProperties.put("ml.babel.TRUSTSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
         configProperties.put("ml.babel.BASE_URL", url);
-        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "/generate");
         configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "12000");
         configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "12000");
         BabelServiceClient client =
@@ -102,11 +95,11 @@ public class TestBabelServiceClient {
 
     @Test
     public void testRestClientHttp() throws BabelServiceClientException, IOException, URISyntaxException {
-        String url = server.getURI().toString();
+        String url = "http://localhost:" + wiremockPort;
         Properties configProperties = new Properties();
         configProperties.put("ml.babel.USE_HTTPS", "false");
         configProperties.put("ml.babel.BASE_URL", url);
-        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "generate");
+        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "/generate");
         configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "3000");
         configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "3000");
         BabelServiceClient client =
@@ -120,24 +113,5 @@ public class TestBabelServiceClient {
 
     private byte[] readBytesFromFile(String resourceFile) throws IOException, URISyntaxException {
         return Files.readAllBytes(Paths.get(ClassLoader.getSystemResource(resourceFile).toURI()));
-    }
-
-    /**
-     * Creates an {@link AbstractHandler handler} returning an arbitrary String as a response.
-     * 
-     * @return never <code>null</code>.
-     */
-    private Handler getMockHandler() {
-        Handler handler = new AbstractHandler() {
-            @Override
-            public void handle(String target, Request request, HttpServletRequest servletRequest,
-                    HttpServletResponse response) throws IOException, ServletException {
-                response.setStatus(SC_OK);
-                response.setContentType("text/xml;charset=utf-8");
-                write(responseBody, response.getOutputStream(), Charset.defaultCharset());
-                request.setHandled(true);
-            }
-        };
-        return handler;
     }
 }
