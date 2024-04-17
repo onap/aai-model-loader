@@ -24,24 +24,18 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.onap.aai.babel.service.data.BabelArtifact;
-import org.onap.aai.babel.service.data.BabelArtifact.ArtifactType;
+import org.onap.aai.babel.service.data.BabelRequest;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.cl.mdc.MdcOverride;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
-import org.onap.aai.modelloader.restclient.BabelServiceClient;
-import org.onap.aai.modelloader.restclient.BabelServiceClientException;
-import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -68,19 +62,15 @@ public class ArtifactDownloadManager {
 
     private final IDistributionClient client;
     private final NotificationPublisher notificationPublisher;
-    private final BabelArtifactConverter babelArtifactConverter;
-    private final ModelLoaderConfig config;
-    private final BabelServiceClientFactory clientFactory;
     private final VnfCatalogExtractor vnfCatalogExtractor;
+    private final BabelArtifactService babelArtifactService;
 
-    public ArtifactDownloadManager(IDistributionClient client, ModelLoaderConfig config,
-            BabelServiceClientFactory clientFactory, BabelArtifactConverter babelArtifactConverter, NotificationPublisher notificationPublisher, VnfCatalogExtractor vnfCatalogExtractor) {
+    public ArtifactDownloadManager(IDistributionClient client,
+            NotificationPublisher notificationPublisher, VnfCatalogExtractor vnfCatalogExtractor, BabelArtifactService babelArtifactService) {
         this.client = client;
         this.notificationPublisher = notificationPublisher;
-        this.babelArtifactConverter = babelArtifactConverter;
-        this.config = config;
-        this.clientFactory = clientFactory;
         this.vnfCatalogExtractor = vnfCatalogExtractor;
+        this.babelArtifactService = babelArtifactService;
     }
 
     /**
@@ -158,7 +148,11 @@ public class ArtifactDownloadManager {
             IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
             throws ProcessToscaArtifactsException, InvalidArchiveException {
         // Get translated artifacts from Babel Service
-        invokeBabelService(modelArtifacts, catalogArtifacts, payload, artifactInfo, distributionId, serviceVersion);
+        BabelRequest babelRequest = new BabelRequest();
+        babelRequest.setArtifactName(artifactInfo.getArtifactName());
+        babelRequest.setCsar(Base64.getEncoder().encodeToString(payload));
+        babelRequest.setArtifactVersion(serviceVersion);
+        babelArtifactService.invokeBabelService(modelArtifacts, catalogArtifacts, babelRequest, distributionId);
 
         // Get VNF Catalog artifacts directly from CSAR
         List<Artifact> csarCatalogArtifacts = vnfCatalogExtractor.extract(payload, artifactInfo.getArtifactName());
@@ -171,75 +165,6 @@ public class ArtifactDownloadManager {
         } else if (!csarCatalogArtifacts.isEmpty()) {
             catalogArtifacts.addAll(csarCatalogArtifacts);
         }
-    }
-
-    public void invokeBabelService(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts, byte[] payload,
-            IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
-            throws ProcessToscaArtifactsException {
-        try {
-            BabelServiceClient babelClient = createBabelServiceClient(artifactInfo, serviceVersion);
-
-            logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
-                    "Posting artifact: " + artifactInfo.getArtifactName() + ", service version: " + serviceVersion
-                            + ", artifact version: " + artifactInfo.getArtifactVersion());
-
-            List<BabelArtifact> babelArtifacts =
-                    babelClient.postArtifact(payload, artifactInfo.getArtifactName(), serviceVersion, distributionId);
-
-            // Sort Babel artifacts based on type
-            Map<ArtifactType, List<BabelArtifact>> artifactMap =
-                    babelArtifacts.stream().collect(Collectors.groupingBy(BabelArtifact::getType));
-
-            if (artifactMap.containsKey(BabelArtifact.ArtifactType.MODEL)) {
-                modelArtifacts.addAll(
-                        babelArtifactConverter.convertToModel(artifactMap.get(BabelArtifact.ArtifactType.MODEL)));
-                artifactMap.remove(BabelArtifact.ArtifactType.MODEL);
-            }
-
-            if (artifactMap.containsKey(BabelArtifact.ArtifactType.VNFCATALOG)) {
-                catalogArtifacts.addAll(babelArtifactConverter
-                        .convertToCatalog(artifactMap.get(BabelArtifact.ArtifactType.VNFCATALOG)));
-                artifactMap.remove(BabelArtifact.ArtifactType.VNFCATALOG);
-            }
-
-            // Log unexpected artifact types
-            if (!artifactMap.isEmpty()) {
-                logger.warn(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR,
-                        artifactInfo.getArtifactName() + " " + serviceVersion
-                                + ". Unexpected artifact types returned by the babel service: "
-                                + artifactMap.keySet().toString());
-            }
-
-        } catch (BabelArtifactParsingException e) {
-            logger.error(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR,
-                    "Error for artifact " + artifactInfo.getArtifactName() + " " + serviceVersion + e);
-            throw new ProcessToscaArtifactsException(
-                    "An error occurred while trying to parse the Babel artifacts: " + e.getLocalizedMessage());
-        } catch (Exception e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
-                    "Error posting artifact " + artifactInfo.getArtifactName() + " " + serviceVersion + " to Babel: "
-                            + e.getLocalizedMessage());
-            throw new ProcessToscaArtifactsException(
-                    "An error occurred while calling the Babel service: " + e.getLocalizedMessage());
-        }
-    }
-
-    BabelServiceClient createBabelServiceClient(IArtifactInfo artifact, String serviceVersion)
-            throws ProcessToscaArtifactsException {
-        BabelServiceClient babelClient;
-        try {
-            logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Creating Babel client");
-            babelClient = clientFactory.create(config);
-        } catch (BabelServiceClientException e) {
-            logger.error(ModelLoaderMsgs.BABEL_REST_REQUEST_ERROR, e, "POST", config.getBabelBaseUrl(),
-                    "Error posting artifact " + artifact.getArtifactName() + " " + serviceVersion + " to Babel: "
-                            + e.getLocalizedMessage());
-            throw new ProcessToscaArtifactsException(
-                    "An error occurred tyring to convert the tosca artifacts to xml artifacts: "
-                            + e.getLocalizedMessage());
-        }
-
-        return babelClient;
     }
 
     private void processModelQuerySpecArtifact(List<Artifact> modelArtifacts,

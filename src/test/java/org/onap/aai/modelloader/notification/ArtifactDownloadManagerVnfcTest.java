@@ -35,10 +35,12 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
@@ -47,7 +49,7 @@ import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
-import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.IBabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
@@ -64,12 +66,13 @@ import org.onap.sdc.utils.DistributionActionResultEnum;
 public class ArtifactDownloadManagerVnfcTest {
 
     @Mock private ArtifactDownloadManager downloadManager;
-    @Mock private BabelServiceClient mockBabelClient;
+    @Mock private IBabelServiceClient mockBabelClient;
     @Mock private IDistributionClient mockDistributionClient;
     @Mock private NotificationPublisher mockNotificationPublisher;
     @Mock private BabelArtifactConverter mockBabelArtifactConverter;
     @Mock private BabelServiceClientFactory mockClientFactory;
     @Mock private VnfCatalogExtractor mockVnfCatalogExtractor;
+    @InjectMocks private BabelArtifactService babelArtifactService;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -79,7 +82,7 @@ public class ArtifactDownloadManagerVnfcTest {
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
         downloadManager = new ArtifactDownloadManager(mockDistributionClient,
-                new ModelLoaderConfig(configProperties, "."), mockClientFactory, mockBabelArtifactConverter, mockNotificationPublisher, mockVnfCatalogExtractor);
+                mockNotificationPublisher, mockVnfCatalogExtractor, babelArtifactService);
     }
 
     @Test
@@ -89,7 +92,9 @@ public class ArtifactDownloadManagerVnfcTest {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         setupValidDownloadCsarMocks(data, artifactInfo);
-        when(mockBabelClient.postArtifact(any(), any(), any(), any())).thenReturn(createBabelArtifacts());
+        when(mockBabelClient.postArtifact(any(), any())).thenReturn(createToscaVnfcArtifacts());
+        // when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createToscaVnfcArtifacts());
+        when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifacts());
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(new ArrayList<>());
 
         List<Artifact> modelArtifacts = new ArrayList<>();

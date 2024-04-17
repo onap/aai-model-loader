@@ -22,9 +22,9 @@
 package org.onap.aai.modelloader.service;
 
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.IBabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 
 public interface BabelServiceClientFactory {
-    public BabelServiceClient create(ModelLoaderConfig config) throws BabelServiceClientException;
+    public IBabelServiceClient create(ModelLoaderConfig config) throws BabelServiceClientException;
 }

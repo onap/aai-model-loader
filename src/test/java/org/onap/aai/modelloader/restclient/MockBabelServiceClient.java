@@ -23,19 +23,20 @@ package org.onap.aai.modelloader.restclient;
 import java.util.Collections;
 import java.util.List;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.babel.service.data.BabelRequest;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 
 /**
  * Mocked Client for interfacing with Babel.
  *
  */
-public class MockBabelServiceClient implements BabelServiceClient {
+public class MockBabelServiceClient implements IBabelServiceClient {
 
     public MockBabelServiceClient(ModelLoaderConfig config) throws BabelServiceClientException {}
 
     @Override
-    public List<BabelArtifact> postArtifact(byte[] artifactPayload, String artifactName, String artifactVersion,
-            String transactionId) throws BabelServiceClientException {
+    public List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId)
+            throws BabelServiceClientException {
         return Collections.emptyList();
     }
 }

@@ -46,7 +46,7 @@ public class BabelArtifactConverter {
      * @throws BabelArtifactParsingException if an error occurs trying to parse the generated XML files that were
      *         converted from tosca artifacts
      */
-    List<Artifact> convertToModel(List<BabelArtifact> xmlArtifacts) throws BabelArtifactParsingException {
+    public List<Artifact> convertToModel(List<BabelArtifact> xmlArtifacts) throws BabelArtifactParsingException {
         Objects.requireNonNull(xmlArtifacts);
         List<Artifact> modelArtifacts = new ArrayList<>();
         ModelArtifactParser modelArtParser = new ModelArtifactParser();
@@ -72,7 +72,7 @@ public class BabelArtifactConverter {
      * @param xmlArtifacts xml artifacts to be parsed
      * @return List<org.openecomp.modelloader.entity.Artifact> list of converted catalog artifacts
      */
-    List<Artifact> convertToCatalog(List<BabelArtifact> xmlArtifacts) {
+    public List<Artifact> convertToCatalog(List<BabelArtifact> xmlArtifacts) {
         Objects.requireNonNull(xmlArtifacts);
         List<Artifact> catalogArtifacts = new ArrayList<>();
 

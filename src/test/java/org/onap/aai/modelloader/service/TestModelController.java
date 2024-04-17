@@ -39,7 +39,7 @@ import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
 import org.onap.aai.modelloader.notification.BabelArtifactConverter;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
-import org.onap.aai.modelloader.restclient.BabelServiceClient;
+import org.onap.aai.modelloader.restclient.IBabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.IDistributionClient;
@@ -63,7 +63,7 @@ public class TestModelController {
     @Autowired VnfCatalogExtractor vnfCatalogExtractor;
 
     @Mock BabelServiceClientFactory clientFactory;
-    @Mock BabelServiceClient babelServiceClient;
+    @Mock IBabelServiceClient babelServiceClient;
     
     private ModelController modelController;
 

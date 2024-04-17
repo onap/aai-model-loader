@@ -18,20 +18,15 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.service;
 
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.restclient.IBabelServiceClient;
-import org.onap.aai.modelloader.restclient.BabelServiceClientException;
-import org.onap.aai.modelloader.restclient.MockBabelServiceClient;
-import org.springframework.stereotype.Service;
+package org.onap.aai.modelloader.restclient;
 
-@Service
-public class MockBabelServiceClientFactory implements BabelServiceClientFactory {
+import java.util.List;
+import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.babel.service.data.BabelRequest;
 
-    @Override
-    public IBabelServiceClient create(ModelLoaderConfig config) throws BabelServiceClientException {
-        return new MockBabelServiceClient(config);
-    }
+public interface IBabelServiceClient {
+
+    List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId) throws BabelServiceClientException;
 
 }
