@@ -30,7 +30,6 @@ import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.impl.DistributionClientFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
