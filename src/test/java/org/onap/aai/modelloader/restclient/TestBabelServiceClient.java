@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -55,6 +56,8 @@ public class TestBabelServiceClient {
 
     @Value("${wiremock.server.port}")
     private int wiremockPort;
+
+    @Autowired BabelServiceClient client;
 
     @BeforeAll
     public static void setup() throws JsonProcessingException {
@@ -89,8 +92,6 @@ public class TestBabelServiceClient {
         configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "/generate");
         configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "12000");
         configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "12000");
-        BabelServiceClient client =
-                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
         List<BabelArtifact> result =
                 client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
                         "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
