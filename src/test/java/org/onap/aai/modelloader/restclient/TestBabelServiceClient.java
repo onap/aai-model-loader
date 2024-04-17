@@ -28,33 +28,39 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
-import org.onap.aai.modelloader.service.HttpsBabelServiceClientFactory;
+import org.onap.aai.babel.service.data.BabelRequest;
+import org.onap.aai.modelloader.BabelClientTestConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 
 /**
  * Local testing of the Babel service client.
  *
  */
 @SpringBootTest
+@DirtiesContext
 @AutoConfigureWireMock(port = 0)
+@Import(BabelClientTestConfiguration.class)
 public class TestBabelServiceClient {
 
     @Value("${wiremock.server.port}")
     private int wiremockPort;
+
+    @Autowired BabelServiceClient client;
 
     @BeforeAll
     public static void setup() throws JsonProcessingException {
@@ -64,7 +70,7 @@ public class TestBabelServiceClient {
             new BabelArtifact("art2", null, ""),
             new BabelArtifact("art3", null, ""));
         WireMock.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/generate"))
+            WireMock.post(WireMock.urlEqualTo("/services/babel-service/v1/app/generateArtifacts"))
                 .withHeader("X-TransactionId", WireMock.equalTo("Test-Transaction-ID-BabelClient"))
                 .withHeader("X-FromAppId", WireMock.equalTo("ModelLoader"))
                 .withRequestBody(WireMock.matchingJsonPath("$.artifactName", WireMock.equalTo("service-Vscpass-Test")))
@@ -78,39 +84,13 @@ public class TestBabelServiceClient {
 
     @Test
     public void testRestClient() throws BabelServiceClientException, IOException, URISyntaxException {
-        String url = "http://localhost:" + wiremockPort;
-        Properties configProperties = new Properties();
-        configProperties.put("ml.babel.KEYSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
-        configProperties.put("ml.babel.KEYSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
-        configProperties.put("ml.babel.TRUSTSTORE_PASSWORD", "OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0");
-        // In a real deployment this would be a different file (to the client keystore)
-        configProperties.put("ml.babel.TRUSTSTORE_FILE", "src/test/resources/auth/aai-client-dummy.p12");
-        configProperties.put("ml.babel.BASE_URL", url);
-        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "/generate");
-        configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "12000");
-        configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "12000");
-        BabelServiceClient client =
-                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
-        List<BabelArtifact> result =
-                client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
-                        "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
-        assertThat(result.size(), is(equalTo(3)));
-    }
+        BabelRequest babelRequest = new BabelRequest();
+        babelRequest.setArtifactName("service-Vscpass-Test");
+        babelRequest.setCsar(Base64.getEncoder().encodeToString(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar")));
+        babelRequest.setArtifactVersion("1.0");
 
-    @Test
-    public void testRestClientHttp() throws BabelServiceClientException, IOException, URISyntaxException {
-        String url = "http://localhost:" + wiremockPort;
-        Properties configProperties = new Properties();
-        configProperties.put("ml.babel.USE_HTTPS", "false");
-        configProperties.put("ml.babel.BASE_URL", url);
-        configProperties.put("ml.babel.GENERATE_ARTIFACTS_URL", "/generate");
-        configProperties.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "3000");
-        configProperties.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "3000");
-        BabelServiceClient client =
-                new HttpsBabelServiceClientFactory().create(new ModelLoaderConfig(configProperties, "."));
         List<BabelArtifact> result =
-                client.postArtifact(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar"),
-                        "service-Vscpass-Test", "1.0", "Test-Transaction-ID-BabelClient");
+                client.postArtifact(babelRequest, "Test-Transaction-ID-BabelClient");
         assertThat(result.size(), is(equalTo(3)));
     }
 
