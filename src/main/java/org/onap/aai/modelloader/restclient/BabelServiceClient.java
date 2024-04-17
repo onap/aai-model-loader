@@ -23,10 +23,10 @@ package org.onap.aai.modelloader.restclient;
 
 import java.util.List;
 import org.onap.aai.babel.service.data.BabelArtifact;
+import org.onap.aai.babel.service.data.BabelRequest;
 
 public interface BabelServiceClient {
 
-    List<BabelArtifact> postArtifact(byte[] artifactPayload, String artifactName, String artifactVersion,
-            String transactionId) throws BabelServiceClientException;
+    List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId) throws BabelServiceClientException;
 
 }

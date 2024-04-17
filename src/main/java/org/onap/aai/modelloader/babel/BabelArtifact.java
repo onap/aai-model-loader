@@ -2,8 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright © 2024 Deutsche Telekom AG Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +17,19 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader.restclient;
+package org.onap.aai.modelloader.babel;
 
-import java.util.Collections;
-import java.util.List;
-import org.onap.aai.babel.service.data.BabelArtifact;
-import org.onap.aai.babel.service.data.BabelRequest;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.entity.ArtifactType;
 
-/**
- * Mocked Client for interfacing with Babel.
- *
- */
-public class MockBabelServiceClient implements BabelServiceClient {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public MockBabelServiceClient(ModelLoaderConfig config) throws BabelServiceClientException {}
-
-    @Override
-    public List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId)
-            throws BabelServiceClientException {
-        return Collections.emptyList();
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class BabelArtifact {
+  String name;
+  public ArtifactType type;
+  String payload;
 }
