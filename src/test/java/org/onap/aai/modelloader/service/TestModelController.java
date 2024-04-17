@@ -33,7 +33,9 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
@@ -64,14 +66,15 @@ public class TestModelController {
 
     @Mock BabelServiceClientFactory clientFactory;
     @Mock BabelServiceClient babelServiceClient;
+    @InjectMocks BabelArtifactService babelArtifactService;
     
     private ModelController modelController;
 
     @BeforeEach
     public void init() throws BabelServiceClientException {
         when(clientFactory.create(any())).thenReturn(babelServiceClient);
-        when(babelServiceClient.postArtifact(any(), any(), any(), any())).thenReturn(Collections.emptyList());
-        ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, modelLoaderConfig, clientFactory, babelArtifactConverter, notificationPublisher, vnfCatalogExtractor);
+        when(babelServiceClient.postArtifact(any(), any())).thenReturn(Collections.emptyList());
+        ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, notificationPublisher, vnfCatalogExtractor, babelArtifactService);
         this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, artifactDeploymentManager, artifactDownloadManager);
     }
 
