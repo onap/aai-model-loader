@@ -69,7 +69,7 @@ public class BabelServiceClientImpl implements BabelServiceClient {
         headers.set(AaiRestClient.HEADER_FROM_APP_ID, AaiRestClient.ML_APP_NAME);
         HttpEntity<BabelRequest> entity = new HttpEntity<>(babelRequest, headers);
 
-        ResponseEntity<List<org.onap.aai.modelloader.babel.BabelArtifact>> artifactResponse = restTemplate.exchange(resourceUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<List<org.onap.aai.modelloader.babel.BabelArtifact>>() {});
+        ResponseEntity<List<BabelArtifact>> artifactResponse = restTemplate.exchange(resourceUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<List<BabelArtifact>>() {});
 
         if (logger.isDebugEnabled()) {
             logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT,
@@ -80,20 +80,6 @@ public class BabelServiceClientImpl implements BabelServiceClient {
             throw new BabelServiceClientException(artifactResponse.getBody().toString());
         }
 
-        List<BabelArtifact> babelArtifact = artifactResponse.getBody().stream()
-            .map(this::mapBabelDto)
-            .collect(Collectors.toList());
-
-        return babelArtifact;
-    }
-
-    private BabelArtifact mapBabelDto(org.onap.aai.modelloader.babel.BabelArtifact babelDto) {
-        ArtifactType artifactType = babelDto.getType() == null
-            ? null 
-            : ArtifactType.valueOf(babelDto.getType().name());
-        return new BabelArtifact(
-            babelDto.getName(),
-            artifactType,
-            babelDto.getPayload());
+        return artifactResponse.getBody();
     }
 }
