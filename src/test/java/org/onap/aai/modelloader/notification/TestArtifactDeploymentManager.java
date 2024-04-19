@@ -48,9 +48,11 @@ import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
+import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.INotificationData;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Tests {@link ArtifactDeploymentManager}.
@@ -73,7 +75,8 @@ public class TestArtifactDeploymentManager {
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
 
         ModelLoaderConfig modelLoaderConfig = new ModelLoaderConfig(configProperties, null);
-        manager = new ArtifactDeploymentManager(modelLoaderConfig, modelArtifactHandlerMock, vnfCatalogArtifactHandlerMock);
+        AaiRestClient aaiRestClient = new AaiRestClient(modelLoaderConfig, new RestTemplate());
+        manager = new ArtifactDeploymentManager(modelArtifactHandlerMock, vnfCatalogArtifactHandlerMock, aaiRestClient);
     }
 
     @AfterEach

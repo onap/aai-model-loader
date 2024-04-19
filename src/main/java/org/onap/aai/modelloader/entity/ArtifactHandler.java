@@ -23,6 +23,7 @@ package org.onap.aai.modelloader.entity;
 import java.util.List;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
+import org.springframework.web.client.RestTemplate;
 
 public abstract class ArtifactHandler {
 

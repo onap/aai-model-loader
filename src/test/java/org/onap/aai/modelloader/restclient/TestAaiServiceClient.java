@@ -31,7 +31,6 @@ import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -41,6 +40,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Local testing of the A&AI Service client.
@@ -62,7 +63,7 @@ public class TestAaiServiceClient {
         props.put("ml.aai.RESTCLIENT_CONNECT_TIMEOUT", "3000");
         props.put("ml.aai.RESTCLIENT_READ_TIMEOUT", "3000");
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
-        aaiClient = new AaiRestClient(config);
+        aaiClient = new AaiRestClient(config, new RestTemplate());
     }
 
     @AfterEach
@@ -74,7 +75,7 @@ public class TestAaiServiceClient {
     public void testBuildAaiRestClient() {
         Properties props = new Properties();
         ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
-        new AaiRestClient(config);
+        new AaiRestClient(config, new RestTemplate());
         assertTrue(true);
     }
 
@@ -82,12 +83,12 @@ public class TestAaiServiceClient {
     public void testOperations() {
         String url = server.getURI().toString();
         String transId = "";
-        MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
-        aaiClient.getResource(url, "", mediaType);
+        MediaType mediaType = MediaType.APPLICATION_JSON;
+        aaiClient.getResource(url, "", mediaType, String.class);
         aaiClient.deleteResource(url, "", transId);
         aaiClient.getAndDeleteResource(url, transId);
-        aaiClient.postResource(url, "", transId, mediaType);
-        aaiClient.putResource(url, "", transId, mediaType);
+        aaiClient.postResource(url, "", transId, mediaType, String.class);
+        aaiClient.putResource(url, "", transId, mediaType, String.class);
         assertTrue(true);
     }
 
