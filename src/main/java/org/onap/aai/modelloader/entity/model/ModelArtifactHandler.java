@@ -29,6 +29,7 @@ import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ModelArtifactHandler extends ArtifactHandler {
@@ -68,5 +69,18 @@ public class ModelArtifactHandler extends ArtifactHandler {
             AbstractModelArtifact model = (AbstractModelArtifact) artifactToDelete;
             model.rollbackModel(aaiClient, config, distributionId);
         }
+    }
+
+    @Override
+    public boolean pushArtifacts(List<Artifact> artifacts, String distributionId, List<Artifact> completedArtifacts,
+            RestTemplate restTemplate) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'pushArtifacts'");
+    }
+
+    @Override
+    public void rollback(List<Artifact> completedArtifacts, String distributionId, RestTemplate restTemplate) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'rollback'");
     }
 }

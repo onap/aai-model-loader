@@ -23,6 +23,7 @@ package org.onap.aai.modelloader.entity;
 import java.util.List;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
+import org.springframework.web.client.RestTemplate;
 
 public abstract class ArtifactHandler {
 
@@ -33,7 +34,14 @@ public abstract class ArtifactHandler {
     }
 
     public abstract boolean pushArtifacts(List<Artifact> artifacts, String distributionId,
+            List<Artifact> completedArtifacts, RestTemplate restTemplate);
+
+    public abstract void rollback(List<Artifact> completedArtifacts, String distributionId, RestTemplate restTemplate);
+    
+    @Deprecated
+    public abstract boolean pushArtifacts(List<Artifact> artifacts, String distributionId,
             List<Artifact> completedArtifacts, AaiRestClient restClient);
 
+    @Deprecated
     public abstract void rollback(List<Artifact> completedArtifacts, String distributionId, AaiRestClient aaiClient);
 }

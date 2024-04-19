@@ -20,23 +20,14 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
-import java.io.StringWriter;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.XMLConstants;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.restclient.client.OperationResult;
-import org.w3c.dom.Node;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 
 public class ModelArtifact extends AbstractModelArtifact {
@@ -49,7 +40,7 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     private String modelVerId;
     private String modelInvariantId;
-    private Node modelVer;
+    private String modelVer;
     private boolean firstVersionOfModel = false;
 
     public ModelArtifact() {
@@ -72,11 +63,11 @@ public class ModelArtifact extends AbstractModelArtifact {
         this.modelInvariantId = modelInvariantId;
     }
 
-    public Node getModelVer() {
+    public String getModelVer() {
         return modelVer;
     }
 
-    public void setModelVer(Node modelVer) {
+    public void setModelVer(String modelVer) {
         this.modelVer = modelVer;
     }
 
@@ -95,8 +86,8 @@ public class ModelArtifact extends AbstractModelArtifact {
      * @return true if a request to GET this resource as XML media is successful (status OK)
      */
     private boolean xmlResourceCanBeFetched(AaiRestClient aaiClient, String distId, String xmlResourceUrl) {
-        OperationResult getResponse = getResourceModel(aaiClient, distId, xmlResourceUrl);
-        return getResponse != null && getResponse.getResultCode() == Response.Status.OK.getStatusCode();
+        ResponseEntity<Model> getResponse = getResourceModel(aaiClient, distId, xmlResourceUrl);
+        return getResponse != null && getResponse.getStatusCode() == HttpStatus.OK;
     }
 
     /**
@@ -107,8 +98,8 @@ public class ModelArtifact extends AbstractModelArtifact {
      * @param xmlResourceUrl
      * @return OperationResult the result of the operation
      */
-    private OperationResult getResourceModel(AaiRestClient aaiClient, String distId, String xmlResourceUrl) {
-        return aaiClient.getResource(xmlResourceUrl, distId, MediaType.APPLICATION_XML_TYPE);
+    private ResponseEntity<Model> getResourceModel(AaiRestClient aaiClient, String distId, String xmlResourceUrl) {
+        return aaiClient.getResource(xmlResourceUrl, distId, MediaType.APPLICATION_XML, Model.class);
     }
 
     /**
@@ -121,9 +112,9 @@ public class ModelArtifact extends AbstractModelArtifact {
      * @return true if the resource PUT as XML media was successful (status OK)
      */
     private boolean putXmlResource(AaiRestClient aaiClient, String distId, String resourceUrl, String payload) {
-        OperationResult putResponse =
-                aaiClient.putResource(resourceUrl, payload, distId, MediaType.APPLICATION_XML_TYPE);
-        return putResponse != null && putResponse.getResultCode() == Response.Status.CREATED.getStatusCode();
+        ResponseEntity<String> putResponse =
+                aaiClient.putResource(resourceUrl, payload, distId, MediaType.APPLICATION_XML, String.class);
+        return putResponse != null && putResponse.getStatusCode() == HttpStatus.CREATED;
     }
 
     @Override
@@ -142,16 +133,16 @@ public class ModelArtifact extends AbstractModelArtifact {
 
         // See whether the model is already present
         String resourceUrl = getModelUrl(config);
-        OperationResult result = getResourceModel(aaiClient, distId, resourceUrl);
+        ResponseEntity<Model> result = getResourceModel(aaiClient, distId, resourceUrl);
 
         if (result != null) {
-            if (result.getResultCode() == Response.Status.OK.getStatusCode()) {
+            if (result.getStatusCode() == HttpStatus.OK) {
                 success = updateExistingModel(aaiClient, config, distId, completedArtifacts);
-            } else if (result.getResultCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+            } else if (result.getStatusCode() == HttpStatus.NOT_FOUND) {
                 success = createNewModel(aaiClient, distId, completedArtifacts, resourceUrl);
             } else {
                 logModelUpdateFailure(
-                        "Response code " + result.getResultCode() + " invalid for getting resource model");
+                        "Response code " + result.getStatusCodeValue() + " invalid for getting resource model");
             }
         } else {
             logModelUpdateFailure("Null response from RestClient");
@@ -206,17 +197,12 @@ public class ModelArtifact extends AbstractModelArtifact {
 
         // Load the model version
         boolean success = true;
-        try {
-            success = putXmlResource(aaiClient, distId, getModelVerUrl(config), nodeToString(getModelVer()));
-            if (success) {
-                completedArtifacts.add(this);
-                logInfoMsg(getType() + " " + getUniqueIdentifier() + " successfully ingested.");
-            } else {
-                logModelUpdateFailure("Error pushing model");
-            }
-        } catch (TransformerException e) {
-            logModelUpdateFailure(e.getMessage());
-            success = false;
+        success = putXmlResource(aaiClient, distId, getModelVerUrl(config), getModelVer());
+        if (success) {
+            completedArtifacts.add(this);
+            logInfoMsg(getType() + " " + getUniqueIdentifier() + " successfully ingested.");
+        } else {
+            logModelUpdateFailure("Error pushing model");
         }
 
         return success;
@@ -281,17 +267,5 @@ public class ModelArtifact extends AbstractModelArtifact {
         }
 
         return baseURL + subURL + instance;
-    }
-
-    private String nodeToString(Node node) throws TransformerException {
-        StringWriter sw = new StringWriter();
-        TransformerFactory transFact = TransformerFactory.newInstance();
-        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-        Transformer t = transFact.newTransformer();
-        t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        t.transform(new DOMSource(node), new StreamResult(sw));
-        return sw.toString();
     }
 }

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.ws.rs.core.MediaType;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -36,6 +35,8 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.modelloader.util.GizmoTranslator;
 import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractModelArtifact extends Artifact implements IModelArtifact {
 
@@ -85,10 +86,11 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     protected boolean pushToGizmo(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
         try {
             String gizmoPayload = GizmoTranslator.translate(getPayload());
-            OperationResult postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
-                    MediaType.APPLICATION_JSON_TYPE);
+            // TODO: Use correct responseType here
+            ResponseEntity<String> postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
+                    MediaType.APPLICATION_JSON, String.class);
 
-            if (postResponse.getResultCode() != HttpStatus.OK.value()) {
+            if (postResponse.getStatusCode() != HttpStatus.OK) {
                 return false;
             }
         } catch (IOException e) {
