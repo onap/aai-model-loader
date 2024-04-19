@@ -41,13 +41,13 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
-import org.w3c.dom.Node;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -89,7 +89,8 @@ public class ModelArtifactHandlerTest {
 
     WireMock.stubFor(
         WireMock.put(urlEqualTo("/aai/v28/service-design-and-creation/models/model/modelInvariantId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("someId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(
@@ -98,6 +99,7 @@ public class ModelArtifactHandlerTest {
 
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
+    modelArtifact.setPayload("");
     List<Artifact> artifacts = List.of(modelArtifact);
     List<Artifact> completedArtifacts = new ArrayList<>();
 
@@ -134,7 +136,8 @@ public class ModelArtifactHandlerTest {
     WireMock.stubFor(
         WireMock.put(urlEqualTo(
             "/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("distributionId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(
@@ -144,8 +147,8 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
     modelArtifact.setModelVerId("modelVersionId");
-    Node node = Mockito.mock(Node.class);
-    modelArtifact.setModelVer(node);
+    modelArtifact.setPayload("");
+    modelArtifact.setModelVer("2.0");
     List<Artifact> artifacts = List.of(modelArtifact);
     List<Artifact> completedArtifacts = new ArrayList<>();
 
@@ -159,9 +162,11 @@ public class ModelArtifactHandlerTest {
   @Test
   public void thatModelCanBeRolledBack() {
     stubFor(WireMock.get(urlEqualTo("/aai/v28/service-design-and-creation/models/model/3a40ab73-6694-4e75-bb6d-9a4a86ce35b3"))
+        .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))    
         .withHeader("X-FromAppId", equalTo("ModelLoader"))
         .withHeader("X-TransactionId", equalTo("distributionId"))
         .willReturn(aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_XML_VALUE)
             .withBodyFile("modelResponse.xml")));
 
     stubFor(WireMock.delete(urlEqualTo("/aai/v28/service-design-and-creation/models/model/3a40ab73-6694-4e75-bb6d-9a4a86ce35b3?resource-version=1710523260974"))
@@ -172,8 +177,8 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("3a40ab73-6694-4e75-bb6d-9a4a86ce35b3");
     modelArtifact.setModelVerId("modelVersionId");
-    Node node = Mockito.mock(Node.class);
-    modelArtifact.setModelVer(node);
+    // modelArtifact.setModelVer("2.0");
+    
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 
@@ -195,30 +200,46 @@ public class ModelArtifactHandlerTest {
    * @param modelArtifact
    */
   private void mockModelCreation(ModelArtifact modelArtifact) {
-    OperationResult createdResult = Mockito.mock(OperationResult.class);
-    when(createdResult.getResultCode()).thenReturn(HttpStatus.CREATED.value());
-    OperationResult notFoundResult = Mockito.mock(OperationResult.class);
-    when(notFoundResult.getResultCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+    ResponseEntity createdResult = Mockito.mock(ResponseEntity.class);
+    when(createdResult.getStatusCode()).thenReturn(HttpStatus.CREATED);
+    ResponseEntity notFoundResult = Mockito.mock(ResponseEntity.class);
+    when(notFoundResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
     AaiRestClient aaiClient = Mockito.mock(AaiRestClient.class);
-    when(aaiClient.putResource(any(), any(), any(), any())).thenReturn(createdResult);
-    when(aaiClient.getResource(any(), any(), any())).thenReturn(notFoundResult);
+    when(aaiClient.putResource(any(), any(), any(), any(), any())).thenReturn(createdResult);
+    when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(notFoundResult);
     modelArtifact.push(aaiClient, config, null, new ArrayList<>());
   }
 
   @Test
   public void thatModelVersionCanBeRolledBack() {
 
-    // "http://localhost:10594/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId"
+    WireMock.stubFor(
+        WireMock.get(urlEqualTo(
+            "/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId"))
+            .withHeader("Accept", equalTo("application/xml"))
+            .withHeader("X-TransactionId", equalTo("distributionId"))
+            .withHeader("X-FromAppId", equalTo("ModelLoader"))
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_XML_VALUE)
+                    .withBodyFile("modelVersion.xml")));
+
+        stubFor(WireMock.delete(urlEqualTo("/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId?resource-version=1708937324692"))
+            .withHeader("X-FromAppId", equalTo("ModelLoader"))
+            .withHeader("X-TransactionId", equalTo("distributionId"))
+            .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
 
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
     modelArtifact.setModelVerId("modelVersionId");
-    Node node = Mockito.mock(Node.class);
-    modelArtifact.setModelVer(node);
+    
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 
     modelArtifactHandler.rollback(completedArtifacts, "distributionId", restClient);
 
+    verify(
+        deleteRequestedFor(
+            urlEqualTo("/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId?resource-version=1708937324692")));
   }
 }

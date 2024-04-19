@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model-ver 
+  xmlns="http://org.onap.aai.inventory/v28">
+  <model-version-id>fe578080-ce19-4604-8760-fc264fbb2565</model-version-id>
+  <model-name>group-assignment</model-name>
+  <model-version>1.0</model-version>
+  <resource-version>1708937324692</resource-version>
+</model-ver>

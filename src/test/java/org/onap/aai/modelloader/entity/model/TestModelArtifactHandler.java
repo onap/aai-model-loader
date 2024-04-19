@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -42,6 +40,8 @@ import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Test the Model Artifact Handler using Mocks
@@ -85,9 +85,9 @@ public class TestModelArtifactHandler {
         when(config.getAaiBaseUrl()).thenReturn("");
         when(config.getAaiModelUrl(any())).thenReturn("");
 
-        OperationResult operationResult = mock(OperationResult.class);
-        when(aaiClient.getResource(any(), any(), any())).thenReturn(operationResult);
-        when(operationResult.getResultCode()).thenReturn(Response.Status.OK.getStatusCode());
+        ResponseEntity operationResult = mock(ResponseEntity.class);
+        when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);
+        when(operationResult.getStatusCode()).thenReturn(HttpStatus.OK);
 
         List<Artifact> artifacts = new ArrayList<>();
         Artifact artifact = new ModelArtifact();
@@ -105,13 +105,13 @@ public class TestModelArtifactHandler {
         when(config.getAaiModelUrl(any())).thenReturn("");
         when(config.getAaiNamedQueryUrl(any())).thenReturn("");
 
-        OperationResult getResult = mock(OperationResult.class);
-        when(aaiClient.getResource(any(), any(), any())).thenReturn(getResult);
-        when(getResult.getResultCode()).thenReturn(Response.Status.NOT_FOUND.getStatusCode());
+        ResponseEntity getResult = mock(ResponseEntity.class);
+        when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
+        when(getResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
 
-        OperationResult putResult = mock(OperationResult.class);
-        when(aaiClient.putResource(any(), any(), any(), any())).thenReturn(putResult);
-        when(putResult.getResultCode()).thenReturn(Response.Status.CREATED.getStatusCode());
+        ResponseEntity putResult = mock(ResponseEntity.class);
+        when(aaiClient.putResource(any(), any(), any(), any(), any())).thenReturn(putResult);
+        when(putResult.getStatusCode()).thenReturn(HttpStatus.CREATED);
 
         List<Artifact> artifacts = new ArrayList<>();
         artifacts.add(new ModelArtifact());
@@ -133,13 +133,13 @@ public class TestModelArtifactHandler {
         when(config.getAaiModelUrl(any())).thenReturn("");
         when(config.getAaiNamedQueryUrl(any())).thenReturn("");
 
-        OperationResult getResult = mock(OperationResult.class);
-        when(aaiClient.getResource(any(), any(), any())).thenReturn(getResult);
-        when(getResult.getResultCode()).thenReturn(Response.Status.NOT_FOUND.getStatusCode());
+        ResponseEntity getResult = mock(ResponseEntity.class);
+        when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
+        when(getResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
 
-        OperationResult putResult = mock(OperationResult.class);
-        when(aaiClient.putResource(any(), any(), any(), any())).thenReturn(putResult);
-        when(putResult.getResultCode()).thenReturn(Response.Status.BAD_REQUEST.getStatusCode());
+        ResponseEntity putResult = mock(ResponseEntity.class);
+        when(aaiClient.putResource(any(), any(), any(), any(), any())).thenReturn(putResult);
+        when(putResult.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
         checkRollback(Collections.singletonList(new ModelArtifact()));
     }
@@ -149,9 +149,9 @@ public class TestModelArtifactHandler {
         when(config.getAaiBaseUrl()).thenReturn("");
         when(config.getAaiModelUrl(any())).thenReturn("");
 
-        OperationResult operationResult = mock(OperationResult.class);
-        when(aaiClient.getResource(any(), any(), any())).thenReturn(operationResult);
-        when(operationResult.getResultCode()).thenReturn(Response.Status.BAD_REQUEST.getStatusCode());
+        ResponseEntity operationResult = mock(ResponseEntity.class);
+        when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);
+        when(operationResult.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
         checkRollback(Collections.singletonList(new ModelArtifact()));
     }
@@ -160,7 +160,7 @@ public class TestModelArtifactHandler {
     public void testNullResourceModelResult() {
         when(config.getAaiBaseUrl()).thenReturn("");
         when(config.getAaiModelUrl(any())).thenReturn("");
-        when(aaiClient.getResource(any(), any(), any())).thenReturn(null);
+        when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(null);
 
         checkRollback(Collections.singletonList(new ModelArtifact()));
     }
