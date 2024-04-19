@@ -22,7 +22,6 @@ package org.onap.aai.modelloader.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
@@ -36,14 +35,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ArtifactDeploymentManager {
 
-    private final ModelLoaderConfig config;
     private final ModelArtifactHandler modelArtifactHandler;
     private final VnfCatalogArtifactHandler vnfCatalogArtifactHandler;
+    private final AaiRestClient aaiClient;
 
-    public ArtifactDeploymentManager(ModelLoaderConfig config, ModelArtifactHandler modelArtifactHandler, VnfCatalogArtifactHandler vnfCatalogArtifactHandler) {
-        this.config = config;
+    public ArtifactDeploymentManager(ModelArtifactHandler modelArtifactHandler, VnfCatalogArtifactHandler vnfCatalogArtifactHandler, AaiRestClient aaiClient) {
         this.modelArtifactHandler = modelArtifactHandler;
         this.vnfCatalogArtifactHandler = vnfCatalogArtifactHandler;
+        this.aaiClient = aaiClient;
     }
 
     /**
@@ -58,7 +57,6 @@ public class ArtifactDeploymentManager {
     public boolean deploy(final INotificationData data, final List<Artifact> modelArtifacts,
             final List<Artifact> catalogArtifacts) {
 
-        AaiRestClient aaiClient = new AaiRestClient(config);
         String distributionId = data.getDistributionID();
 
         List<Artifact> completedArtifacts = new ArrayList<>();

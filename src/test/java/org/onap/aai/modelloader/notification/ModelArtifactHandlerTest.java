@@ -41,12 +41,13 @@ import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Node;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,7 +90,8 @@ public class ModelArtifactHandlerTest {
 
     WireMock.stubFor(
         WireMock.put(urlEqualTo("/aai/v28/service-design-and-creation/models/model/modelInvariantId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("someId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(
@@ -134,7 +136,8 @@ public class ModelArtifactHandlerTest {
     WireMock.stubFor(
         WireMock.put(urlEqualTo(
             "/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("distributionId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(
@@ -195,13 +198,13 @@ public class ModelArtifactHandlerTest {
    * @param modelArtifact
    */
   private void mockModelCreation(ModelArtifact modelArtifact) {
-    OperationResult createdResult = Mockito.mock(OperationResult.class);
-    when(createdResult.getResultCode()).thenReturn(HttpStatus.CREATED.value());
-    OperationResult notFoundResult = Mockito.mock(OperationResult.class);
-    when(notFoundResult.getResultCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+    ResponseEntity createdResult = Mockito.mock(ResponseEntity.class);
+    when(createdResult.getStatusCode()).thenReturn(HttpStatus.CREATED);
+    ResponseEntity notFoundResult = Mockito.mock(ResponseEntity.class);
+    when(notFoundResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
     AaiRestClient aaiClient = Mockito.mock(AaiRestClient.class);
-    when(aaiClient.putResource(any(), any(), any(), any())).thenReturn(createdResult);
-    when(aaiClient.getResource(any(), any(), any())).thenReturn(notFoundResult);
+    when(aaiClient.putResource(any(), any(), any(), any(), any())).thenReturn(createdResult);
+    when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(notFoundResult);
     modelArtifact.push(aaiClient, config, null, new ArrayList<>());
   }
 

@@ -21,15 +21,15 @@
 package org.onap.aai.modelloader.entity.model;
 
 import java.util.List;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 
 import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 
 public class NamedQueryArtifact extends AbstractModelArtifact {
@@ -64,13 +64,13 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
 
     private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
             List<Artifact> completedArtifacts) {
-        OperationResult getResponse =
-                aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML_TYPE);
-        if (getResponse == null || getResponse.getResultCode() != Response.Status.OK.getStatusCode()) {
+        ResponseEntity<String> getResponse =
+                aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML, String.class);
+        if (getResponse == null || getResponse.getStatusCode() != HttpStatus.OK) {
             // Only attempt the PUT if the model doesn't already exist
-            OperationResult putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId,
-                    MediaType.APPLICATION_XML_TYPE);
-            if (putResponse != null && putResponse.getResultCode() == Response.Status.CREATED.getStatusCode()) {
+            ResponseEntity<String> putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId,
+                    MediaType.APPLICATION_XML, String.class);
+            if (putResponse != null && putResponse.getStatusCode() == HttpStatus.CREATED) {
                 completedArtifacts.add(this);
                 logInfoMsg(getType().toString() + " " + getUniqueIdentifier() + " successfully ingested.");
             } else {
