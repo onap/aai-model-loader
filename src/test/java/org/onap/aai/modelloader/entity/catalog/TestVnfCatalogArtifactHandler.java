@@ -23,6 +23,7 @@ package org.onap.aai.modelloader.entity.catalog;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,9 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -45,7 +43,9 @@ import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 public class TestVnfCatalogArtifactHandler {
 
@@ -61,24 +61,23 @@ public class TestVnfCatalogArtifactHandler {
     @Test
     public void testUpdateVnfImages() throws Exception {
         // GET operation
-        OperationResult mockGetResp = mock(OperationResult.class);
+        ResponseEntity mockGetResp = mock(ResponseEntity.class);
 
         // @formatter:off
-        when(mockGetResp.getResultCode())
-                .thenReturn(Response.Status.OK.getStatusCode())
-                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
-                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
-                .thenReturn(Response.Status.OK.getStatusCode());
+        when(mockGetResp.getStatusCodeValue())
+                .thenReturn(HttpStatus.OK.value())
+                .thenReturn(HttpStatus.NOT_FOUND.value())
+                .thenReturn(HttpStatus.NOT_FOUND.value())
+                .thenReturn(HttpStatus.OK.value());
         // @formatter:on
 
-        when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class)))
+        when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class), Mockito.any()))
                 .thenReturn(mockGetResp);
         mockPutOperations();
 
         // Example VNF Catalog XML
         VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
-        assertThat(handler.pushArtifacts(createVnfCatalogArtifact(), "test", new ArrayList<Artifact>(), mockRestClient),
-                is(true));
+        assertTrue(handler.pushArtifacts(createVnfCatalogArtifact(), "test", new ArrayList<Artifact>(), mockRestClient));
 
         assertPutOperationsSucceeded();
     }
@@ -86,17 +85,17 @@ public class TestVnfCatalogArtifactHandler {
     @Test
     public void testUpdateVnfImagesFromXml() throws Exception {
         // GET operation
-        OperationResult mockGetResp = mock(OperationResult.class);
+        ResponseEntity mockGetResp = mock(ResponseEntity.class);
 
         // @formatter:off
-        when(mockGetResp.getResultCode())
-                .thenReturn(Response.Status.OK.getStatusCode())
-                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
-                .thenReturn(Response.Status.NOT_FOUND.getStatusCode())
-                .thenReturn(Response.Status.OK.getStatusCode());
+        when(mockGetResp.getStatusCodeValue())
+                .thenReturn(HttpStatus.OK.value())
+                .thenReturn(HttpStatus.NOT_FOUND.value())
+                .thenReturn(HttpStatus.NOT_FOUND.value())
+                .thenReturn(HttpStatus.OK.value());
         // @formatter:on
 
-        when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class)))
+        when(mockRestClient.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.any(MediaType.class), Mockito.any()))
                 .thenReturn(mockGetResp);
         mockPutOperations();
 
@@ -109,7 +108,7 @@ public class TestVnfCatalogArtifactHandler {
         // Only two of the VNF images should be pushed
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         AaiRestClient client = Mockito.verify(mockRestClient, Mockito.times(2));
-        client.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(), Mockito.any(MediaType.class));
+        client.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(), Mockito.any(MediaType.class), Mockito.any());
         assertThat(argument.getAllValues().size(), is(2));
         assertThat(argument.getAllValues().get(0), containsString("5.2.5"));
         assertThat(argument.getAllValues().get(0), containsString("VM00"));
@@ -161,10 +160,10 @@ public class TestVnfCatalogArtifactHandler {
      * Always return CREATED (success) for a PUT operation.
      */
     private void mockPutOperations() {
-        OperationResult mockPutResp = mock(OperationResult.class);
-        when(mockPutResp.getResultCode()).thenReturn(Response.Status.CREATED.getStatusCode());
+        ResponseEntity mockPutResp = mock(ResponseEntity.class);
+        when(mockPutResp.getStatusCode()).thenReturn(HttpStatus.CREATED);
         when(mockRestClient.putResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.any(MediaType.class))).thenReturn(mockPutResp);
+                Mockito.any(MediaType.class), Mockito.any())).thenReturn(mockPutResp);
     }
 
     private void assertPutOperationsSucceeded() {
@@ -172,7 +171,7 @@ public class TestVnfCatalogArtifactHandler {
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         AaiRestClient mockedClient = Mockito.verify(mockRestClient, Mockito.times(2));
         mockedClient.putResource(Mockito.anyString(), argument.capture(), Mockito.anyString(),
-                Mockito.any(MediaType.class));
+                Mockito.any(MediaType.class), Mockito.any());
         assertThat(argument.getAllValues().get(0), containsString("3.16.9"));
         assertThat(argument.getAllValues().get(0), containsString("VM00"));
         assertThat(argument.getAllValues().get(1), containsString("3.16.1"));

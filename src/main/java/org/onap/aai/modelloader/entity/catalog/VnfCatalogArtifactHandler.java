@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.text.StringEscapeUtils;
@@ -41,10 +39,14 @@ import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
+import org.onap.aai.modelloader.entity.vnf.VnfImages;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
-import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -147,7 +149,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             String imageId = imageIdBuilder.toString();
             int resultCode = getVnfImage(restClient, distributionId, imageId, dataItem);
 
-            if (resultCode == Response.Status.NOT_FOUND.getStatusCode()) {
+            if (resultCode == HttpStatus.NOT_FOUND.value()) {
                 // This vnf-image is missing, so add it
                 boolean success = putVnfImage(restClient, dataItem, distributionId);
                 if (success) {
@@ -156,7 +158,7 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
                 } else {
                     throw new VnfImageException(imageId);
                 }
-            } else if (resultCode == Response.Status.OK.getStatusCode()) {
+            } else if (resultCode == HttpStatus.OK.value()) {
                 logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, imageId + " already exists. Skipping ingestion.");
             } else {
                 // if other than 404 or 200, something went wrong
@@ -172,12 +174,12 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             for (Entry<String, String> entry : dataItem.entrySet()) {
                 b.addParameter(entry.getKey(), entry.getValue());
             }
-            OperationResult tryGet =
-                    restClient.getResource(b.build().toString(), distributionId, MediaType.APPLICATION_JSON_TYPE);
+            ResponseEntity<VnfImages> tryGet =
+                    restClient.getResource(b.build().toString(), distributionId, MediaType.APPLICATION_JSON, VnfImages.class);
             if (tryGet == null) {
                 throw new VnfImageException(imageId);
             }
-            return tryGet.getResultCode();
+            return tryGet.getStatusCodeValue();
         } catch (URISyntaxException ex) {
             throw new VnfImageException(ex);
         }
@@ -188,11 +190,12 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
         String uuid = UUID.randomUUID().toString();
         dataItem.put(ATTR_UUID, uuid);
 
+        // TODO: Get rid of the dataItem map and replace it with the VnfImage object
         String payload = new Gson().toJson(dataItem);
         String putUrl = config.getAaiBaseUrl() + config.getAaiVnfImageUrl() + "/vnf-image/" + uuid;
-        OperationResult putResp =
-                restClient.putResource(putUrl, payload, distributionId, MediaType.APPLICATION_JSON_TYPE);
-        return putResp != null && putResp.getResultCode() == Response.Status.CREATED.getStatusCode();
+        ResponseEntity<String> putResp =
+                restClient.putResource(putUrl, payload, distributionId, MediaType.APPLICATION_JSON, String.class);
+        return putResp != null && putResp.getStatusCode() == HttpStatus.CREATED;
     }
 
     private List<Map<String, String>> unmarshallVnfcData(Artifact vnfcArtifact) {

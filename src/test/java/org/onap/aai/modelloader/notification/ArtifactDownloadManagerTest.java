@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.DistributionClientTestConfiguration;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -66,11 +65,11 @@ public class ArtifactDownloadManagerTest {
     notificationData.setServiceVersion("2.0");
 
     stubFor(get(urlEqualTo("/sdc/v1/catalog/services/DemovlbCds/1.0/artifacts/service-TestSvc-csar.csar"))
-        .withHeader("Accept", equalTo(ContentType.APPLICATION_OCTET_STREAM.toString()))
+        .withHeader("Accept", equalTo(MediaType.APPLICATION_OCTET_STREAM_VALUE))
         .withHeader("X-ECOMP-RequestID", matching(".+"))
         .withHeader("X-ECOMP-InstanceID", equalTo("aai-ml-id-test"))
         .willReturn(aResponse()
-          .withHeader("Content-Type", MediaType.APPLICATION_OCTET_STREAM.toString())
+          .withHeader("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
           .withBodyFile("service-TestSvc-csar.csar")));
     
     stubFor(
@@ -83,7 +82,7 @@ public class ArtifactDownloadManagerTest {
             .withRequestBody(matchingJsonPath("$.csar", matching(".*")))
             .willReturn(
                 aResponse()
-                    .withHeader("Content-Type", "application/json")
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBodyFile("service-TestSvc-csar-babel-response.json")));
 
     ArtifactInfoImpl artifactInfo = new ArtifactInfoImpl();

@@ -30,15 +30,16 @@ import java.util.Properties;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
-import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -89,21 +90,21 @@ public class TestAaiRestClient {
             model.setPayload(readFile(MODEL_FILE));
             model.setModelNamespace("http://org.openecomp.aai.inventory/v9");
 
-            AaiRestClient aaiClient = new AaiRestClient(config);
+            AaiRestClient aaiClient = new AaiRestClient(config, new RestTemplate());
 
             // GET model
-            OperationResult opResult =
-                    aaiClient.getResource(getUrl(model, config), "example-trans-id-0", MediaType.APPLICATION_XML_TYPE);
-            assertEquals(opResult.getResultCode(), Response.Status.NOT_FOUND.getStatusCode());
+            ResponseEntity opResult =
+                    aaiClient.getResource(getUrl(model, config), "example-trans-id-0", MediaType.APPLICATION_XML, String.class);
+            assertEquals(opResult.getStatusCode(), HttpStatus.NOT_FOUND);
 
             // PUT the model
             opResult = aaiClient.putResource(getUrl(model, config), model.getPayload(), "example-trans-id-1",
-                    MediaType.APPLICATION_XML_TYPE);
-            assertEquals(opResult.getResultCode(), Response.Status.CREATED.getStatusCode());
+                    MediaType.APPLICATION_XML, String.class);
+            assertEquals(opResult.getStatusCode(), HttpStatus.CREATED);
 
             // DELETE the model
             opResult = aaiClient.getAndDeleteResource(getUrl(model, config), "example-trans-id-3");
-            assertEquals(opResult.getResultCode(), Response.Status.NO_CONTENT.getStatusCode());
+            assertEquals(opResult.getStatusCode(), HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             e.printStackTrace();
         }

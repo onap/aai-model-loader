@@ -21,11 +21,10 @@
 
 package org.onap.aai.modelloader.restclient;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.babel.service.data.BabelRequest;
-import org.onap.aai.babel.service.data.BabelArtifact.ArtifactType;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
@@ -35,6 +34,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -65,6 +65,8 @@ public class BabelServiceClientImpl implements BabelServiceClient {
         String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.set(AaiRestClient.HEADER_TRANS_ID, transactionId);
         headers.set(AaiRestClient.HEADER_FROM_APP_ID, AaiRestClient.ML_APP_NAME);
         HttpEntity<BabelRequest> entity = new HttpEntity<>(babelRequest, headers);
