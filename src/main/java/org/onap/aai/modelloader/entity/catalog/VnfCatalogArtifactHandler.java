@@ -45,6 +45,7 @@ import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -63,6 +64,19 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
 
     public VnfCatalogArtifactHandler(ModelLoaderConfig config) {
         super(config);
+    }
+
+    @Override
+    public boolean pushArtifacts(List<Artifact> artifacts, String distributionId, List<Artifact> completedArtifacts,
+            RestTemplate restTemplate) {
+        // TODO Migrate to this method, away from the deprecated AaiRestClient one
+        throw new UnsupportedOperationException("Unimplemented method 'pushArtifacts'");
+    }
+
+    @Override
+    public void rollback(List<Artifact> completedArtifacts, String distributionId, RestTemplate restTemplate) {
+        // TODO Migrate to this method, away from the deprecated AaiRestClient one
+        throw new UnsupportedOperationException("Unimplemented method 'rollback'");
     }
 
     /*
