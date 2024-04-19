@@ -20,11 +20,19 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import javax.xml.XMLConstants;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.entity.Artifact;
@@ -53,7 +61,13 @@ public class ModelArtifactParser extends AbstractModelArtifactParser {
             parseRelationshipNode(node, model);
         } else {
             if (node.getNodeName().equalsIgnoreCase(MODEL_VER)) {
-                ((ModelArtifact) model).setModelVer(node);
+                String modelVersion;
+                try {
+                    modelVersion = nodeToString(node);
+                    ((ModelArtifact) model).setModelVer(modelVersion);
+                } catch (TransformerException e) {
+                    logger.error(ModelLoaderMsgs.ARTIFACT_PARSE_ERROR, "Failed to parse resource version for input: " + node.toString());
+                }
                 if (((ModelArtifact) model).getModelNamespace() != null
                         && !((ModelArtifact) model).getModelNamespace().isEmpty()) {
                     Element e = (Element) node;
@@ -64,6 +78,18 @@ public class ModelArtifactParser extends AbstractModelArtifactParser {
 
             parseChildNodes(node, model);
         }
+    }
+
+    private String nodeToString(Node node) throws TransformerException {
+        StringWriter sw = new StringWriter();
+        TransformerFactory transFact = TransformerFactory.newInstance();
+        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transFact.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        Transformer t = transFact.newTransformer();
+        t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        t.transform(new DOMSource(node), new StreamResult(sw));
+        return sw.toString();
     }
 
     /**

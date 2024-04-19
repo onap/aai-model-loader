@@ -22,10 +22,8 @@
 package org.onap.aai.modelloader.restclient;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.babel.service.data.BabelRequest;
-import org.onap.aai.babel.service.data.BabelArtifact.ArtifactType;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
