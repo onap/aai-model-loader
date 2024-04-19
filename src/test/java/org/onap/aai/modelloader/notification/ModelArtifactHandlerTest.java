@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.w3c.dom.Node;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,7 +90,8 @@ public class ModelArtifactHandlerTest {
 
     WireMock.stubFor(
         WireMock.put(urlEqualTo("/aai/v28/service-design-and-creation/models/model/modelInvariantId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("someId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(
@@ -134,7 +136,8 @@ public class ModelArtifactHandlerTest {
     WireMock.stubFor(
         WireMock.put(urlEqualTo(
             "/aai/v28/service-design-and-creation/models/model/modelInvariantId/model-vers/model-ver/modelVersionId"))
-            .withHeader("Content-Type", equalTo("application/xml"))
+            .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
+            .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("distributionId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
             .willReturn(

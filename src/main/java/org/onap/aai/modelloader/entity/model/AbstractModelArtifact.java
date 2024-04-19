@@ -36,6 +36,7 @@ import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.modelloader.util.GizmoTranslator;
 import org.onap.aai.restclient.client.OperationResult;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractModelArtifact extends Artifact implements IModelArtifact {
 
@@ -85,7 +86,7 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
     protected boolean pushToGizmo(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
         try {
             String gizmoPayload = GizmoTranslator.translate(getPayload());
-            OperationResult postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
+            ResponseEntity postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
                     MediaType.APPLICATION_JSON_TYPE);
 
             if (postResponse.getResultCode() != HttpStatus.OK.value()) {

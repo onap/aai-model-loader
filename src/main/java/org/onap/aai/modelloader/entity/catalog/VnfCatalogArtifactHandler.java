@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.text.StringEscapeUtils;
@@ -41,10 +39,14 @@ import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
+import org.onap.aai.modelloader.entity.vnf.VnfImages;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.aai.restclient.client.OperationResult;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -63,6 +65,19 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
 
     public VnfCatalogArtifactHandler(ModelLoaderConfig config) {
         super(config);
+    }
+
+    @Override
+    public boolean pushArtifacts(List<Artifact> artifacts, String distributionId, List<Artifact> completedArtifacts,
+            RestTemplate restTemplate) {
+        // TODO Migrate to this method, away from the deprecated AaiRestClient one
+        throw new UnsupportedOperationException("Unimplemented method 'pushArtifacts'");
+    }
+
+    @Override
+    public void rollback(List<Artifact> completedArtifacts, String distributionId, RestTemplate restTemplate) {
+        // TODO Migrate to this method, away from the deprecated AaiRestClient one
+        throw new UnsupportedOperationException("Unimplemented method 'rollback'");
     }
 
     /*
@@ -172,12 +187,12 @@ public class VnfCatalogArtifactHandler extends ArtifactHandler {
             for (Entry<String, String> entry : dataItem.entrySet()) {
                 b.addParameter(entry.getKey(), entry.getValue());
             }
-            OperationResult tryGet =
-                    restClient.getResource(b.build().toString(), distributionId, MediaType.APPLICATION_JSON_TYPE);
+            ResponseEntity<VnfImages> tryGet =
+                    restClient.getResource(b.build().toString(), distributionId, MediaType.APPLICATION_JSON, VnfImages.class);
             if (tryGet == null) {
                 throw new VnfImageException(imageId);
             }
-            return tryGet.getResultCode();
+            return tryGet.getStatusCodeValue();
         } catch (URISyntaxException ex) {
             throw new VnfImageException(ex);
         }
