@@ -21,17 +21,24 @@
 package org.onap.aai.modelloader.entity.model;
 
 import java.util.List;
+
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
+import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 
 public class ModelArtifact extends AbstractModelArtifact {
+
+    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifact.class);
 
     private static final String AAI_MODEL_VER_SUB_URL = "/model-vers/model-ver";
 
@@ -121,8 +128,13 @@ public class ModelArtifact extends AbstractModelArtifact {
      * @return true if the resource PUT as XML media was successful (status OK)
      */
     private boolean putXmlResource(AaiRestClient aaiClient, String distId, String resourceUrl, String payload) {
-        ResponseEntity<String> putResponse =
-                aaiClient.putResource(resourceUrl, payload, distId, MediaType.APPLICATION_XML, String.class);
+        ResponseEntity<String> putResponse = null;
+        try {
+            putResponse =
+                    aaiClient.putResource(resourceUrl, payload, distId, MediaType.APPLICATION_XML, String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            logger.error(ModelLoaderMsgs.AAI_REST_REQUEST_ERROR, "Error putting resource: " + e.toString());
+        }
         return putResponse != null && putResponse.getStatusCode() == HttpStatus.CREATED;
     }
 
