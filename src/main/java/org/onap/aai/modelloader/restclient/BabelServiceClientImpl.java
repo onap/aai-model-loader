@@ -57,8 +57,8 @@ public class BabelServiceClientImpl implements BabelServiceClient {
 
     @Override
     public List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId) throws BabelServiceClientException {
-        if (logger.isInfoEnabled()) {
-            logger.info(ModelLoaderMsgs.BABEL_REST_REQUEST_PAYLOAD, " Artifact Name: " + babelRequest.getArtifactName()
+        if (logger.isDebugEnabled()) {
+            logger.debug(ModelLoaderMsgs.BABEL_REST_REQUEST_PAYLOAD, " Artifact Name: " + babelRequest.getArtifactName()
                     + " Artifact version: " + babelRequest.getArtifactVersion() + " Artifact payload: " + babelRequest.getCsar());
         }
 
