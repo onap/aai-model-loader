@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Collections;
 
-import javax.ws.rs.core.Response;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -47,6 +45,8 @@ import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.IDistributionClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -80,28 +80,28 @@ public class TestModelController {
 
     @Test
     public void testLoadModel() {
-        Response response = modelController.loadModel("");
-        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        ResponseEntity<String> response = modelController.loadModel("");
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
     public void testSaveModel() {
-        Response response = modelController.saveModel("", "");
-        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        ResponseEntity<String> response = modelController.saveModel("", "");
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
     public void testIngestModel() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = modelController.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
-        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        ResponseEntity<String> response = modelController.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
     public void testIngestModelMissingName() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = modelController.ingestModel("", "", Base64.getEncoder().encodeToString(csarPayload));
-        assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+        ResponseEntity<String> response = modelController.ingestModel("", "", Base64.getEncoder().encodeToString(csarPayload));
+        assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
 }

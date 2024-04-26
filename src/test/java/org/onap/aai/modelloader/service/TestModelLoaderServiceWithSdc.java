@@ -26,12 +26,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.IOException;
 import java.util.Base64;
 
-import javax.ws.rs.core.Response;
-
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -48,8 +48,8 @@ public class TestModelLoaderServiceWithSdc {
     @Test
     public void testIngestModel() throws IOException {
         byte[] csarPayload = new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar");
-        Response response = controller.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
-        assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+        ResponseEntity<String> response = controller.ingestModel("model-name", "", Base64.getEncoder().encodeToString(csarPayload));
+        assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
 
