@@ -34,6 +34,7 @@ import org.onap.aai.modelloader.notification.NotificationDataImpl;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -83,7 +84,7 @@ public class ModelController {
             response = processTestArtifact(modelName, modelVersion, payload);
         } else {
             logger.debug("Simulation interface disabled");
-            response = ResponseEntity.internalServerError().build();
+            response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
         return response;
@@ -116,7 +117,7 @@ public class ModelController {
             boolean success =
                     artifactDeploymentManager.deploy(notificationData, modelArtifacts, catalogArtifacts);
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Deployment success was " + success);
-            response = success ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
+            response = success ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             String responseMessage = e.getMessage();
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Exception handled: " + responseMessage);
@@ -126,7 +127,7 @@ public class ModelController {
             } else {
                 responseMessage += "\nSDC publishing is enabled but has been bypassed";
             }
-            response = ResponseEntity.internalServerError().body(responseMessage);
+            response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMessage);
         }
         return response;
     }
