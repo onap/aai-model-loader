@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.14.0
+project: model-loader
+ref: de4e6c93f2f4038167e8b5fef92426c4daac4b83
+containers:
+    - name: model-loader
+      version: 1.14-STAGING-20240425T063121Z
