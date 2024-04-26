@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import jline.internal.Log;
+
+import org.onap.aai.cl.api.Logger;
+import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.entity.Artifact;
 
 /**
@@ -38,6 +40,8 @@ import org.onap.aai.modelloader.entity.Artifact;
  * where B depends on A, and A depends on C, the sorted result will be [C, A, B]
  */
 public class ModelSorter {
+
+    private static Logger logger = LoggerFactory.getInstance().getLogger(ModelSorter.class);
 
     /**
      * Wraps a Model object to form dependencies other Models using Edges.
@@ -168,7 +172,7 @@ public class ModelSorter {
                     // create node
                     AbstractModelArtifact referencedModel = versionIdToModelMap.get(referencedModelId);
                     if (referencedModel == null) {
-                        Log.debug("ignoring " + referencedModelId);
+                        logger.debug("ignoring " + referencedModelId);
                         continue; // referenced model not supplied, no need to sort it
                     }
                     referencedNode = new Node(referencedModel);
