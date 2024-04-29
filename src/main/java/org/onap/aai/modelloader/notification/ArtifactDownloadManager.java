@@ -24,6 +24,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.onap.aai.babel.service.data.BabelRequest;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
@@ -31,6 +34,8 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
+import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.IModelParser;
 import org.onap.aai.modelloader.entity.model.NamedQueryArtifactParser;
@@ -132,9 +137,11 @@ public class ArtifactDownloadManager {
     private void processDownloadedArtifacts(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts,
             IArtifactInfo artifactInfo, IDistributionClientDownloadResult downloadResult, INotificationData data)
             throws ProcessToscaArtifactsException, InvalidArchiveException, BabelArtifactParsingException {
+        List<Artifact> artifacts = null;
         if ("TOSCA_CSAR".equalsIgnoreCase(artifactInfo.getArtifactType())) {
-            processToscaArtifacts(modelArtifacts, catalogArtifacts, downloadResult.getArtifactPayload(), artifactInfo,
+            artifacts = processToscaArtifacts(downloadResult.getArtifactPayload(), artifactInfo,
                     data.getDistributionID(), data.getServiceVersion());
+            
         } else if (ArtifactTypeEnum.MODEL_QUERY_SPEC.toString().equalsIgnoreCase(artifactInfo.getArtifactType())) {
             processModelQuerySpecArtifact(modelArtifacts, downloadResult);
         } else {
@@ -142,29 +149,46 @@ public class ArtifactDownloadManager {
                     artifactInfo.getArtifactType());
             throw new InvalidArchiveException("Unsupported artifact type: " + artifactInfo.getArtifactType());
         }
+        if(artifacts != null) {
+            for(Artifact artifact : artifacts) {
+                if(artifact.getType() == ArtifactType.VNF_CATALOG || artifact.getType() == ArtifactType.VNF_CATALOG_XML) {
+                    catalogArtifacts.add(artifact);
+                } else {
+                    modelArtifacts.add(artifact);
+                }
+            }
+        }
     }
 
-    public void processToscaArtifacts(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts, byte[] payload,
-            IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
+    public List<Artifact> processToscaArtifacts(byte[] payload, IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
             throws ProcessToscaArtifactsException, InvalidArchiveException {
         // Get translated artifacts from Babel Service
         BabelRequest babelRequest = new BabelRequest();
         babelRequest.setArtifactName(artifactInfo.getArtifactName());
         babelRequest.setCsar(Base64.getEncoder().encodeToString(payload));
         babelRequest.setArtifactVersion(serviceVersion);
-        babelArtifactService.invokeBabelService(modelArtifacts, catalogArtifacts, babelRequest, distributionId);
+        List<Artifact> artifacts = babelArtifactService.invokeBabelService(babelRequest, distributionId);
 
         // Get VNF Catalog artifacts directly from CSAR
         List<Artifact> csarCatalogArtifacts = vnfCatalogExtractor.extract(payload, artifactInfo.getArtifactName());
 
         // Throw an error if VNF Catalog data is present in the Babel payload and directly in the CSAR
-        if (!catalogArtifacts.isEmpty() && !csarCatalogArtifacts.isEmpty()) {
+        if (isDuplicateVnfCatalogData(artifacts, csarCatalogArtifacts)) {
             logger.error(ModelLoaderMsgs.DUPLICATE_VNFC_DATA_ERROR, artifactInfo.getArtifactName());
             throw new InvalidArchiveException("CSAR: " + artifactInfo.getArtifactName()
                     + " contains VNF Catalog data in the format of both TOSCA and XML files. Only one format can be used for each CSAR file.");
-        } else if (!csarCatalogArtifacts.isEmpty()) {
-            catalogArtifacts.addAll(csarCatalogArtifacts);
         }
+        return Stream
+                .concat(artifacts.stream(), csarCatalogArtifacts.stream())
+                .collect(Collectors.toList());
+
+    }
+
+    private boolean isDuplicateVnfCatalogData(List<Artifact> babelArtifacts, List<Artifact> csarCatalogArtifacts) {
+        boolean babelIsEmpty = babelArtifacts.stream()
+            .filter(VnfCatalogArtifact.class::isInstance)
+            .findAny().isEmpty();
+        return !csarCatalogArtifacts.isEmpty() && !babelIsEmpty;
     }
 
     private void processModelQuerySpecArtifact(List<Artifact> modelArtifacts,

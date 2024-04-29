@@ -29,6 +29,7 @@ import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
 import org.onap.aai.modelloader.notification.NotificationDataImpl;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
@@ -103,11 +104,16 @@ public class ModelController {
 
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Generating XML models from test artifact");
 
+            List<Artifact> artifacts = artifactDownloadManager.processToscaArtifacts(csarFile, artifactInfo, "test-transaction-id", modelVersion);
             List<Artifact> modelArtifacts = new ArrayList<>();
             List<Artifact> catalogArtifacts = new ArrayList<>();
-
-            artifactDownloadManager.processToscaArtifacts(modelArtifacts,
-                    catalogArtifacts, csarFile, artifactInfo, "test-transaction-id", modelVersion);
+            for(Artifact artifact : artifacts) {
+                if(artifact.getType().equals(ArtifactType.MODEL)) {
+                    modelArtifacts.add(artifact);
+                } else {
+                    catalogArtifacts.add(artifact);
+                }
+            }
 
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Loading xml models from test artifacts: "
                     + modelArtifacts.size() + " model(s) and " + catalogArtifacts.size() + " catalog(s)");
@@ -115,7 +121,7 @@ public class ModelController {
             NotificationDataImpl notificationData = new NotificationDataImpl();
             notificationData.setDistributionID("TestDistributionID");
             boolean success =
-                    artifactDeploymentManager.deploy(notificationData, modelArtifacts, catalogArtifacts);
+                    artifactDeploymentManager.deploy(notificationData.getDistributionID(), modelArtifacts, catalogArtifacts);
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Deployment success was " + success);
             response = success ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {

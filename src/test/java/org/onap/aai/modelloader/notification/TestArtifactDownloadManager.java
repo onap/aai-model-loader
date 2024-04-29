@@ -24,8 +24,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithInvalidType;
@@ -50,7 +50,9 @@ import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
+import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
@@ -196,11 +198,14 @@ public class TestArtifactDownloadManager {
 
         setupValidDownloadCsarMocks(data, artifactInfo, new ArtifactTestUtils());
 
+        when(mockBabelArtifactConverter.convertToModel(any(BabelArtifact.class))).thenReturn(List.of(new ModelArtifact()));
+        when(mockBabelArtifactConverter.convertToCatalog(any(BabelArtifact.class))).thenReturn(new VnfCatalogArtifact(""));
+
         List<org.onap.aai.modelloader.entity.Artifact> modelArtifacts = new ArrayList<>();
-        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
-                is(true));
-        assertThat(catalogFiles.size(), is(0));
+        List<org.onap.aai.modelloader.entity.Artifact> catalogArtifacts = new ArrayList<>();
+        assertTrue(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogArtifacts));
+        assertThat(modelArtifacts.size(), is(1));
+        assertThat(catalogArtifacts.size(), is(1));
 
         Mockito.verify(mockDistributionClient).download(artifactInfo);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifactInfo);
@@ -233,8 +238,7 @@ public class TestArtifactDownloadManager {
 
         List<org.onap.aai.modelloader.entity.Artifact> modelFiles = new ArrayList<>();
         List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelFiles, catalogFiles),
-                is(true));
+        assertTrue(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelFiles, catalogFiles));
 
         assertThat(modelFiles, is(not(IsEmptyCollection.empty())));
         assertThat(catalogFiles, is(empty()));
@@ -268,10 +272,15 @@ public class TestArtifactDownloadManager {
 
         setupValidDownloadCsarMocks(data, serviceArtifact, artifactTestUtils);
         setupValidModelQuerySpecMocks(artifactTestUtils, data, modelSpecArtifact);
+        when(mockBabelArtifactConverter.convertToModel(any(BabelArtifact.class))).thenReturn(List.of(new ModelArtifact()));
+        when(mockBabelArtifactConverter.convertToCatalog(any(BabelArtifact.class))).thenReturn(new VnfCatalogArtifact(""));
 
-        List<org.onap.aai.modelloader.entity.Artifact> modelFiles = new ArrayList<>();
-        List<org.onap.aai.modelloader.entity.Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, artifacts, modelFiles, catalogFiles), is(true));
+
+        List<org.onap.aai.modelloader.entity.Artifact> modelArtifacts = new ArrayList<>();
+        List<org.onap.aai.modelloader.entity.Artifact> catalogArtifacts = new ArrayList<>();
+        assertTrue(downloadManager.downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts));
+        assertThat(modelArtifacts.size(), is(2));
+        assertThat(catalogArtifacts.size(), is(1));
 
         Mockito.verify(mockDistributionClient).download(serviceArtifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, serviceArtifact);
@@ -295,7 +304,7 @@ public class TestArtifactDownloadManager {
         when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        when(mockBabelArtifactConverter.convertToModel(anyList()))
+        when(mockBabelArtifactConverter.convertToModel(any()))
                 .thenThrow(BabelArtifactParsingException.class);
         doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifacts());

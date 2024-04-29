@@ -96,13 +96,13 @@ public class TestEventCallback {
         when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
                 any(List.class), any(List.class))).thenReturn(true);
 
-        when(mockArtifactDeploymentManager.deploy(any(INotificationData.class), any(List.class), any(List.class)))
+        when(mockArtifactDeploymentManager.deploy(any(String.class), any(List.class), any(List.class)))
                 .thenReturn(true);
 
         eventCallback.activateCallback(data);
 
         verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
                 any(List.class), any(List.class));
-        verify(mockArtifactDeploymentManager).deploy(any(INotificationData.class), any(List.class), any(List.class));
+        verify(mockArtifactDeploymentManager).deploy(any(String.class), any(List.class), any(List.class));
     }
 }

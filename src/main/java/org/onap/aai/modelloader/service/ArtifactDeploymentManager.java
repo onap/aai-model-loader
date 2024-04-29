@@ -22,11 +22,11 @@ package org.onap.aai.modelloader.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
 import org.onap.aai.modelloader.entity.model.ModelArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-import org.onap.sdc.api.notification.INotificationData;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,16 +48,14 @@ public class ArtifactDeploymentManager {
     /**
      * Deploys model and catalog artifacts to A&AI.
      *
-     * @param data data about the notification that is being processed
+     * @param distributionId data about the notification that is being processed
      * @param modelArtifacts collection of artifacts that represent yml files found in a TOSCA_CSAR file that have been
      *        converted to XML and also those for model query specs
      * @param catalogArtifacts collection of artifacts that represent vnf catalog files
      * @return boolean <code>true</code> if all deployments were successful otherwise <code>false</code>
      */
-    public boolean deploy(final INotificationData data, final List<Artifact> modelArtifacts,
+    public boolean deploy(final String distributionId, final List<Artifact> modelArtifacts,
             final List<Artifact> catalogArtifacts) {
-
-        String distributionId = data.getDistributionID();
 
         List<Artifact> completedArtifacts = new ArrayList<>();
         boolean deploySuccess =

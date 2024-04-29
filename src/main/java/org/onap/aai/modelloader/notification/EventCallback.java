@@ -67,7 +67,7 @@ public class EventCallback implements INotificationCallback {
                 artifactDownloadManager.downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
 
         if (success) {
-            success = artifactDeploymentManager.deploy(data, modelArtifacts, catalogArtifacts);
+            success = artifactDeploymentManager.deploy(data.getDistributionID(), modelArtifacts, catalogArtifacts);
         }
 
         String statusString = success ? "SUCCESS" : "FAILURE";

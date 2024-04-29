@@ -82,7 +82,8 @@ public abstract class AbstractModelArtifactParser implements IModelParser {
 
             IModelArtifact model = parseModel(doc.getDocumentElement(), artifactPayload);
 
-            if (!processParsedModel(modelList, artifactName, model)) {
+            boolean success = processParsedModel(modelList, artifactName, model);
+            if (!success) {
                 modelList = null;
             }
         } catch (Exception ex) {

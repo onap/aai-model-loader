@@ -23,6 +23,7 @@ package org.onap.aai.modelloader.notification;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -99,7 +100,7 @@ public class ArtifactDownloadManagerVnfcTest {
         assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
                 is(true));
 
-        assertEquals(2, catalogFiles.size(), "There should have been some catalog files");
+        assertEquals(1, catalogFiles.size(), "There should be a catalog file");
     }
 
     @Test
@@ -114,10 +115,10 @@ public class ArtifactDownloadManagerVnfcTest {
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
-                is(true));
+        assertTrue(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles));
 
-        assertEquals(3, catalogFiles.size(), "There should have been some catalog files");
+        assertEquals(3, catalogFiles.size(), "There should be three catalog artifacts");
+        assertEquals(1, modelArtifacts.size(), "There should be a model artifact");
     }
 
     @Test
@@ -171,8 +172,8 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockDistributionClient.download(artifactInfo))
                 .thenReturn(createDistributionClientDownloadResult(DistributionActionResultEnum.SUCCESS, null,
                         new ArtifactTestUtils().loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
-        when(mockBabelArtifactConverter.convertToModel(Mockito.anyList())).thenReturn(createModelArtifacts());
-        when(mockBabelArtifactConverter.convertToCatalog(Mockito.anyList())).thenReturn(createToscaVnfcArtifacts());
+        when(mockBabelArtifactConverter.convertToModel(Mockito.any(BabelArtifact.class))).thenReturn(createModelArtifacts());
+        when(mockBabelArtifactConverter.convertToCatalog(Mockito.any(BabelArtifact.class))).thenReturn(new VnfCatalogArtifact("Some VNFC payload"));
     }
 
     private List<BabelArtifact> createBabelArtifacts() {
@@ -191,15 +192,7 @@ public class ArtifactDownloadManagerVnfcTest {
     private List<Artifact> createModelArtifacts() {
         List<Artifact> modelArtifacts = new ArrayList<>();
         modelArtifacts.add(new ModelArtifact());
-        modelArtifacts.add(new ModelArtifact());
         return modelArtifacts;
-    }
-
-    private List<Artifact> createToscaVnfcArtifacts() {
-        List<Artifact> vnfcArtifacts = new ArrayList<>();
-        vnfcArtifacts.add(new VnfCatalogArtifact("Some VNFC payload"));
-        vnfcArtifacts.add(new VnfCatalogArtifact("Some VNFC payload"));
-        return vnfcArtifacts;
     }
 
     private List<Artifact> createXmlVnfcArtifacts() {

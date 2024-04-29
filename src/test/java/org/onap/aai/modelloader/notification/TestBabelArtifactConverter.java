@@ -22,11 +22,9 @@ package org.onap.aai.modelloader.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -34,6 +32,7 @@ import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
+import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -47,15 +46,9 @@ public class TestBabelArtifactConverter {
     @Test
     public void convert_nullToscaFiles() throws BabelArtifactParsingException {
         assertThrows(NullPointerException.class, () -> {
-            new BabelArtifactConverter().convertToModel(null);
+            new BabelArtifactConverter(new ModelArtifactParser()).convertToModel(null);
             fail("An instance of ArtifactGenerationException should have been thrown");
         });
-    }
-
-    @Test
-    public void testEmptyToscaFiles() throws BabelArtifactParsingException {
-        assertTrue(new BabelArtifactConverter().convertToModel(new ArrayList<>()).isEmpty(),
-                "Nothing should have been returned");
     }
 
     @Test
@@ -67,22 +60,20 @@ public class TestBabelArtifactConverter {
 
             INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-            List<BabelArtifact> toscaArtifacts = setupTest(problemXml, data);
+            BabelArtifact toscaArtifact = setupTest(problemXml, data);
 
-            new BabelArtifactConverter().convertToModel(toscaArtifacts);
+            new BabelArtifactConverter(new ModelArtifactParser()).convertToModel(toscaArtifact);
             fail("An instance of ModelArtifactParsingException should have been thrown");
         });
     }
 
-    private List<BabelArtifact> setupTest(byte[] xml, INotificationData data) throws IOException {
-        List<BabelArtifact> toscaArtifacts = new ArrayList<>();
+    private BabelArtifact setupTest(byte[] xml, INotificationData data) throws IOException {
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
         BabelArtifact xmlArtifact =
                 new BabelArtifact(artifactInfo.getArtifactName(), BabelArtifact.ArtifactType.MODEL, new String(xml));
-        toscaArtifacts.add(xmlArtifact);
 
-        return toscaArtifacts;
+        return xmlArtifact;
     }
 
     @Test
@@ -90,9 +81,9 @@ public class TestBabelArtifactConverter {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
         byte[] xml = new ArtifactTestUtils().loadResource("convertedYmls/AAI-SCP-Test-VSP-resource-1.0.xml");
-        List<BabelArtifact> toscaArtifacts = setupTest(xml, data);
+        BabelArtifact toscaArtifact = setupTest(xml, data);
 
-        List<Artifact> modelArtifacts = new BabelArtifactConverter().convertToModel(toscaArtifacts);
+        List<Artifact> modelArtifacts = new BabelArtifactConverter(new ModelArtifactParser()).convertToModel(toscaArtifact);
 
         assertEquals(1, modelArtifacts.size(), "There should have been 1 artifact");
         assertEquals(new String(xml), modelArtifacts.get(0).getPayload());

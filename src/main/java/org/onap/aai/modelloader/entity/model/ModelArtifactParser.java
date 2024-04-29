@@ -37,10 +37,12 @@ import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+@Component
 public class ModelArtifactParser extends AbstractModelArtifactParser {
 
     public static final String MODEL_VER = "model-ver";

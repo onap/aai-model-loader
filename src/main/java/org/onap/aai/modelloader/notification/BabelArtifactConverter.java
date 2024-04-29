@@ -20,7 +20,6 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.onap.aai.babel.service.data.BabelArtifact;
@@ -38,6 +37,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class BabelArtifactConverter {
 
+    private final ModelArtifactParser modelArtifactParser;
+
+    public BabelArtifactConverter(ModelArtifactParser modelArtifactParser) {
+        this.modelArtifactParser = modelArtifactParser;
+    }
+
     /**
      * This method converts BabelArtifacts into instances of {@link ModelArtifact}.
      *
@@ -46,24 +51,15 @@ public class BabelArtifactConverter {
      * @throws BabelArtifactParsingException if an error occurs trying to parse the generated XML files that were
      *         converted from tosca artifacts
      */
-    public List<Artifact> convertToModel(List<BabelArtifact> xmlArtifacts) throws BabelArtifactParsingException {
-        Objects.requireNonNull(xmlArtifacts);
-        List<Artifact> modelArtifacts = new ArrayList<>();
-        ModelArtifactParser modelArtParser = new ModelArtifactParser();
-
-        // Parse TOSCA payloads
-        for (BabelArtifact xmlArtifact : xmlArtifacts) {
-
-            List<Artifact> parsedArtifacts = modelArtParser.parse(xmlArtifact.getPayload(), xmlArtifact.getName());
-
-            if (parsedArtifacts == null || parsedArtifacts.isEmpty()) {
-                throw new BabelArtifactParsingException("Could not parse generated XML: " + xmlArtifact.getPayload());
-            }
-
-            modelArtifacts.addAll(parsedArtifacts);
+    public List<Artifact> convertToModel(BabelArtifact babelArtifact) throws BabelArtifactParsingException {
+        Objects.requireNonNull(babelArtifact);
+        List<Artifact> parsedArtifacts = modelArtifactParser.parse(babelArtifact.getPayload(), babelArtifact.getName());
+        
+        if (parsedArtifacts == null || parsedArtifacts.isEmpty()) {
+            throw new BabelArtifactParsingException("Could not parse generated XML: " + babelArtifact.getPayload());
         }
 
-        return modelArtifacts;
+        return parsedArtifacts;
     }
 
     /**
@@ -72,14 +68,7 @@ public class BabelArtifactConverter {
      * @param xmlArtifacts xml artifacts to be parsed
      * @return List<org.openecomp.modelloader.entity.Artifact> list of converted catalog artifacts
      */
-    public List<Artifact> convertToCatalog(List<BabelArtifact> xmlArtifacts) {
-        Objects.requireNonNull(xmlArtifacts);
-        List<Artifact> catalogArtifacts = new ArrayList<>();
-
-        for (BabelArtifact xmlArtifact : xmlArtifacts) {
-            catalogArtifacts.add(new VnfCatalogArtifact(xmlArtifact.getPayload()));
-        }
-
-        return catalogArtifacts;
+    public Artifact convertToCatalog(BabelArtifact babelArtifact) {
+        return new VnfCatalogArtifact(babelArtifact.getPayload());
     }
 }
