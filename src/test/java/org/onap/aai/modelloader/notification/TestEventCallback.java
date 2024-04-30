@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
@@ -75,34 +75,32 @@ public class TestEventCallback {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void activateCallback_downloadFails() {
+    public void activateCallback_downloadFails() throws Exception {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
-                any(List.class), any(List.class))).thenReturn(false);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)
+                )).thenThrow(DownloadFailureException.class);
 
         eventCallback.activateCallback(data);
 
-        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
-                any(List.class), any(List.class));
+        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class));
         Mockito.verifyNoInteractions(mockArtifactDeploymentManager);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void activateCallback() throws BabelArtifactParsingException {
+    public void activateCallback() throws Exception {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class),
-                any(List.class), any(List.class))).thenReturn(true);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
+            .thenReturn(Collections.emptyList());
 
         when(mockArtifactDeploymentManager.deploy(any(String.class), any(List.class), any(List.class)))
                 .thenReturn(true);
 
         eventCallback.activateCallback(data);
 
-        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class),
-                any(List.class), any(List.class));
+        verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class));
         verify(mockArtifactDeploymentManager).deploy(any(String.class), any(List.class), any(List.class));
     }
 }

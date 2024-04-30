@@ -28,15 +28,16 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.DistributionClientTestConfiguration;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
+import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.service.ArtifactInfoImpl;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @DirtiesContext
 @AutoConfigureWireMock(port = 0)
@@ -59,7 +58,7 @@ public class ArtifactDownloadManagerTest {
   @Autowired ArtifactDownloadManager artifactDownloadManager;
 
   @Test
-  public void downloadArtifacts() throws JsonProcessingException {
+  public void downloadArtifacts() throws Exception {
     NotificationDataImpl notificationData = new NotificationDataImpl();
     notificationData.setDistributionID("distributionID");
     notificationData.setServiceVersion("2.0");
@@ -94,13 +93,16 @@ public class ArtifactDownloadManagerTest {
     artifactInfo.setArtifactUUID("f6f907f1-3f45-4fb4-8cbe-15a4c6ee16db");
     List<IArtifactInfo> artifacts = new ArrayList<>();
     artifacts.add(artifactInfo);
-    List<Artifact> modelArtifacts = new ArrayList<>(); // processed artifacts will be written to this list
-    List<Artifact> catalogArtifacts = new ArrayList<>(); // processed artifacts will be written to this list
-    boolean result = artifactDownloadManager.downloadArtifacts(notificationData, artifacts, modelArtifacts, catalogArtifacts);
+    List<Artifact> result = artifactDownloadManager.downloadArtifacts(notificationData, artifacts);
     
-    assertEquals(1, modelArtifacts.size());
-    assertEquals(ArtifactType.MODEL, modelArtifacts.get(0).getType());
-    assertTrue(result);
+    assertEquals(1, result.size());
+    ModelArtifact modelArtifact = (ModelArtifact) result.get(0);
+    assertEquals(ArtifactType.MODEL, modelArtifact.getType());
+    assertEquals("3c8bc8e7-e387-46ed-8616-70e99e2206dc", modelArtifact.getModelInvariantId());
+    assertEquals("http://org.onap.aai.inventory/v28", modelArtifact.getModelNamespace());
+    assertEquals("v28", modelArtifact.getModelNamespaceVersion());
+    assertEquals("71f47717-b100-4eac-940b-7d4e86a4cbb7", modelArtifact.getModelVerId());
+    assertEquals(Set.of("82194af1-3c2c-485a-8f44-420e22a9eaa4|46b92144-923a-4d20-b85a-3cbd847668a9"), modelArtifact.getDependentModelIds());
   }
 
 }

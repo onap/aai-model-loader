@@ -64,7 +64,6 @@ public class TestModelController {
     @Autowired NotificationPublisher notificationPublisher;
     @Autowired VnfCatalogExtractor vnfCatalogExtractor;
 
-    @Mock BabelServiceClientFactory clientFactory;
     @Mock BabelServiceClient babelServiceClient;
     @InjectMocks BabelArtifactService babelArtifactService;
     
@@ -72,7 +71,6 @@ public class TestModelController {
 
     @BeforeEach
     public void init() throws BabelServiceClientException {
-        when(clientFactory.create(any())).thenReturn(babelServiceClient);
         when(babelServiceClient.postArtifact(any(), any())).thenReturn(Collections.emptyList());
         ArtifactDownloadManager artifactDownloadManager = new ArtifactDownloadManager(iDistributionClient, notificationPublisher, vnfCatalogExtractor, babelArtifactService);
         this.modelController = new ModelController(iDistributionClient, modelLoaderConfig, artifactDeploymentManager, artifactDownloadManager);

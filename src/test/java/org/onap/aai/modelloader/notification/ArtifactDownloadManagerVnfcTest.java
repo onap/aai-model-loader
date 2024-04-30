@@ -20,10 +20,8 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -33,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,6 @@ import org.onap.aai.modelloader.extraction.InvalidArchiveException;
 import org.onap.aai.modelloader.extraction.VnfCatalogExtractor;
 import org.onap.aai.modelloader.restclient.BabelServiceClient;
 import org.onap.aai.modelloader.restclient.BabelServiceClientException;
-import org.onap.aai.modelloader.service.BabelServiceClientFactory;
 import org.onap.aai.modelloader.util.ArtifactTestUtils;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -70,14 +68,12 @@ public class ArtifactDownloadManagerVnfcTest {
     @Mock private IDistributionClient mockDistributionClient;
     @Mock private NotificationPublisher mockNotificationPublisher;
     @Mock private BabelArtifactConverter mockBabelArtifactConverter;
-    @Mock private BabelServiceClientFactory mockClientFactory;
     @Mock private VnfCatalogExtractor mockVnfCatalogExtractor;
     @InjectMocks private BabelArtifactService babelArtifactService;
 
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(mockClientFactory.create(Mockito.any())).thenReturn(mockBabelClient);
 
         Properties configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream("model-loader.properties"));
@@ -87,7 +83,7 @@ public class ArtifactDownloadManagerVnfcTest {
 
     @Test
     public void downloadArtifacts_validToscaVnfcCsarFile()
-            throws IOException, BabelServiceClientException, BabelArtifactParsingException, InvalidArchiveException {
+            throws Exception {
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
@@ -95,17 +91,20 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifacts());
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(new ArrayList<>());
 
-        List<Artifact> modelArtifacts = new ArrayList<>();
-        List<Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
-                is(true));
-
-        assertEquals(1, catalogFiles.size(), "There should be a catalog file");
+        List<Artifact> artifacts = downloadManager.downloadArtifacts(data, data.getServiceArtifacts());
+        List<Artifact> catalogArtifacts = artifacts.stream()
+                .filter(VnfCatalogArtifact.class::isInstance)
+                .collect(Collectors.toList());
+        List<Artifact> modelArtifacts = artifacts.stream()
+                .filter(ModelArtifact.class::isInstance)
+                .collect(Collectors.toList());
+        assertEquals(1, catalogArtifacts.size(), "There should be a catalog artifact");
+        assertEquals(1, modelArtifacts.size(), "There should be a model artifact");
     }
 
     @Test
     public void downloadArtifacts_validXmlVnfcCsarFile()
-            throws IOException, BabelServiceClientException, BabelArtifactParsingException, InvalidArchiveException {
+            throws Exception {
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
@@ -113,17 +112,21 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifactsNoVnfc());
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createXmlVnfcArtifacts());
 
-        List<Artifact> modelArtifacts = new ArrayList<>();
-        List<Artifact> catalogFiles = new ArrayList<>();
-        assertTrue(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles));
+        List<Artifact> artifacts = downloadManager.downloadArtifacts(data, data.getServiceArtifacts());
 
-        assertEquals(3, catalogFiles.size(), "There should be three catalog artifacts");
+        List<Artifact> catalogArtifacts = artifacts.stream()
+                .filter(VnfCatalogArtifact.class::isInstance)
+                .collect(Collectors.toList());
+        List<Artifact> modelArtifacts = artifacts.stream()
+                .filter(ModelArtifact.class::isInstance)
+                .collect(Collectors.toList());
+        assertEquals(3, catalogArtifacts.size(), "There should be three catalog artifacts");
         assertEquals(1, modelArtifacts.size(), "There should be a model artifact");
     }
 
     @Test
     public void downloadArtifacts_validNoVnfcCsarFile()
-            throws IOException, BabelServiceClientException, BabelArtifactParsingException, InvalidArchiveException {
+            throws Exception {
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
@@ -131,17 +134,17 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifactsNoVnfc());
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(new ArrayList<>());
 
-        List<Artifact> modelArtifacts = new ArrayList<>();
-        List<Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
-                is(true));
+        List<Artifact> artifacts = downloadManager.downloadArtifacts(data, data.getServiceArtifacts());
+        List<Artifact> catalogArtifacts = artifacts.stream()
+                .filter(VnfCatalogArtifact.class::isInstance)
+                .collect(Collectors.toList());
 
-        assertEquals(0, catalogFiles.size(), "There should not have been any catalog files");
+        assertEquals(0, catalogArtifacts.size(), "There should not have been any catalog files");
     }
 
     @Test
     public void downloadArtifacts_invalidXmlAndToscaVnfcCsarFile()
-            throws IOException, BabelServiceClientException, BabelArtifactParsingException, InvalidArchiveException {
+            throws Exception {
         INotificationData data = getNotificationDataWithToscaCsarFile();
         IArtifactInfo artifactInfo = data.getServiceArtifacts().get(0);
 
@@ -150,10 +153,8 @@ public class ArtifactDownloadManagerVnfcTest {
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createXmlVnfcArtifacts());
         doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
 
-        List<Artifact> modelArtifacts = new ArrayList<>();
-        List<Artifact> catalogFiles = new ArrayList<>();
-        assertThat(downloadManager.downloadArtifacts(data, data.getServiceArtifacts(), modelArtifacts, catalogFiles),
-                is(false));
+        InvalidArchiveException invalidArchiveException = assertThrows(InvalidArchiveException.class,
+                () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
 
         Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
     }

@@ -27,6 +27,7 @@ import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.extraction.ArtifactInfoExtractor;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
@@ -60,11 +61,26 @@ public class EventCallback implements INotificationCallback {
         logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Received distribution " + data.getDistributionID());
 
         List<IArtifactInfo> artifacts = new ArtifactInfoExtractor().extract(data);
+        boolean success = true;
+        List<Artifact> downloadedArtifacts = new ArrayList<>();
+        try {
+            downloadedArtifacts =
+                    artifactDownloadManager.downloadArtifacts(data, artifacts);
+        } catch (Exception e) {
+            success = false;
+        }
+
         List<Artifact> catalogArtifacts = new ArrayList<>();
         List<Artifact> modelArtifacts = new ArrayList<>();
-
-        boolean success =
-                artifactDownloadManager.downloadArtifacts(data, artifacts, modelArtifacts, catalogArtifacts);
+        if(downloadedArtifacts != null) {
+            for(Artifact artifact : downloadedArtifacts) {
+                if(artifact.getType() == ArtifactType.VNF_CATALOG || artifact.getType() == ArtifactType.VNF_CATALOG_XML) {
+                    catalogArtifacts.add(artifact);
+                } else {
+                    modelArtifacts.add(artifact);
+                }
+            }
+        }
 
         if (success) {
             success = artifactDeploymentManager.deploy(data.getDistributionID(), modelArtifacts, catalogArtifacts);

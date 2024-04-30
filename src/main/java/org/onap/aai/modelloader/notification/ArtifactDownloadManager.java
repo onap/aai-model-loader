@@ -22,6 +22,7 @@ package org.onap.aai.modelloader.notification;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,29 +87,25 @@ public class ArtifactDownloadManager {
      * @param modelArtifacts collection of artifacts for model query specs
      * @param catalogArtifacts collection of artifacts that represent vnf catalog files
      * @return boolean <code>true</code> if the download process was successful otherwise <code>false</code>
+     * @throws Exception 
      */
-    boolean downloadArtifacts(INotificationData data, List<IArtifactInfo> artifacts, List<Artifact> modelArtifacts,
-            List<Artifact> catalogArtifacts) {
-        boolean success = true;
+    List<Artifact> downloadArtifacts(INotificationData data, List<IArtifactInfo> artifacts) throws Exception {
 
+        List<Artifact> allArtifacts = new ArrayList<>();
         for (IArtifactInfo artifact : artifacts) {
             try {
                 IDistributionClientDownloadResult downloadResult = downloadIndividualArtifacts(data, artifact);
-                processDownloadedArtifacts(modelArtifacts, catalogArtifacts, artifact, downloadResult, data);
+                List<Artifact> processedArtifacts = processDownloadedArtifacts(artifact, downloadResult, data);
+                allArtifacts.addAll(processedArtifacts);
             } catch (DownloadFailureException e) {
                 notificationPublisher.publishDownloadFailure(client, data, artifact, e.getMessage());
-                success = false;
-            } catch (Exception e) {
+                throw e;
+            } catch (ProcessToscaArtifactsException | InvalidArchiveException | BabelArtifactParsingException e) {
                 notificationPublisher.publishDeployFailure(client, data, artifact);
-                success = false;
-            }
-
-            if (!success) {
-                break;
+                throw e;
             }
         }
-
-        return success;
+        return allArtifacts;
     }
 
     private IDistributionClientDownloadResult downloadIndividualArtifacts(INotificationData data,
@@ -134,30 +131,25 @@ public class ArtifactDownloadManager {
         return downloadResult;
     }
 
-    private void processDownloadedArtifacts(List<Artifact> modelArtifacts, List<Artifact> catalogArtifacts,
+    private List<Artifact> processDownloadedArtifacts(
             IArtifactInfo artifactInfo, IDistributionClientDownloadResult downloadResult, INotificationData data)
             throws ProcessToscaArtifactsException, InvalidArchiveException, BabelArtifactParsingException {
-        List<Artifact> artifacts = null;
+        List<Artifact> artifacts = new ArrayList<>();
+        List<Artifact> querySpecArtifacts = new ArrayList<>();
         if ("TOSCA_CSAR".equalsIgnoreCase(artifactInfo.getArtifactType())) {
             artifacts = processToscaArtifacts(downloadResult.getArtifactPayload(), artifactInfo,
                     data.getDistributionID(), data.getServiceVersion());
             
         } else if (ArtifactTypeEnum.MODEL_QUERY_SPEC.toString().equalsIgnoreCase(artifactInfo.getArtifactType())) {
-            processModelQuerySpecArtifact(modelArtifacts, downloadResult);
+            querySpecArtifacts = processModelQuerySpecArtifact(downloadResult);
         } else {
             logger.info(ModelLoaderMsgs.UNSUPPORTED_ARTIFACT_TYPE, artifactInfo.getArtifactName(),
                     artifactInfo.getArtifactType());
             throw new InvalidArchiveException("Unsupported artifact type: " + artifactInfo.getArtifactType());
         }
-        if(artifacts != null) {
-            for(Artifact artifact : artifacts) {
-                if(artifact.getType() == ArtifactType.VNF_CATALOG || artifact.getType() == ArtifactType.VNF_CATALOG_XML) {
-                    catalogArtifacts.add(artifact);
-                } else {
-                    modelArtifacts.add(artifact);
-                }
-            }
-        }
+        return Stream
+            .concat(artifacts.stream(), querySpecArtifacts.stream())
+            .collect(Collectors.toList());
     }
 
     public List<Artifact> processToscaArtifacts(byte[] payload, IArtifactInfo artifactInfo, String distributionId, String serviceVersion)
@@ -191,8 +183,7 @@ public class ArtifactDownloadManager {
         return !csarCatalogArtifacts.isEmpty() && !babelIsEmpty;
     }
 
-    private void processModelQuerySpecArtifact(List<Artifact> modelArtifacts,
-            IDistributionClientDownloadResult downloadResult) throws BabelArtifactParsingException {
+    private List<Artifact> processModelQuerySpecArtifact(IDistributionClientDownloadResult downloadResult) throws BabelArtifactParsingException {
         logger.debug(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Processing named query artifact.");
 
         IModelParser parser = new NamedQueryArtifactParser();
@@ -200,15 +191,11 @@ public class ArtifactDownloadManager {
         List<Artifact> parsedArtifacts =
                 parser.parse(new String(downloadResult.getArtifactPayload()), downloadResult.getArtifactFilename());
 
-        if (parsedArtifactsExist(parsedArtifacts)) {
-            modelArtifacts.addAll(parsedArtifacts);
+        if (parsedArtifacts != null && !parsedArtifacts.isEmpty()) {
+            return parsedArtifacts;
         } else {
             throw new BabelArtifactParsingException(
                     "Could not parse generated XML: " + new String(downloadResult.getArtifactPayload()));
         }
-    }
-
-    private boolean parsedArtifactsExist(List<Artifact> parsedArtifacts) {
-        return parsedArtifacts != null && !parsedArtifacts.isEmpty();
     }
 }
