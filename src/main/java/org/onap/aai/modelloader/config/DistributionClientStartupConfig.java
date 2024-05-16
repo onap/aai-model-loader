@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.annotation.PreDestroy;
+
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
 import org.onap.aai.modelloader.notification.EventCallback;
@@ -42,13 +44,13 @@ public class DistributionClientStartupConfig {
 
     private static final Logger logger = LoggerFactory.getInstance().getLogger(DistributionClientStartupConfig.class);
 
-    private final IDistributionClient client;
+    private final IDistributionClient distributionClient;
     private final ModelLoaderConfig config;
     private final EventCallback eventCallback;
 
-    public DistributionClientStartupConfig(IDistributionClient client, ModelLoaderConfig config,
+    public DistributionClientStartupConfig(IDistributionClient distributionClient, ModelLoaderConfig config,
             EventCallback eventCallback) {
-        this.client = client;
+        this.distributionClient = distributionClient;
         this.config = config;
         this.eventCallback = eventCallback;
     }
@@ -58,12 +60,12 @@ public class DistributionClientStartupConfig {
         // Initialize distribution client
         logger.debug(ModelLoaderMsgs.INITIALIZING, "Initializing distribution client...");
         IDistributionClientResult initResult = null;
-        initResult = client.init(config, eventCallback);
+        initResult = distributionClient.init(config, eventCallback);
 
         if (initResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
             // Start distribution client
             logger.debug(ModelLoaderMsgs.INITIALIZING, "Starting distribution client...");
-            IDistributionClientResult startResult = client.start();
+            IDistributionClientResult startResult = distributionClient.start();
             if (startResult.getDistributionActionResult() == DistributionActionResultEnum.SUCCESS) {
                 logger.info(ModelLoaderMsgs.INITIALIZING, "Connection to SDC established");
             } else {
@@ -72,7 +74,7 @@ public class DistributionClientStartupConfig {
 
                 // Kick off a timer to retry the SDC connection
                 Timer timer = new Timer();
-                TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
+                TimerTask task = new SdcConnectionJob(distributionClient, config, eventCallback, timer);
                 timer.schedule(task, new Date(), 60000);
             }
         } else {
@@ -81,8 +83,16 @@ public class DistributionClientStartupConfig {
 
             // Kick off a timer to retry the SDC connection
             Timer timer = new Timer();
-            TimerTask task = new SdcConnectionJob(client, config, eventCallback, timer);
+            TimerTask task = new SdcConnectionJob(distributionClient, config, eventCallback, timer);
             timer.schedule(task, new Date(), 60000);
+        }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        logger.info(ModelLoaderMsgs.STOPPING_CLIENT);
+        if (distributionClient != null) {
+            distributionClient.stop();
         }
     }
 }
