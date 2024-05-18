@@ -42,4 +42,4 @@ PROPS="$PROPS -Dserver.port=9500"
 JVM_MAX_HEAP=${MAX_HEAP:-1024}
 
 echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
-java $java_runtime_arguments $PROPS -jar $JARFILE
+java $java_runtime_arguments ${JVM_OPTS} $PROPS -jar $JARFILE
