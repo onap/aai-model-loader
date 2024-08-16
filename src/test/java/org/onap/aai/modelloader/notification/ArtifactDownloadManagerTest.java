@@ -38,7 +38,7 @@ import org.onap.aai.modelloader.DistributionClientTestConfiguration;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
-import org.onap.aai.modelloader.service.ArtifactInfoImpl;
+import org.onap.aai.modelloader.service.ArtifactInfo;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,7 +59,7 @@ public class ArtifactDownloadManagerTest {
 
   @Test
   public void downloadArtifacts() throws Exception {
-    NotificationDataImpl notificationData = new NotificationDataImpl();
+    NotificationData notificationData = new NotificationData();
     notificationData.setDistributionID("distributionID");
     notificationData.setServiceVersion("2.0");
 
@@ -70,7 +70,7 @@ public class ArtifactDownloadManagerTest {
         .willReturn(aResponse()
           .withHeader("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
           .withBodyFile("service-TestSvc-csar.csar")));
-    
+
     stubFor(
         post(urlEqualTo("/services/babel-service/v1/app/generateArtifacts"))
             .withHeader("X-TransactionId", equalTo("distributionID"))
@@ -84,7 +84,7 @@ public class ArtifactDownloadManagerTest {
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBodyFile("service-TestSvc-csar-babel-response.json")));
 
-    ArtifactInfoImpl artifactInfo = new ArtifactInfoImpl();
+    ArtifactInfo artifactInfo = new ArtifactInfo();
     artifactInfo.setArtifactName("service-TestSvc-csar.csar");
     artifactInfo.setArtifactVersion("1.0");
     artifactInfo.setArtifactURL("/sdc/v1/catalog/services/DemovlbCds/1.0/artifacts/service-TestSvc-csar.csar");
@@ -94,7 +94,7 @@ public class ArtifactDownloadManagerTest {
     List<IArtifactInfo> artifacts = new ArrayList<>();
     artifacts.add(artifactInfo);
     List<Artifact> result = artifactDownloadManager.downloadArtifacts(notificationData, artifacts);
-    
+
     assertEquals(1, result.size());
     ModelArtifact modelArtifact = (ModelArtifact) result.get(0);
     assertEquals(ArtifactType.MODEL, modelArtifact.getType());

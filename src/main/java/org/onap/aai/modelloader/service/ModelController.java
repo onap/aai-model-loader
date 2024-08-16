@@ -31,7 +31,7 @@ import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.notification.ArtifactDownloadManager;
-import org.onap.aai.modelloader.notification.NotificationDataImpl;
+import org.onap.aai.modelloader.notification.NotificationData;
 import org.onap.aai.modelloader.notification.NotificationPublisher;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -92,9 +92,9 @@ public class ModelController {
     }
 
     private ResponseEntity<String> processTestArtifact(String modelName, String modelVersion, String payload) {
-        IArtifactInfo artifactInfo = new ArtifactInfoImpl();
-        ((ArtifactInfoImpl) artifactInfo).setArtifactName(modelName);
-        ((ArtifactInfoImpl) artifactInfo).setArtifactVersion(modelVersion);
+        IArtifactInfo artifactInfo = new ArtifactInfo();
+        ((ArtifactInfo) artifactInfo).setArtifactName(modelName);
+        ((ArtifactInfo) artifactInfo).setArtifactVersion(modelVersion);
 
         ResponseEntity<String> response;
         try {
@@ -118,7 +118,7 @@ public class ModelController {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Loading xml models from test artifacts: "
                     + modelArtifacts.size() + " model(s) and " + catalogArtifacts.size() + " catalog(s)");
 
-            NotificationDataImpl notificationData = new NotificationDataImpl();
+            NotificationData notificationData = new NotificationData();
             notificationData.setDistributionID("TestDistributionID");
             boolean success =
                     artifactDeploymentManager.deploy(notificationData.getDistributionID(), modelArtifacts, catalogArtifacts);
@@ -129,7 +129,7 @@ public class ModelController {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Exception handled: " + responseMessage);
             if (config.getASDCConnectionDisabled()) {
                 // Make sure the NotificationPublisher logger is invoked as per the standard processing flow.
-                new NotificationPublisher().publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
+                new NotificationPublisher().publishDeployFailure(client, new NotificationData(), artifactInfo);
             } else {
                 responseMessage += "\nSDC publishing is enabled but has been bypassed";
             }

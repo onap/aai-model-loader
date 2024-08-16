@@ -29,7 +29,7 @@ import lombok.Data;
  * This class is an implementation of IArtifactInfo for test purposes.
  */
 @Data
-public class ArtifactInfoImpl implements IArtifactInfo {
+public class ArtifactInfo implements IArtifactInfo {
 
     private String artifactName;
     private String artifactType;
@@ -39,6 +39,9 @@ public class ArtifactInfoImpl implements IArtifactInfo {
     private String artifactChecksum;
     private Integer artifactTimeout;
     private String artifactUUID;
+    // This is not part of the IArtifactInfo interface
+    // but is sent in the SDC distribution event
+    private String generatedFromUUID;
     private IArtifactInfo generatedArtifact;
     private List<IArtifactInfo> relatedArtifacts;
 }

@@ -93,6 +93,7 @@ public class ModelArtifactHandlerTest {
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_XML_VALUE))
             .withHeader("X-TransactionId", equalTo("someId"))
             .withHeader("X-FromAppId", equalTo("ModelLoader"))
+            // .withRequestBody(WireMock.equalToJson("{}"))
             .willReturn(
                 WireMock.aResponse()
                     .withStatus(HttpStatus.CREATED.value())));
@@ -162,7 +163,7 @@ public class ModelArtifactHandlerTest {
   @Test
   public void thatModelCanBeRolledBack() {
     stubFor(WireMock.get(urlEqualTo("/aai/v28/service-design-and-creation/models/model/3a40ab73-6694-4e75-bb6d-9a4a86ce35b3"))
-        .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))    
+        .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
         .withHeader("X-FromAppId", equalTo("ModelLoader"))
         .withHeader("X-TransactionId", equalTo("distributionId"))
         .willReturn(aResponse()
@@ -178,7 +179,7 @@ public class ModelArtifactHandlerTest {
     modelArtifact.setModelInvariantId("3a40ab73-6694-4e75-bb6d-9a4a86ce35b3");
     modelArtifact.setModelVerId("modelVersionId");
     // modelArtifact.setModelVer("2.0");
-    
+
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 
@@ -232,7 +233,7 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
     modelArtifact.setModelVerId("modelVersionId");
-    
+
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 

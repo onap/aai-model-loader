@@ -21,41 +21,45 @@ package org.onap.aai.modelloader.distribution;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.onap.aai.modelloader.notification.NotificationDataImpl;
+import org.onap.aai.modelloader.DistributionClientTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext
-@SpringBootTest(properties = { "model-loader.sdc.connection.enabled=true"})
+@AutoConfigureWireMock(port = 0)
+@SpringBootTest(properties = { "ml.distribution.connection.enabled=true"})
 @EmbeddedKafka(partitions = 1, ports = 9092, topics = {"${topics.distribution.notification}"})
+@Import(DistributionClientTestConfiguration.class)
 public class NotificationIntegrationTest {
 
     @Autowired EventCallbackAspect eventCallbackAspect;
 
     @Autowired
-    private KafkaTemplate<String, NotificationDataImpl> kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Value("${topics.distribution.notification}")
     private String topic;
 
     @Test
-    @Disabled("This test is not yet implemented")
+    // @Disabled("This test is not yet implemented")
     public void thatActivateCallbackIsCalled()
       throws Exception {
-        NotificationDataImpl notificationData = new NotificationDataImpl();
-        notificationData.setDistributionID("distributionID");
-    
-        // TODO: send distribution event here
-        kafkaTemplate.send(topic, notificationData);
+        String distributionEvent = new String(Files.readAllBytes(Paths.get(new ClassPathResource("__files/distributionEvent.json").getURI())));
+
+        kafkaTemplate.send(topic, distributionEvent);
 
         // TODO: mock distribution client requests to /sdc/v1/artifactTypes
         // TODO: mock distribution client requests to /sdc/v1/distributionKafkaData

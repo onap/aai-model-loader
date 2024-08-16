@@ -22,7 +22,7 @@ package org.onap.aai.modelloader.fixture;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.onap.aai.modelloader.service.ArtifactInfoImpl;
+import org.onap.aai.modelloader.service.ArtifactInfo;
 import org.onap.sdc.api.notification.IArtifactInfo;
 
 /**
@@ -42,7 +42,7 @@ public class ArtifactInfoBuilder {
      */
     public static IArtifactInfo build(final String type, final String name, final String description,
             final String version) {
-        ArtifactInfoImpl artifact = new ArtifactInfoImpl();
+        ArtifactInfo artifact = new ArtifactInfo();
 
         artifact.setArtifactType(type);
         artifact.setArtifactName(name);

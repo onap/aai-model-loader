@@ -28,7 +28,7 @@ import org.onap.sdc.api.notification.IResourceInstance;
 import lombok.Data;
 
 @Data
-public class NotificationDataImpl implements INotificationData {
+public class NotificationData implements INotificationData {
 
     private String distributionID;
     private String serviceName;

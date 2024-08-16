@@ -27,20 +27,40 @@ import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.ge
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneService;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithOneServiceAndResources;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.onap.aai.modelloader.config.DistributionClientJacksonConfig;
 import org.onap.aai.modelloader.fixture.ArtifactInfoBuilder;
 import org.onap.aai.modelloader.fixture.MockNotificationDataImpl;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
+import org.onap.sdc.api.notification.IResourceInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ContextConfiguration;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests {@link ArtifactInfoExtractor}.
  */
-public class TestArtifactInfoExtractor {
+@SpringBootTest
+@ContextConfiguration(classes = DistributionClientJacksonConfig.class)
+public class ArtifactInfoExtractorTest {
+
+    @Autowired
+    @Qualifier("distributionClientMapper")
+    ObjectMapper mapper;
 
     private ArtifactInfoExtractor extractor;
 
@@ -104,5 +124,18 @@ public class TestArtifactInfoExtractor {
 
         assertEquals(2, artifacts.size(), "Two artifact should have been returned");
         assertEquals(expectedArtifacts, artifacts, "The actual artifact did not match the expected one");
+    }
+
+    @Test
+    public void thatArtifactInfoExtractionWorks() throws IOException {
+        String distributionEvent = new String(Files.readAllBytes(Paths.get(new ClassPathResource("__files/distributionEvent.json").getURI())));
+        INotificationData notificationData = mapper.readValue(distributionEvent, INotificationData.class);
+        List<IArtifactInfo> artifactsInResources = notificationData.getResources().stream().map(IResourceInstance::getArtifacts).flatMap(List::stream).collect(Collectors.toList());
+        List<IArtifactInfo> expectedArtifacts = new ArrayList<>(notificationData.getServiceArtifacts());
+        expectedArtifacts.addAll(artifactsInResources);
+
+        List<IArtifactInfo> artifacts = new ArtifactInfoExtractor().extract(notificationData);
+        assertEquals(expectedArtifacts.size(), artifacts.size());
+        assertTrue(artifacts.containsAll(expectedArtifacts) && expectedArtifacts.containsAll(artifacts));
     }
 }

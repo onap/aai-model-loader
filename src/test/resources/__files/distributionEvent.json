@@ -1,0 +1,118 @@
+{
+	"distributionID": "81bec675-d495-48fb-a7d8-583991b7c1ea",
+	"serviceName": "basic_cnf_macro_gnb",
+	"serviceVersion": "1.0",
+	"serviceUUID": "01165ae7-8827-4389-82f3-16b15e572658",
+	"serviceDescription": "ONAP SDK Service",
+	"serviceInvariantUUID": "9d2eed31-9b8b-4ce7-acee-591ab5be8617",
+	"resources": [
+		{
+			"resourceInstanceName": "basic_cnf_macro_gnb 0",
+			"resourceName": "basic_cnf_macro_gnb",
+			"resourceVersion": "1.0",
+			"resoucreType": "VF",
+			"resourceUUID": "34d89ab3-e4d4-42c8-b40e-5986c6b0b12e",
+			"resourceInvariantUUID": "c3455e1c-d3fd-4669-ada9-00d8f23d0215",
+			"resourceCustomizationUUID": "68a41614-64ad-420e-ab4b-7cf88482cae9",
+			"category": "Generic",
+			"subcategory": "Network Service",
+			"artifacts": [
+				{
+					"artifactName": "vf-license-model.xml",
+					"artifactType": "VF_LICENSE",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/vf-license-model.xml",
+					"artifactChecksum": "MzUzYjIxN2I0ZjJlNThmYTkyZDhlMTkxMDViMzg2ZjQ=",
+					"artifactDescription": "VF license file",
+					"artifactTimeout": 0,
+					"artifactUUID": "50783aac-9d74-46c0-9d35-0cff675a6ce6",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "basic_cnf_macro_gnb0_modules.json",
+					"artifactType": "VF_MODULES_METADATA",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/basic_cnf_macro_gnb0_modules.json",
+					"artifactChecksum": "YTJhNjM4ODMyOTc4ZGNiZjZkNTcxODI5NzIyMjVlMjU=",
+					"artifactDescription": "Auto-generated VF Modules information artifact",
+					"artifactTimeout": 0,
+					"artifactUUID": "8f565874-65ae-49bf-b73a-2ce7ab7a03b2",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "base_template_dummy_ignore.yaml",
+					"artifactType": "HEAT",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/base_template_dummy_ignore.yaml",
+					"artifactChecksum": "ZjI3NTdkZWViNTEzY2NhZjg4MmQ3OTcxZjcyMmNmNDY=",
+					"artifactDescription": "created from csar",
+					"artifactTimeout": 30,
+					"artifactUUID": "fa0ac90d-f00e-45b9-849e-73ce7d58800a",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "vendor-license-model.xml",
+					"artifactType": "VENDOR_LICENSE",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/vendor-license-model.xml",
+					"artifactChecksum": "ZjdjMmRkYjQwODlhYmQ4OTMxZGJiNWViMTFhODQ1MGI=",
+					"artifactDescription": " Vendor license file",
+					"artifactTimeout": 0,
+					"artifactUUID": "3ca978ab-b50f-4e0f-9b02-49e7658be508",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "helm_cuup.env",
+					"artifactType": "HEAT_ENV",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/helm_cuup.env",
+					"artifactChecksum": "MTA2MjAxNDAyMmY0NmMwYTlmMDMyN2FjZDUxODkzNWI=",
+					"artifactDescription": "Auto-generated HEAT Environment deployment artifact",
+					"artifactTimeout": 0,
+					"artifactUUID": "cb98a0d0-21c0-4608-b7ca-783e2d9407a3",
+					"artifactVersion": "2",
+					"generatedFromUUID": "79fcf7ab-da5c-4322-a77c-62d481c7606a"
+				},
+				{
+					"artifactName": "base_template_dummy_ignore.env",
+					"artifactType": "HEAT_ENV",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/base_template_dummy_ignore.env",
+					"artifactChecksum": "MTFhYjczYTdlMDU5MmE4N2FlMzhkM2RmMjIxZmY4ZmM=",
+					"artifactDescription": "Auto-generated HEAT Environment deployment artifact",
+					"artifactTimeout": 0,
+					"artifactUUID": "c04d3437-6ada-4233-9fcf-6844c0e60256",
+					"artifactVersion": "2",
+					"generatedFromUUID": "fa0ac90d-f00e-45b9-849e-73ce7d58800a"
+				},
+				{
+					"artifactName": "helm_cuup.tgz",
+					"artifactType": "HELM",
+					"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/resourceInstances/basic_cnf_macro_gnb0/artifacts/helm_cuup.tgz",
+					"artifactChecksum": "YzA0NjU1MGZhZjUxODhlNzVjYzNhNWZiNTJhMGM3NjU=",
+					"artifactDescription": "created from csar",
+					"artifactTimeout": 30,
+					"artifactUUID": "79fcf7ab-da5c-4322-a77c-62d481c7606a",
+					"artifactVersion": "1"
+				}
+			]
+		}
+	],
+	"serviceArtifacts": [
+		{
+			"artifactName": "service-BasicCnfMacroGnb-template.yml",
+			"artifactType": "TOSCA_TEMPLATE",
+			"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/artifacts/service-BasicCnfMacroGnb-template.yml",
+			"artifactChecksum": "ZDJjYjY4MjY5NTVhYWEzZDNiNDg3YzI1YTI2OWMzMTQ=",
+			"artifactDescription": "TOSCA representation of the asset",
+			"artifactTimeout": 0,
+			"artifactUUID": "89d7a1e7-bc9c-4716-8180-50eaeac4f34d",
+			"artifactVersion": "1"
+		},
+		{
+			"artifactName": "service-BasicCnfMacroGnb-csar.csar",
+			"artifactType": "TOSCA_CSAR",
+			"artifactURL": "/sdc/v1/catalog/services/BasicCnfMacroGnb/1.0/artifacts/service-BasicCnfMacroGnb-csar.csar",
+			"artifactChecksum": "ZjE3ZmY2NWNiMmRjMmQ3MDhhN2U2NmY0OWZiNWJiYTI=",
+			"artifactDescription": "TOSCA definition package of the asset",
+			"artifactTimeout": 0,
+			"artifactUUID": "a6331ce4-e8cb-462a-820f-c9996d7020c6",
+			"artifactVersion": "1"
+		}
+	],
+	"workloadContext": "Production"
+}
