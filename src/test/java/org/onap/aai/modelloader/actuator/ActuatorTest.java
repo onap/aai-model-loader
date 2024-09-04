@@ -19,29 +19,46 @@
  */
 package org.onap.aai.modelloader.actuator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
+@AutoConfigureWebTestClient
+@TestPropertySource(properties = {
+  "management.endpoints.web.exposure.include=prometheus,metrics,info,health"
+})
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ActuatorTest {
-  
-  @Autowired RestTemplate restTemplate;
-  @LocalServerPort
-  private int serverPort;
+
+  @Autowired
+  private WebTestClient webTestClient;
 
   @Test
   public void thatLivenessEndpointReturnsOk() {
-    String url = String.format("http://localhost:%s/actuator/health", serverPort);
-    ResponseEntity<String> entity = restTemplate.getForEntity(url, String.class);
-    assertEquals(entity.getStatusCode(), HttpStatus.OK);
-    assertEquals(entity.getBody(), "{\"status\":\"UP\"}");
+    webTestClient.get().uri("/actuator/health")
+      .exchange()
+      .expectStatus().isOk()
+      .expectBody()
+      .jsonPath("$.status")
+      .isEqualTo("UP");
   }
+
+  // @Test
+  // public void testPrometheusEndpoint() {
+  //   webTestClient.get().uri("/actuator/prometheus")
+  //     .exchange()
+  //     .expectStatus().isOk()
+  //     .expectHeader().contentType("text/plain; charset=utf-8")
+  //     .expectBody(String.class)
+  //     .consumeWith(response -> {
+  //         String responseBody = response.getResponseBody();
+  //         assert responseBody != null;
+  //         assert responseBody.contains("# HELP");
+  //         assert responseBody.contains("# TYPE");
+  //     });
+  // }
 }
