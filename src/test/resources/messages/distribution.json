@@ -1,0 +1,106 @@
+{
+	"distributionID": "ac6f29fc-d6b3-428b-8ee2-b2e3ea636fe9",
+	"serviceName": "pnf_macro",
+	"serviceVersion": "1.0",
+	"serviceUUID": "1b8b0466-f7f2-4616-8198-055228f8d1eb",
+	"serviceDescription": "ONAP SDK Service",
+	"serviceInvariantUUID": "8939eac6-07f9-4395-b7ab-fe5c1a3e7cfe",
+	"resources": [
+		{
+			"resourceInstanceName": "pnf_macro 0",
+			"resourceName": "pnf_macro",
+			"resourceVersion": "1.0",
+			"resoucreType": "PNF",
+			"resourceUUID": "ef5c823c-c048-4d0c-94d3-4569ee66947c",
+			"resourceInvariantUUID": "27dd7ddf-babc-402e-b04a-bb76a0f58a4a",
+			"resourceCustomizationUUID": "33e9569f-0e58-4bb4-9825-43925ddeb213",
+			"category": "Generic",
+			"subcategory": "Network Service",
+			"artifacts": [
+				{
+					"artifactName": "vf-license-model.xml",
+					"artifactType": "VF_LICENSE",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/vf-license-model.xml",
+					"artifactChecksum": "ZmJlMzZkN2NkZWRjNDUyNDUwZTY2YjE0NmNkMGFiOWI=",
+					"artifactDescription": "VF license file",
+					"artifactTimeout": 0,
+					"artifactUUID": "f8c6e818-aa35-43d2-bc23-fb2c498fb675",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "pNF.csar",
+					"artifactType": "ETSI_PACKAGE",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/pNF.csar",
+					"artifactChecksum": "ZGVhZmM4YTM3NDgwYjQxNDFmZjYzYzQ5N2E4NDFkNDE=",
+					"artifactDescription": "Artifact created from csar",
+					"artifactTimeout": 0,
+					"artifactUUID": "27a07164-8d63-4d7e-a8b3-8422e938b37c",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "mynetconf.yang",
+					"artifactType": "YANG_MODULE",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/mynetconf.yang",
+					"artifactChecksum": "N2Q1MDkxNjUwYzU1MWI2OTUzNmY4YTc3YmQ2YTlkZTc=",
+					"artifactDescription": "Artifact created from csar",
+					"artifactTimeout": 0,
+					"artifactUUID": "b5ce5c4e-4501-45e6-826b-6cbfbe8dbfee",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "vendor-license-model.xml",
+					"artifactType": "VENDOR_LICENSE",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/vendor-license-model.xml",
+					"artifactChecksum": "MTZiYmJhZmJiOTBjZmVkYzNjM2UwNjFkZmZmYzNkNjc=",
+					"artifactDescription": " Vendor license file",
+					"artifactTimeout": 0,
+					"artifactUUID": "8c68e938-4988-4107-834a-eab4c4e65392",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "PM_Dictionary.yaml",
+					"artifactType": "PM_DICTIONARY",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/PM_Dictionary.yaml",
+					"artifactChecksum": "ZDJlYTVlNjA2ZGRhOTc3MDBkODVjNmEyMjA2OTA5YTE=",
+					"artifactDescription": "Artifact created from csar",
+					"artifactTimeout": 0,
+					"artifactUUID": "e014ef41-35a6-4222-9c52-907c3a42a0b3",
+					"artifactVersion": "1"
+				},
+				{
+					"artifactName": "MyPnf_Pnf_v1.yaml",
+					"artifactType": "VES_EVENTS",
+					"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/resourceInstances/pnf_macro0/artifacts/MyPnf_Pnf_v1.yaml",
+					"artifactChecksum": "ZTllOGUwNjdiYWEyMWJhZDc4NjNlOGNmNGJkZWVlMWY=",
+					"artifactDescription": "Artifact created from csar",
+					"artifactTimeout": 0,
+					"artifactUUID": "e01c8cab-cb60-493b-895f-b1998bbaed84",
+					"artifactVersion": "1"
+				}
+			]
+		}
+	],
+	"serviceArtifacts": [
+		{
+			"artifactName": "service-PnfMacro-template.yml",
+			"artifactType": "TOSCA_TEMPLATE",
+			"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/artifacts/service-PnfMacro-template.yml",
+			"artifactChecksum": "YmEzMTIzYTU5NDQ4MGIzNThmM2Q3N2Q5OTNiZjhlYjA=",
+			"artifactDescription": "TOSCA representation of the asset",
+			"artifactTimeout": 0,
+			"artifactUUID": "9c5c224c-7c6e-41c6-abd9-0bc5169e566c",
+			"artifactVersion": "1"
+		},
+		{
+			"artifactName": "service-PnfMacro-csar.csar",
+			"artifactType": "TOSCA_CSAR",
+			"artifactURL": "/sdc/v1/catalog/services/PnfMacro/1.0/artifacts/service-PnfMacro-csar.csar",
+			"artifactChecksum": "MTQ5YmNkMjVkOWI2NmJhYzg5NTNiNzQ3YTA2NGIzYTA=",
+			"artifactDescription": "TOSCA definition package of the asset",
+			"artifactTimeout": 0,
+			"artifactUUID": "61d45180-7c5f-4ae0-9044-6b005de76b3f",
+			"artifactVersion": "1"
+		}
+	],
+	"workloadContext": "Production"
+}

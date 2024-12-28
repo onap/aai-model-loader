@@ -38,7 +38,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 @ConditionalOnProperty(value = "ml.distribution.connection.enabled", havingValue = "true", matchIfMissing = true)
 public class DistributionClientStartupConfig {
 
@@ -47,13 +50,6 @@ public class DistributionClientStartupConfig {
     private final IDistributionClient distributionClient;
     private final ModelLoaderConfig config;
     private final EventCallback eventCallback;
-
-    public DistributionClientStartupConfig(IDistributionClient distributionClient, ModelLoaderConfig config,
-            EventCallback eventCallback) {
-        this.distributionClient = distributionClient;
-        this.config = config;
-        this.eventCallback = eventCallback;
-    }
 
     @EventListener(ApplicationReadyEvent.class)
     protected void initSdcClient() {

@@ -30,14 +30,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 
 @TestConfiguration
 public class DistributionClientTestConfiguration {
@@ -48,9 +55,12 @@ public class DistributionClientTestConfiguration {
   @Value("${wiremock.server.port}")
   private int wiremockPort;
 
+  @Value("${spring.embedded.kafka.brokers}")
+  private String kafkaBootstrapAddress;
+
   @Primary
   @Bean(name = "testProperties")
-  public Properties configProperties() throws IOException {
+  Properties configProperties() throws IOException {
     // Load model loader system configuration
     InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"));
     Properties configProperties = new Properties();
@@ -59,6 +69,21 @@ public class DistributionClientTestConfiguration {
     setOverrides(configProperties);
 
     return configProperties;
+  }
+
+  @Bean
+  ProducerFactory<String, String> distributionClientProducerFactory() {
+      Map<String, Object> configProps = new HashMap<>();
+      configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapAddress);
+      configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+      configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+      return new DefaultKafkaProducerFactory<>(configProps);
+  }
+
+  @Bean
+  KafkaTemplate<String, String> distributionClientKafkaTemplate() {
+      return new KafkaTemplate<>(distributionClientProducerFactory());
   }
 
   private void setOverrides(Properties configProperties) {
@@ -76,6 +101,10 @@ public class DistributionClientTestConfiguration {
     stubFor(get(urlEqualTo("/sdc/v1/distributionKafkaData"))
         .withHeader("X-ECOMP-RequestID", matching(".+"))
         .withHeader("X-ECOMP-InstanceID", equalTo("aai-ml-id-test"))
-        .willReturn(aResponse().withHeader("Content-Type", "application/json").withBodyFile("kafkaBootstrap.json")));
+        .willReturn(aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withTransformers("response-template")
+          .withTransformerParameter("kafkaBootstrapAddress", kafkaBootstrapAddress)
+          .withBodyFile("kafkaBootstrap.json")));
   }
 }

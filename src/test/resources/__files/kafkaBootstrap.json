@@ -1,5 +1,5 @@
 {
-  "kafkaBootStrapServer": "localhost:9092",
+  "kafkaBootStrapServer": "{{parameters.kafkaBootstrapAddress}}",
   "distrNotificationTopicName": "SDC-DISTR-NOTIF-TOPIC-AUTO",
   "distrStatusTopicName": "SDC-DISTR-STATUS-TOPIC-AUTO"
 }
