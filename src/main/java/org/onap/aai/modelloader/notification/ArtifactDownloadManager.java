@@ -35,7 +35,6 @@ import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.babel.BabelArtifactService;
 import org.onap.aai.modelloader.entity.Artifact;
-import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.entity.model.BabelArtifactParsingException;
 import org.onap.aai.modelloader.entity.model.IModelParser;
