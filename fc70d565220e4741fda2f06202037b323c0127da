@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8524bb2c_f263209e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T11:12:02Z",
+      "side": 1,
+      "message": "Please make sure that your commit message has the form of\n```\n\u003cDiscriptive title\u003e (not \"community contribution\"!)\n\n- \u003cfurther description\u003e\n\nIssue-ID:...\nChange-Id:\nSigned-off-by:\n```\nAlso look at the formatting with the newlines",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "256b53f9_fbcd305b",
