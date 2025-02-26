@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "256b53f9_fbcd305b",
+        "filename": "src/test/java/org/onap/aai/modelloader/ModelLoaderApplicationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T09:57:16Z",
+      "side": 1,
+      "message": "How is this WireMock stub",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2aacb85a_faa69cd6",
+        "filename": "src/test/java/org/onap/aai/modelloader/ModelLoaderApplicationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T09:57:16Z",
+      "side": 1,
+      "message": "What is this supposed to test?",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8af9a817_db3824b2",
+        "filename": "src/test/java/org/onap/aai/modelloader/service/TestSdcConnectionJob.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T09:57:16Z",
+      "side": 1,
+      "message": "Can we add a positive matching `verify()` here too? Because asserting `never()` leaves some room for what should instead be happening...",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b8cf4945_73c97bd5",
+        "filename": "src/test/java/org/onap/aai/modelloader/service/TestSdcConnectionJob.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T09:57:16Z",
+      "side": 1,
+      "message": "Same for all other tests of this kind",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0e7591d0_b4b79373",
+        "filename": "src/test/resources/application.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T09:57:16Z",
+      "side": 1,
+      "message": "Is this used in any of your newly added tests? I can\u0027t find a place where this would apply",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
