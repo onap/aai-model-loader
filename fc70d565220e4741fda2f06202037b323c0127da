@@ -105,6 +105,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a36c1131_26bc3ddb",
+        "filename": "src/test/java/org/onap/aai/modelloader/service/TestSdcConnectionJob.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T15:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8af9a817_db3824b2",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b8cf4945_73c97bd5",
@@ -118,6 +136,24 @@
       "writtenOn": "2025-02-26T09:57:16Z",
       "side": 1,
       "message": "Same for all other tests of this kind",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "00569ce2_0fe9985b",
+        "filename": "src/test/java/org/onap/aai/modelloader/service/TestSdcConnectionJob.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T15:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8cf4945_73c97bd5",
       "revId": "fc70d565220e4741fda2f06202037b323c0127da",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
