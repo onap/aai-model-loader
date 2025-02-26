@@ -20,21 +20,22 @@
  */
 package org.onap.aai.modelloader.notification;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.modelloader.entity.Artifact;
+import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
@@ -79,7 +80,7 @@ public class TestEventCallback {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
         when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)
-                )).thenThrow(DownloadFailureException.class);
+        )).thenThrow(DownloadFailureException.class);
 
         eventCallback.activateCallback(data);
 
@@ -93,7 +94,7 @@ public class TestEventCallback {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
         when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
-            .thenReturn(Collections.emptyList());
+                .thenReturn(Collections.emptyList());
 
         when(mockArtifactDeploymentManager.deploy(any(String.class), any(List.class), any(List.class)))
                 .thenReturn(true);
@@ -102,5 +103,22 @@ public class TestEventCallback {
 
         verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class));
         verify(mockArtifactDeploymentManager).deploy(any(String.class), any(List.class), any(List.class));
+    }
+    @Test
+    public void testActivateCallback_withVnfCatalogArtifacts() throws Exception {
+        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithCatalogFile();
+
+        List<Artifact> downloadedArtifacts = new ArrayList<>();
+        downloadedArtifacts.add(new Artifact(ArtifactType.MODEL));
+        downloadedArtifacts.add(new Artifact(ArtifactType.VNF_CATALOG));
+
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
+                .thenReturn(downloadedArtifacts);
+
+        eventCallback.activateCallback(data);
+
+        verify(mockArtifactDeploymentManager).deploy(eq("ID"),
+                argThat(list -> list.stream().anyMatch(a -> a.getType() == ArtifactType.MODEL)),
+                anyList());
     }
 }
