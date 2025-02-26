@@ -35,6 +35,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ece55cf4_030e1a04",
+        "filename": "src/test/java/org/onap/aai/modelloader/ModelLoaderApplicationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T11:50:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "256b53f9_fbcd305b",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2aacb85a_faa69cd6",
@@ -48,6 +66,24 @@
       "writtenOn": "2025-02-26T09:57:16Z",
       "side": 1,
       "message": "What is this supposed to test?",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5a2593e7_e871ce73",
+        "filename": "src/test/java/org/onap/aai/modelloader/ModelLoaderApplicationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T11:50:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2aacb85a_faa69cd6",
       "revId": "fc70d565220e4741fda2f06202037b323c0127da",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -99,6 +135,24 @@
       "writtenOn": "2025-02-26T09:57:16Z",
       "side": 1,
       "message": "Is this used in any of your newly added tests? I can\u0027t find a place where this would apply",
+      "revId": "fc70d565220e4741fda2f06202037b323c0127da",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "67b7b4a1_c844194e",
+        "filename": "src/test/resources/application.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-02-26T11:50:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e7591d0_b4b79373",
       "revId": "fc70d565220e4741fda2f06202037b323c0127da",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
