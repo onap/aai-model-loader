@@ -43,14 +43,10 @@ public class ModelLoaderConfig implements IConfiguration {
     public static final String PREFIX_MODEL_LOADER_CONFIG = "ml";
     public static final String PREFIX_DISTRIBUTION_CLIENT = PREFIX_MODEL_LOADER_CONFIG + ".distribution.";
     public static final String PREFIX_AAI = PREFIX_MODEL_LOADER_CONFIG + ".aai.";
-    public static final String PREFIX_BABEL = PREFIX_MODEL_LOADER_CONFIG + ".babel.";
     public static final String PREFIX_DEBUG = PREFIX_MODEL_LOADER_CONFIG + ".debug.";
 
     private static final String SUFFIX_KEYSTORE_FILE = "KEYSTORE_FILE";
     private static final String SUFFIX_KEYSTORE_PASS = "KEYSTORE_PASSWORD";
-
-    private static final String SUFFIX_TRUSTSTORE_FILE = "TRUSTSTORE_FILE";
-    private static final String SUFFIX_TRUSTSTORE_PASS = "TRUSTSTORE_PASSWORD";
 
     // Configuration file properties
     protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH =
@@ -90,13 +86,6 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_AAI_AUTHENTICATION_PASSWORD = PREFIX_AAI + "AUTH_PASSWORD";
     protected static final String PROP_AAI_USE_GIZMO = PREFIX_AAI + "USE_GIZMO";
     protected static final String PROP_AAI_USE_HTTPS = PREFIX_AAI + "USE_HTTPS";
-    protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
-    protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
-    protected static final String PROP_BABEL_KEYSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_KEYSTORE_PASS;
-    protected static final String PROP_BABEL_TRUSTSTORE_FILE = PREFIX_BABEL + SUFFIX_TRUSTSTORE_FILE;
-    protected static final String PROP_BABEL_TRUSTSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_TRUSTSTORE_PASS;
-    protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
-    protected static final String PROP_BABEL_USE_HTTPS = PREFIX_BABEL + "USE_HTTPS";
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
     protected static final String FILESEP =
             (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
@@ -240,46 +229,12 @@ public class ModelLoaderConfig implements IConfiguration {
         return certLocation + File.separator + modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
     }
 
-    public String getBabelKeyStorePath() {
-        String filename = get(PROP_BABEL_KEYSTORE_FILE);
-        if (filename == null) {
-            return null;
-        } else {
-            return certLocation + File.separator + filename;
-        }
-    }
-
     public String getAaiKeyStorePassword() {
         return getDeobfuscatedValue(get(PROP_AAI_KEYSTORE_PASSWORD));
     }
 
-    public String getBabelKeyStorePassword() {
-        return getDeobfuscatedValue(get(PROP_BABEL_KEYSTORE_PASSWORD));
-    }
-
-    public String getBabelTrustStorePath() {
-        String filename = get(PROP_BABEL_TRUSTSTORE_FILE);
-        if (filename == null) {
-            return null;
-        } else {
-            return certLocation + File.separator + filename;
-        }
-    }
-
-    public String getBabelTrustStorePassword() {
-        return getDeobfuscatedValue(get(PROP_BABEL_TRUSTSTORE_PASSWORD));
-    }
-
     public String getAaiBaseUrl() {
         return get(PROP_AAI_BASE_URL);
-    }
-
-    public String getBabelBaseUrl() {
-        return get(PROP_BABEL_BASE_URL);
-    }
-
-    public String getBabelGenerateArtifactsUrl() {
-        return get(PROP_BABEL_GENERATE_RESOURCE_URL);
     }
 
     public String getAaiModelUrl(String version) {
@@ -314,11 +269,6 @@ public class ModelLoaderConfig implements IConfiguration {
 
     public boolean useHttpsWithAAI() {
         String useHttps = get(PROP_AAI_USE_HTTPS);
-        return useHttps != null && useHttps.equalsIgnoreCase("true");
-    }
-
-    public boolean useHttpsWithBabel() {
-        String useHttps = get(PROP_BABEL_USE_HTTPS);
         return useHttps != null && useHttps.equalsIgnoreCase("true");
     }
 

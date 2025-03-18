@@ -61,7 +61,7 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_PASSWORD, password);
         assertEquals(password, config.getPassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_PASSWORD, password);
         assertEquals(password, config.getPassword());
     }
@@ -72,7 +72,7 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getKeyStorePassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getKeyStorePassword());
     }
@@ -83,7 +83,7 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
         assertEquals(password, config.getAaiAuthenticationPassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
         assertEquals(password, config.getAaiAuthenticationPassword());
     }
@@ -93,7 +93,7 @@ public class TestModelLoaderConfig {
         String password = "myvoiceismypassword";
         ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getAaiKeyStorePassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getAaiKeyStorePassword());
     }
@@ -105,44 +105,6 @@ public class TestModelLoaderConfig {
         props.put(ModelLoaderConfig.PROP_AAI_BASE_URL, url);
         ModelLoaderConfig config = new ModelLoaderConfig(props, null);
         assertEquals(url, config.getAaiBaseUrl());
-    }
-
-    @Test
-    public void testDecryptBabelKeystorePassword() {
-        String password = "babelpassword";
-        ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_BABEL_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getBabelKeyStorePassword());
-        
-        config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_BABEL_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getBabelKeyStorePassword());
-    }
-
-    @Test
-    public void testBabelKeystorePath() {
-        String root = "path_to_keystore";
-        String path = "relative_keystore_path";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_KEYSTORE_FILE, path);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, root);
-        assertEquals(root + File.separator + path, config.getBabelKeyStorePath());
-    }
-
-    @Test
-    public void testBabelBaseUrl() {
-        String url = "http://localhost/";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_BASE_URL, url);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getBabelBaseUrl());
-    }
-
-    @Test
-    public void testBabelGenerateArtifactsUrl() {
-        String url = "/path/to/the/resource";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_GENERATE_RESOURCE_URL, url);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getBabelGenerateArtifactsUrl());
     }
 
     @Test
@@ -161,7 +123,7 @@ public class TestModelLoaderConfig {
 
     /**
      * Create a Model Loader Configuration object from the supplied Property.
-     * 
+     *
      * @param propertyName property key
      * @param propertyValue value of the property
      * @return a new ModelLoaderConfig object containing a single obfuscated property value
@@ -171,7 +133,7 @@ public class TestModelLoaderConfig {
         props.put(propertyName, Password.obfuscate(propertyValue));
         return new ModelLoaderConfig(props, null);
     }
-    
+
     private ModelLoaderConfig createUnobfuscatedTestConfig(String propertyName, String propertyValue) {
         Properties props = new Properties();
         props.put(propertyName, propertyValue);
