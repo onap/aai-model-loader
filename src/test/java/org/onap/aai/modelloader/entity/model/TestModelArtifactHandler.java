@@ -31,10 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
@@ -53,6 +55,16 @@ public class TestModelArtifactHandler {
     @Mock
     private AaiRestClient aaiClient;
 
+    private static AaiProperties aaiProperties = new AaiProperties();
+
+    @BeforeAll
+    public static void setup() {
+        aaiProperties.setBaseUrl("http://aai.onap:80");
+        aaiProperties.setModelUrl("/aai/%s/service-design-and-creation/models/model/");
+        aaiProperties.setNamedQueryUrl("/aai/%s/service-design-and-creation/named-queries/named-query/");
+        aaiProperties.setVnfImageUrl("/aai/%s/service-design-and-creation/vnf-images");
+    }
+
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.openMocks(this);
@@ -60,7 +72,7 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testEmptyLists() {
-        ModelArtifactHandler handler = new ModelArtifactHandler(config);
+        ModelArtifactHandler handler = new ModelArtifactHandler(aaiProperties);
         handler.pushArtifacts(Collections.emptyList(), "", Collections.emptyList(), aaiClient);
         handler.rollback(Collections.emptyList(), "", aaiClient);
         assertTrue(true);
@@ -68,9 +80,6 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushExistingModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-
         ResponseEntity operationResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);
         when(operationResult.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -79,7 +88,7 @@ public class TestModelArtifactHandler {
         Artifact artifact = new ModelArtifact();
         artifacts.add(artifact);
 
-        ModelArtifactHandler handler = new ModelArtifactHandler(config);
+        ModelArtifactHandler handler = new ModelArtifactHandler(aaiProperties);
         boolean pushed = handler.pushArtifacts(artifacts, "", Collections.emptyList(), aaiClient);
         assertTrue(pushed);
         handler.rollback(artifacts, "", aaiClient);
@@ -87,10 +96,6 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsWithRollback() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
-
         ResponseEntity getResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
         when(getResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
@@ -107,7 +112,7 @@ public class TestModelArtifactHandler {
         artifacts.add(namedQueryArtifact);
 
         List<Artifact> completedArtifacts = new ArrayList<>();
-        ModelArtifactHandler handler = new ModelArtifactHandler(config);
+        ModelArtifactHandler handler = new ModelArtifactHandler(aaiProperties);
         boolean pushed = handler.pushArtifacts(artifacts, "", completedArtifacts, aaiClient);
         assertThat(pushed, is(true));
         handler.rollback(artifacts, "", aaiClient);
@@ -115,10 +120,6 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testPushNewModelsBadRequest() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-        when(config.getAaiNamedQueryUrl(any())).thenReturn("");
-
         ResponseEntity getResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(getResult);
         when(getResult.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
@@ -132,9 +133,6 @@ public class TestModelArtifactHandler {
 
     @Test
     public void testBadRequestResourceModelResult() {
-        when(config.getAaiBaseUrl()).thenReturn("");
-        when(config.getAaiModelUrl(any())).thenReturn("");
-
         ResponseEntity operationResult = mock(ResponseEntity.class);
         when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(operationResult);
         when(operationResult.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
@@ -143,10 +141,9 @@ public class TestModelArtifactHandler {
     }
 
     private void checkRollback(List<Artifact> artifacts) {
-        ModelArtifactHandler handler = new ModelArtifactHandler(config);
+        ModelArtifactHandler handler = new ModelArtifactHandler(aaiProperties);
         boolean pushed = handler.pushArtifacts(artifacts, "", Collections.emptyList(), aaiClient);
         assertThat(pushed, is(false));
         handler.rollback(artifacts, "", aaiClient);
     }
 }
-

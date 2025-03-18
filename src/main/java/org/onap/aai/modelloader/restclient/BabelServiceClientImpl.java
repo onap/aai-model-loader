@@ -27,7 +27,7 @@ import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.babel.service.data.BabelRequest;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.BabelProperties;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -39,21 +39,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * HTTPS Client for interfacing with Babel.
  *
  */
 @Component
+@RequiredArgsConstructor
 public class BabelServiceClientImpl implements BabelServiceClient {
 
     private static final Logger logger = LoggerFactory.getInstance().getLogger(BabelServiceClientImpl.class);
-    private final ModelLoaderConfig config;
+    private final BabelProperties babelProperties;
     private final RestTemplate restTemplate;
-
-    public BabelServiceClientImpl(ModelLoaderConfig config, RestTemplate restTemplate) {
-        this.config = config;
-        this.restTemplate = restTemplate;
-    }
 
     @Override
     public List<BabelArtifact> postArtifact(BabelRequest babelRequest, String transactionId) throws BabelServiceClientException {
@@ -62,7 +60,7 @@ public class BabelServiceClientImpl implements BabelServiceClient {
                     + " Artifact version: " + babelRequest.getArtifactVersion() + " Artifact payload: " + babelRequest.getCsar());
         }
 
-        String resourceUrl = config.getBabelBaseUrl() + config.getBabelGenerateArtifactsUrl();
+        String resourceUrl = babelProperties.getBaseUrl() + babelProperties.getGenerateArtifactsUrl();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

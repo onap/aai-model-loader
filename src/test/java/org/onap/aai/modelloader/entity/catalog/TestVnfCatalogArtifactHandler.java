@@ -24,7 +24,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,12 +33,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
@@ -49,13 +48,21 @@ import org.springframework.http.ResponseEntity;
 
 public class TestVnfCatalogArtifactHandler {
 
-    protected static String CONFIG_FILE = "model-loader.properties";
+    protected static AaiProperties aaiProperties = new AaiProperties();
 
     private AaiRestClient mockRestClient = mock(AaiRestClient.class);
 
+    @BeforeAll
+    public static void setup() {
+        aaiProperties.setBaseUrl("http://aai.onap:80");
+        aaiProperties.setModelUrl("/aai/%s/service-design-and-creation/models/model/");
+        aaiProperties.setNamedQueryUrl("/aai/%s/service-design-and-creation/named-queries/named-query/");
+        aaiProperties.setVnfImageUrl("/aai/v*/service-design-and-creation/vnf-images");
+    }
+
     /**
      * Update A&AI with 4 images, 2 of which already exist.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -76,7 +83,7 @@ public class TestVnfCatalogArtifactHandler {
         mockPutOperations();
 
         // Example VNF Catalog XML
-        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(aaiProperties);
         assertTrue(handler.pushArtifacts(createVnfCatalogArtifact(), "test", new ArrayList<Artifact>(), mockRestClient));
 
         assertPutOperationsSucceeded();
@@ -100,7 +107,7 @@ public class TestVnfCatalogArtifactHandler {
         mockPutOperations();
 
         // Example VNF Catalog XML
-        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(createConfig());
+        VnfCatalogArtifactHandler handler = new VnfCatalogArtifactHandler(aaiProperties);
         assertThat(
                 handler.pushArtifacts(createVnfCatalogXmlArtifact(), "test", new ArrayList<Artifact>(), mockRestClient),
                 is(true));
@@ -116,20 +123,9 @@ public class TestVnfCatalogArtifactHandler {
         assertThat(argument.getAllValues().get(1), containsString("VM00"));
     }
 
-    private ModelLoaderConfig createConfig() {
-        Properties configProperties = new Properties();
-        try {
-            configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
-        } catch (IOException e) {
-            fail();
-        }
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties, null);
-        return config;
-    }
-
     /**
      * Example VNF Catalog based on JSON data (returned by Babel)
-     * 
+     *
      * @return test Artifacts
      * @throws IOException
      * @throws UnsupportedEncodingException
@@ -144,7 +140,7 @@ public class TestVnfCatalogArtifactHandler {
 
     /**
      * Example VNF Catalog based on VNF_CATALOG XML
-     * 
+     *
      * @return test Artifacts
      * @throws IOException
      * @throws UnsupportedEncodingException

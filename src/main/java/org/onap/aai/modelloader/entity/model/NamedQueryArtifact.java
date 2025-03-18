@@ -22,10 +22,9 @@ package org.onap.aai.modelloader.entity.model;
 
 import java.util.List;
 
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
-
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,21 +53,21 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
     }
 
     @Override
-    public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId, List<Artifact> completedArtifacts) {
-        if (config.useGizmo()) {
-            return pushToGizmo(aaiClient, config, distId);
+    public boolean push(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId, List<Artifact> completedArtifacts) {
+        if (aaiProperties.isUseGizmo()) {
+            return pushToGizmo(aaiClient, aaiProperties, distId);
         }
 
-        return pushToResources(aaiClient, config, distId, completedArtifacts);
+        return pushToResources(aaiClient, aaiProperties, distId, completedArtifacts);
     }
 
-    private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    private boolean pushToResources(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts) {
         ResponseEntity<String> getResponse =
-                aaiClient.getResource(getNamedQueryUrl(config), distId, MediaType.APPLICATION_XML, String.class);
+                aaiClient.getResource(getNamedQueryUrl(aaiProperties), distId, MediaType.APPLICATION_XML, String.class);
         if (getResponse == null || getResponse.getStatusCode() != HttpStatus.OK) {
             // Only attempt the PUT if the model doesn't already exist
-            ResponseEntity<String> putResponse = aaiClient.putResource(getNamedQueryUrl(config), getPayload(), distId,
+            ResponseEntity<String> putResponse = aaiClient.putResource(getNamedQueryUrl(aaiProperties), getPayload(), distId,
                     MediaType.APPLICATION_XML, String.class);
             if (putResponse != null && putResponse.getStatusCode() == HttpStatus.CREATED) {
                 completedArtifacts.add(this);
@@ -86,20 +85,20 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
     }
 
     @Override
-    public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
-        // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if 
+    public void rollbackModel(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId) {
+        // Gizmo is resilient and doesn't require a rollback.  A redistribution will work fine even if
         // the model is partially loaded.
-        if (config.useGizmo()) {
+        if (aaiProperties.isUseGizmo()) {
             return;
         }
-        
+
         // Best effort to delete. Nothing we can do in the event this fails.
-        aaiClient.getAndDeleteResource(getNamedQueryUrl(config), distId);
+        aaiClient.getAndDeleteResource(getNamedQueryUrl(aaiProperties), distId);
     }
 
-    private String getNamedQueryUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiNamedQueryUrl(getModelNamespaceVersion()).trim();
+    private String getNamedQueryUrl(AaiProperties aaiProperties) {
+        String baseURL = aaiProperties.getBaseUrl().trim();
+        String subURL = String.format(aaiProperties.getNamedQueryUrl(), getModelNamespaceVersion()).trim();
         String instance = this.getNamedQueryUuid();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {

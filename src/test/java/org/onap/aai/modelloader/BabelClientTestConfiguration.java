@@ -52,6 +52,6 @@ public class BabelClientTestConfiguration {
   }
 
   private void setOverrides(Properties configProperties) {
-    configProperties.setProperty("ml.babel.BASE_URL", "http://localhost:" + wiremockPort);
+    configProperties.setProperty("ml.babel.base-url", "http://localhost:" + wiremockPort);
   }
 }

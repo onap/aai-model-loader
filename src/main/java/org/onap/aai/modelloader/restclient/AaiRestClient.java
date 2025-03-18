@@ -23,7 +23,7 @@ package org.onap.aai.modelloader.restclient;
 import java.util.Collections;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.AaiResourcesObject;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.springframework.http.HttpEntity;
@@ -42,16 +42,17 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class AaiRestClient {
 
+    private final AaiProperties aaiProperties;
+
     private static Logger logger = LoggerFactory.getInstance().getLogger(AaiRestClient.class.getName());
     public static final String HEADER_TRANS_ID = "X-TransactionId";
     public static final String HEADER_FROM_APP_ID = "X-FromAppId";
     public static final String ML_APP_NAME = "ModelLoader";
     private static final String RESOURCE_VERSION_PARAM = "resource-version";
-    private final ModelLoaderConfig config;
     private final RestTemplate restTemplate;
 
-    public AaiRestClient(ModelLoaderConfig config, RestTemplate restTemplate) {
-        this.config = config;
+    public AaiRestClient(AaiProperties aaiProperties, RestTemplate restTemplate) {
+        this.aaiProperties = aaiProperties;
         this.restTemplate = restTemplate;
     }
 
@@ -135,12 +136,12 @@ public class AaiRestClient {
 
 
     private boolean useBasicAuth() {
-        return config.getAaiAuthenticationUser() != null && config.getAaiAuthenticationPassword() != null;
+        return aaiProperties.getAuthUser() != null && aaiProperties.getAuthPassword() != null;
     }
 
     /**
      * Create the HTTP headers required for an A&AI operation (GET/POST/PUT/DELETE)
-     * 
+     *
      * @param transId
      * @return map of headers
      */
@@ -149,7 +150,7 @@ public class AaiRestClient {
         headers.set(AaiRestClient.HEADER_TRANS_ID, transId);
         headers.set(AaiRestClient.HEADER_FROM_APP_ID, AaiRestClient.ML_APP_NAME);
         if (useBasicAuth()) {
-            headers.setBasicAuth(config.getAaiAuthenticationUser(), config.getAaiAuthenticationPassword());
+            headers.setBasicAuth(aaiProperties.getAuthUser(), aaiProperties.getAuthPassword());
         }
         return headers;
     }

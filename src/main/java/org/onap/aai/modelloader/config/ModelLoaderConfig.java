@@ -21,13 +21,11 @@
 
 package org.onap.aai.modelloader.config;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,15 +40,10 @@ public class ModelLoaderConfig implements IConfiguration {
     // Configuration file structure
     public static final String PREFIX_MODEL_LOADER_CONFIG = "ml";
     public static final String PREFIX_DISTRIBUTION_CLIENT = PREFIX_MODEL_LOADER_CONFIG + ".distribution.";
-    public static final String PREFIX_AAI = PREFIX_MODEL_LOADER_CONFIG + ".aai.";
-    public static final String PREFIX_BABEL = PREFIX_MODEL_LOADER_CONFIG + ".babel.";
     public static final String PREFIX_DEBUG = PREFIX_MODEL_LOADER_CONFIG + ".debug.";
 
     private static final String SUFFIX_KEYSTORE_FILE = "KEYSTORE_FILE";
     private static final String SUFFIX_KEYSTORE_PASS = "KEYSTORE_PASSWORD";
-
-    private static final String SUFFIX_TRUSTSTORE_FILE = "TRUSTSTORE_FILE";
-    private static final String SUFFIX_TRUSTSTORE_PASS = "TRUSTSTORE_PASSWORD";
 
     // Configuration file properties
     protected static final String PROP_ML_DISTRIBUTION_ACTIVE_SERVER_TLS_AUTH =
@@ -80,29 +73,9 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_ML_DISTRIBUTION_SASL_JAAS_CONFIG = PREFIX_DISTRIBUTION_CLIENT + "SASL_JAAS_CONFIG";
     protected static final String PROP_ML_DISTRIBUTION_SASL_MECHANISM = PREFIX_DISTRIBUTION_CLIENT + "SASL_MECHANISM";
     protected static final String PROP_ML_DISTRIBUTION_SECURITY_PROTOCOL = PREFIX_DISTRIBUTION_CLIENT + "SECURITY_PROTOCOL";
-    protected static final String PROP_AAI_BASE_URL = PREFIX_AAI + "BASE_URL";
-    protected static final String PROP_AAI_KEYSTORE_FILE = PREFIX_AAI + SUFFIX_KEYSTORE_FILE;
-    protected static final String PROP_AAI_KEYSTORE_PASSWORD = PREFIX_AAI + SUFFIX_KEYSTORE_PASS;
-    protected static final String PROP_AAI_MODEL_RESOURCE_URL = PREFIX_AAI + "MODEL_URL";
-    protected static final String PROP_AAI_NAMED_QUERY_RESOURCE_URL = PREFIX_AAI + "NAMED_QUERY_URL";
-    protected static final String PROP_AAI_VNF_IMAGE_RESOURCE_URL = PREFIX_AAI + "VNF_IMAGE_URL";
-    protected static final String PROP_AAI_AUTHENTICATION_USER = PREFIX_AAI + "AUTH_USER";
-    protected static final String PROP_AAI_AUTHENTICATION_PASSWORD = PREFIX_AAI + "AUTH_PASSWORD";
-    protected static final String PROP_AAI_USE_GIZMO = PREFIX_AAI + "USE_GIZMO";
-    protected static final String PROP_AAI_USE_HTTPS = PREFIX_AAI + "USE_HTTPS";
-    protected static final String PROP_BABEL_BASE_URL = PREFIX_BABEL + "BASE_URL";
-    protected static final String PROP_BABEL_KEYSTORE_FILE = PREFIX_BABEL + SUFFIX_KEYSTORE_FILE;
-    protected static final String PROP_BABEL_KEYSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_KEYSTORE_PASS;
-    protected static final String PROP_BABEL_TRUSTSTORE_FILE = PREFIX_BABEL + SUFFIX_TRUSTSTORE_FILE;
-    protected static final String PROP_BABEL_TRUSTSTORE_PASSWORD = PREFIX_BABEL + SUFFIX_TRUSTSTORE_PASS;
-    protected static final String PROP_BABEL_GENERATE_RESOURCE_URL = PREFIX_BABEL + "GENERATE_ARTIFACTS_URL";
-    protected static final String PROP_BABEL_USE_HTTPS = PREFIX_BABEL + "USE_HTTPS";
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
     protected static final String FILESEP =
             (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
-    protected static final String PROP_AAI_CLIENT_CONNECT_TIMEOUT_MS = PREFIX_AAI + "RESTCLIENT_CONNECT_TIMEOUT";
-    protected static final String PROP_AAI_CLIENT_READ_TIMEOUT_MS = PREFIX_AAI + "RESTCLIENT_READ_TIMEOUT";
-
     private static String configHome;
     private Properties modelLoaderProperties = null;
     private String certLocation = ".";
@@ -236,68 +209,6 @@ public class ModelLoaderConfig implements IConfiguration {
         return getIntegerPropertyOrZero(PROP_ML_DISTRIBUTION_HTTPS_PROXY_PORT);
     }
 
-    public String getAaiKeyStorePath() {
-        return certLocation + File.separator + modelLoaderProperties.getProperty(PROP_AAI_KEYSTORE_FILE);
-    }
-
-    public String getBabelKeyStorePath() {
-        String filename = get(PROP_BABEL_KEYSTORE_FILE);
-        if (filename == null) {
-            return null;
-        } else {
-            return certLocation + File.separator + filename;
-        }
-    }
-
-    public String getAaiKeyStorePassword() {
-        return getDeobfuscatedValue(get(PROP_AAI_KEYSTORE_PASSWORD));
-    }
-
-    public String getBabelKeyStorePassword() {
-        return getDeobfuscatedValue(get(PROP_BABEL_KEYSTORE_PASSWORD));
-    }
-
-    public String getBabelTrustStorePath() {
-        String filename = get(PROP_BABEL_TRUSTSTORE_FILE);
-        if (filename == null) {
-            return null;
-        } else {
-            return certLocation + File.separator + filename;
-        }
-    }
-
-    public String getBabelTrustStorePassword() {
-        return getDeobfuscatedValue(get(PROP_BABEL_TRUSTSTORE_PASSWORD));
-    }
-
-    public String getAaiBaseUrl() {
-        return get(PROP_AAI_BASE_URL);
-    }
-
-    public String getBabelBaseUrl() {
-        return get(PROP_BABEL_BASE_URL);
-    }
-
-    public String getBabelGenerateArtifactsUrl() {
-        return get(PROP_BABEL_GENERATE_RESOURCE_URL);
-    }
-
-    public String getAaiModelUrl(String version) {
-        setModelVersion(version);
-        return updatePropertyOXMVersion(PROP_AAI_MODEL_RESOURCE_URL, version);
-    }
-
-    public String getAaiNamedQueryUrl(String version) {
-        return updatePropertyOXMVersion(PROP_AAI_NAMED_QUERY_RESOURCE_URL, version);
-    }
-
-    public String getAaiVnfImageUrl() {
-        return updatePropertyOXMVersion(PROP_AAI_VNF_IMAGE_RESOURCE_URL, getModelVersion());
-    }
-
-    public String getAaiAuthenticationUser() {
-        return get(PROP_AAI_AUTHENTICATION_USER);
-    }
 
     public String getModelVersion() {
         return modelVersion;
@@ -307,57 +218,12 @@ public class ModelLoaderConfig implements IConfiguration {
         this.modelVersion = modelVersion;
     }
 
-    public boolean useGizmo() {
-        String useGizmo = get(PROP_AAI_USE_GIZMO);
-        return useGizmo != null && useGizmo.equalsIgnoreCase("true");
-    }
-
-    public boolean useHttpsWithAAI() {
-        String useHttps = get(PROP_AAI_USE_HTTPS);
-        return useHttps != null && useHttps.equalsIgnoreCase("true");
-    }
-
-    public boolean useHttpsWithBabel() {
-        String useHttps = get(PROP_BABEL_USE_HTTPS);
-        return useHttps != null && useHttps.equalsIgnoreCase("true");
-    }
-
-    /**
-     * @return password for AAI authentication that has been reverse-engineered from its obfuscated form.
-     */
-    public String getAaiAuthenticationPassword() {
-        String password = getDeobfuscatedValue(get(PROP_AAI_AUTHENTICATION_PASSWORD));
-
-        if (password != null && password.isEmpty()) {
-            password = null;
-        }
-
-        return password;
-    }
-
     /**
      * @return a boolean value indicating whether the simulator is enabled.
      */
     public boolean getIngestSimulatorEnabled() {
         String propValue = get(PROP_DEBUG_INGEST_SIMULATOR);
         return propValue != null && "enabled".equalsIgnoreCase(propValue);
-    }
-
-    /**
-     * Read the value of the property and replace any wildcard OXM version "v*" with the supplied default OXM version
-     *
-     * @param propertyName
-     *            the name of the property storing the OXM version (possibly containing v*)
-     * @param version
-     *            the default OXM version
-     * @return the String value of the defined property (with any wildcard OXM version defaulted)
-     */
-    private String updatePropertyOXMVersion(String propertyName, String version) {
-        String value = get(propertyName);
-        if (version != null && value != null) {
-            value = value.replace("v*", version);
-        }
-        return value;
     }
 
     /**
@@ -404,16 +270,6 @@ public class ModelLoaderConfig implements IConfiguration {
                 return 0;
             }
         }
-    }
-
-    public int getClientConnectTimeoutMs() {
-        String connectTimeout = Optional.ofNullable(get(PROP_AAI_CLIENT_CONNECT_TIMEOUT_MS)).orElse("120000");
-        return Integer.parseInt(connectTimeout);
-    }
-
-    public int getClientReadTimeoutMs() {
-        String connectTimeout = Optional.ofNullable(get(PROP_AAI_CLIENT_READ_TIMEOUT_MS)).orElse("120000");
-        return Integer.parseInt(connectTimeout);
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
@@ -139,42 +139,29 @@ public class ModelArtifact extends AbstractModelArtifact {
     }
 
     @Override
-    public boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    public boolean push(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts) {
-        if (config.useGizmo()) {
-            return pushToGizmo(aaiClient, config, distId);
+        if (aaiProperties.isUseGizmo()) {
+            return pushToGizmo(aaiClient, aaiProperties, distId);
         }
 
-        return pushToResources(aaiClient, config, distId, completedArtifacts);
+        return pushToResources(aaiClient, aaiProperties, distId, completedArtifacts);
     }
 
-    private boolean pushToResources(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    private boolean pushToResources(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts) {
         boolean success = false;
 
         // See whether the model is already present
-        String resourceUrl = getModelUrl(config);
+        String resourceUrl = getModelUrl(aaiProperties);
         // ResponseEntity<Model> result;
         boolean modelExists = checkIfModelExists(aaiClient, distId, resourceUrl);
 
         if(modelExists) {
-            success = updateExistingModel(aaiClient, config, distId, completedArtifacts);
+            success = updateExistingModel(aaiClient, aaiProperties, distId, completedArtifacts);
         } else {
             success = createNewModel(aaiClient, distId, completedArtifacts, resourceUrl);
         }
-
-        // if (result != null) {
-        //     if (result.getStatusCode() == HttpStatus.OK) {
-        //         success = updateExistingModel(aaiClient, config, distId, completedArtifacts);
-        //     } else if (result.getStatusCode() == HttpStatus.NOT_FOUND) {
-        //         success = createNewModel(aaiClient, distId, completedArtifacts, resourceUrl);
-        //     } else {
-        //         logModelUpdateFailure(
-        //                 "Response code " + result.getStatusCodeValue() + " invalid for getting resource model");
-        //     }
-        // } else {
-        //     logModelUpdateFailure("Null response from RestClient");
-        // }
 
         return success;
     }
@@ -214,31 +201,31 @@ public class ModelArtifact extends AbstractModelArtifact {
         logErrorMsg(FAILURE_MSG_PREFIX + getType() + " " + getUniqueIdentifier() + " " + message + ROLLBACK_MSG_SUFFIX);
     }
 
-    private boolean updateExistingModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    private boolean updateExistingModel(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts) {
         boolean success;
         logInfoMsg(getType() + " " + getModelInvariantId() + " already exists.  Skipping ingestion.");
-        success = pushModelVersion(aaiClient, config, distId, completedArtifacts);
+        success = pushModelVersion(aaiClient, aaiProperties, distId, completedArtifacts);
         return success;
     }
 
     /**
      * @param aaiClient
-     * @param config
+     * @param aaiProperties
      * @param distId
      * @param completedArtifacts
      * @return
      */
-    private boolean pushModelVersion(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    private boolean pushModelVersion(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts) {
-        if (xmlResourceCanBeFetched(aaiClient, distId, getModelVerUrl(config))) {
+        if (xmlResourceCanBeFetched(aaiClient, distId, getModelVerUrl(aaiProperties))) {
             logInfoMsg(getType() + " " + getUniqueIdentifier() + " already exists.  Skipping ingestion.");
             return true;
         }
 
         // Load the model version
         boolean success = true;
-        success = putXmlResource(aaiClient, distId, getModelVerUrl(config), getModelVer());
+        success = putXmlResource(aaiClient, distId, getModelVerUrl(aaiProperties), getModelVer());
         if (success) {
             completedArtifacts.add(this);
             logInfoMsg(getType() + " " + getUniqueIdentifier() + " successfully ingested.");
@@ -251,27 +238,27 @@ public class ModelArtifact extends AbstractModelArtifact {
 
 
     @Override
-    public void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+    public void rollbackModel(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId) {
         // Gizmo is resilient and doesn't require a rollback. A redistribution will work fine even if
         // the model is partially loaded.
-        if (config.useGizmo()) {
+        if (aaiProperties.isUseGizmo()) {
             return;
         }
 
-        String url = getModelVerUrl(config);
+        String url = getModelVerUrl(aaiProperties);
         if (firstVersionOfModel) {
             // If this was the first version of the model which was added, we want to remove the entire
             // model rather than just the version.
-            url = getModelUrl(config);
+            url = getModelUrl(aaiProperties);
         }
 
         // Best effort to delete. Nothing we can do in the event this fails.
         aaiClient.getAndDeleteResource(url, distId);
     }
 
-    private String getModelUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim();
+    private String getModelUrl(AaiProperties aaiProperties) {
+        String baseURL = aaiProperties.getBaseUrl().trim();
+        String subURL = String.format(aaiProperties.getModelUrl(), getModelNamespaceVersion()).trim();
         String instance = getModelInvariantId();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {
@@ -289,9 +276,9 @@ public class ModelArtifact extends AbstractModelArtifact {
         return baseURL + subURL + instance;
     }
 
-    private String getModelVerUrl(ModelLoaderConfig config) {
-        String baseURL = config.getAaiBaseUrl().trim();
-        String subURL = config.getAaiModelUrl(getModelNamespaceVersion()).trim() + getModelInvariantId()
+    private String getModelVerUrl(AaiProperties aaiProperties) {
+        String baseURL = aaiProperties.getBaseUrl().trim();
+        String subURL = String.format(aaiProperties.getModelUrl(), getModelNamespaceVersion()).trim() + getModelInvariantId()
                 + AAI_MODEL_VER_SUB_URL;
         String instance = getModelVerId();
 
