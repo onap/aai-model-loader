@@ -31,7 +31,6 @@ import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.ge
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.babel.service.data.BabelArtifact;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifact;
 import org.onap.aai.modelloader.entity.catalog.VnfCatalogArtifactHandler;
@@ -60,10 +59,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TestArtifactDeploymentManager {
 
-    private static final String CONFIG_FILE = "model-loader.properties";
     private static final String SHOULD_HAVE_RETURNED_FALSE = "This should have returned false";
 
-    private Properties configProperties;
     private ArtifactDeploymentManager manager;
 
     @Mock private ModelArtifactHandler modelArtifactHandlerMock;
@@ -72,17 +69,18 @@ public class TestArtifactDeploymentManager {
     @BeforeEach
     public void setup() throws IOException {
         MockitoAnnotations.openMocks(this);
-        configProperties = new Properties();
-        configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
+        AaiProperties aaiProperties = new AaiProperties();
+        aaiProperties.setBaseUrl("http://aai.onap:80");
+        aaiProperties.setModelUrl("/aai/%s/service-design-and-creation/models/model/");
+        aaiProperties.setNamedQueryUrl("/aai/%s/service-design-and-creation/named-queries/named-query/");
+        aaiProperties.setVnfImageUrl("/aai/%s/service-design-and-creation/vnf-images");
 
-        ModelLoaderConfig modelLoaderConfig = new ModelLoaderConfig(configProperties, null);
-        AaiRestClient aaiRestClient = new AaiRestClient(modelLoaderConfig, new RestTemplate());
+        AaiRestClient aaiRestClient = new AaiRestClient(aaiProperties, new RestTemplate());
         manager = new ArtifactDeploymentManager(modelArtifactHandlerMock, vnfCatalogArtifactHandlerMock, aaiRestClient);
     }
 
     @AfterEach
     public void tearDown() {
-        configProperties = null;
         modelArtifactHandlerMock = null;
         vnfCatalogArtifactHandlerMock = null;
         manager = null;
@@ -202,7 +200,7 @@ public class TestArtifactDeploymentManager {
 
     /**
      * Deploy both models and VNF images.
-     * 
+     *
      * @throws IOException
      * @throws BabelArtifactParsingException
      * @throws InvalidArchiveException

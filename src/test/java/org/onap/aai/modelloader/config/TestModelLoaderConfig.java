@@ -22,7 +22,6 @@ package org.onap.aai.modelloader.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import org.eclipse.jetty.util.security.Password;
@@ -61,7 +60,7 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_PASSWORD, password);
         assertEquals(password, config.getPassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_PASSWORD, password);
         assertEquals(password, config.getPassword());
     }
@@ -72,96 +71,15 @@ public class TestModelLoaderConfig {
         ModelLoaderConfig config =
                 createObfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getKeyStorePassword());
-        
+
         config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_ML_DISTRIBUTION_KEYSTORE_PASSWORD, password);
         assertEquals(password, config.getKeyStorePassword());
-    }
-
-    @Test
-    public void testDecryptAaiAuthenticationPassword() {
-        String password = "myvoiceismypassword";
-        ModelLoaderConfig config =
-                createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
-        assertEquals(password, config.getAaiAuthenticationPassword());
-        
-        config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_AUTHENTICATION_PASSWORD, password);
-        assertEquals(password, config.getAaiAuthenticationPassword());
-    }
-
-    @Test
-    public void testDecryptAaiKeystorePassword() {
-        String password = "myvoiceismypassword";
-        ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getAaiKeyStorePassword());
-        
-        config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_AAI_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getAaiKeyStorePassword());
-    }
-
-    @Test
-    public void testAaiBaseUrl() {
-        String url = "http://localhost:1234/";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_AAI_BASE_URL, url);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getAaiBaseUrl());
-    }
-
-    @Test
-    public void testDecryptBabelKeystorePassword() {
-        String password = "babelpassword";
-        ModelLoaderConfig config = createObfuscatedTestConfig(ModelLoaderConfig.PROP_BABEL_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getBabelKeyStorePassword());
-        
-        config = createUnobfuscatedTestConfig(ModelLoaderConfig.PROP_BABEL_KEYSTORE_PASSWORD, password);
-        assertEquals(password, config.getBabelKeyStorePassword());
-    }
-
-    @Test
-    public void testBabelKeystorePath() {
-        String root = "path_to_keystore";
-        String path = "relative_keystore_path";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_KEYSTORE_FILE, path);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, root);
-        assertEquals(root + File.separator + path, config.getBabelKeyStorePath());
-    }
-
-    @Test
-    public void testBabelBaseUrl() {
-        String url = "http://localhost/";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_BASE_URL, url);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getBabelBaseUrl());
-    }
-
-    @Test
-    public void testBabelGenerateArtifactsUrl() {
-        String url = "/path/to/the/resource";
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_BABEL_GENERATE_RESOURCE_URL, url);
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-        assertEquals(url, config.getBabelGenerateArtifactsUrl());
-    }
-
-    @Test
-    public void testGetUrls() {
-        Properties props = new Properties();
-        props.put(ModelLoaderConfig.PROP_AAI_MODEL_RESOURCE_URL, "/aai/v*/service-design-and-creation/models/model/");
-        props.put(ModelLoaderConfig.PROP_AAI_NAMED_QUERY_RESOURCE_URL,
-                "/aai/v*/service-design-and-creation/named-queries/named-query/");
-        ModelLoaderConfig config = new ModelLoaderConfig(props, null);
-
-        assertEquals("/aai/v9/service-design-and-creation/models/model/", config.getAaiModelUrl("v9"));
-        assertEquals("/aai/v10/service-design-and-creation/named-queries/named-query/",
-                config.getAaiNamedQueryUrl("v10"));
     }
 
 
     /**
      * Create a Model Loader Configuration object from the supplied Property.
-     * 
+     *
      * @param propertyName property key
      * @param propertyValue value of the property
      * @return a new ModelLoaderConfig object containing a single obfuscated property value
@@ -171,7 +89,7 @@ public class TestModelLoaderConfig {
         props.put(propertyName, Password.obfuscate(propertyValue));
         return new ModelLoaderConfig(props, null);
     }
-    
+
     private ModelLoaderConfig createUnobfuscatedTestConfig(String propertyName, String propertyValue) {
         Properties props = new Properties();
         props.put(propertyName, propertyValue);

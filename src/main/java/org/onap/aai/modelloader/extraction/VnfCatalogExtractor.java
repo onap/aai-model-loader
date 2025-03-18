@@ -74,7 +74,7 @@ public class VnfCatalogExtractor {
 
         List<Artifact> vnfcFiles = new ArrayList<>();
         try (SeekableInMemoryByteChannel inMemoryByteChannel = new SeekableInMemoryByteChannel(archive);
-                ZipFile zipFile = new ZipFile(inMemoryByteChannel)) {
+                ZipFile zipFile = ZipFile.builder().setSeekableByteChannel(inMemoryByteChannel).get()) {
             for (Enumeration<ZipArchiveEntry> enumeration = zipFile.getEntries(); enumeration.hasMoreElements();) {
                 ZipArchiveEntry entry = enumeration.nextElement();
                 if (fileShouldBeExtracted(entry)) {
@@ -108,4 +108,3 @@ public class VnfCatalogExtractor {
         return extractFile;
     }
 }
-

@@ -23,7 +23,7 @@ package org.onap.aai.modelloader.entity.model;
 import java.util.List;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactHandler;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
@@ -35,8 +35,8 @@ public class ModelArtifactHandler extends ArtifactHandler {
 
     private static Logger logger = LoggerFactory.getInstance().getLogger(ModelArtifactHandler.class.getName());
 
-    public ModelArtifactHandler(ModelLoaderConfig config) {
-        super(config);
+    public ModelArtifactHandler(AaiProperties aaiProperties) {
+        super(aaiProperties);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ModelArtifactHandler extends ArtifactHandler {
         // Push the ordered list of model artifacts to A&AI. If one fails, we need to roll back the changes.
         for (Artifact art : sortedModelArtifacts) {
             AbstractModelArtifact model = (AbstractModelArtifact) art;
-            if (!model.push(aaiClient, config, distributionID, completedArtifacts)) {
+            if (!model.push(aaiClient, aaiProperties, distributionID, completedArtifacts)) {
                 return false;
             }
         }
@@ -66,7 +66,7 @@ public class ModelArtifactHandler extends ArtifactHandler {
     public void rollback(List<Artifact> completedArtifacts, String distributionId, AaiRestClient aaiClient) {
         for (Artifact artifactToDelete : completedArtifacts) {
             AbstractModelArtifact model = (AbstractModelArtifact) artifactToDelete;
-            model.rollbackModel(aaiClient, config, distributionId);
+            model.rollbackModel(aaiClient, aaiProperties, distributionId);
         }
     }
 }

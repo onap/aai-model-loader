@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
@@ -63,7 +64,7 @@ public class ModelArtifactHandlerTest {
 
   final ObjectMapper objectMapper = new ObjectMapper();
   @Mock
-  ModelLoaderConfig config;
+  AaiProperties aaiProperties;
   @InjectMocks
   ModelArtifactHandler modelArtifactHandler;
 
@@ -72,8 +73,8 @@ public class ModelArtifactHandlerTest {
 
   @BeforeEach
   public void setUp() {
-    when(config.getAaiBaseUrl()).thenReturn("http://localhost:" + wiremockPort);
-    when(config.getAaiModelUrl(any())).thenReturn("/aai/v28/service-design-and-creation/models/model/");
+    when(aaiProperties.getBaseUrl()).thenReturn("http://localhost:" + wiremockPort);
+    when(aaiProperties.getModelUrl()).thenReturn("/aai/%s/service-design-and-creation/models/model/");
   }
 
   @Test
@@ -99,6 +100,7 @@ public class ModelArtifactHandlerTest {
 
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
+    modelArtifact.setModelNamespace("v28");
     modelArtifact.setPayload("");
     List<Artifact> artifacts = List.of(modelArtifact);
     List<Artifact> completedArtifacts = new ArrayList<>();
@@ -147,6 +149,7 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
     modelArtifact.setModelVerId("modelVersionId");
+    modelArtifact.setModelNamespace("v28");
     modelArtifact.setPayload("");
     modelArtifact.setModelVer("2.0");
     List<Artifact> artifacts = List.of(modelArtifact);
@@ -162,7 +165,7 @@ public class ModelArtifactHandlerTest {
   @Test
   public void thatModelCanBeRolledBack() {
     stubFor(WireMock.get(urlEqualTo("/aai/v28/service-design-and-creation/models/model/3a40ab73-6694-4e75-bb6d-9a4a86ce35b3"))
-        .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))    
+        .withHeader("Accept", equalTo(MediaType.APPLICATION_XML_VALUE))
         .withHeader("X-FromAppId", equalTo("ModelLoader"))
         .withHeader("X-TransactionId", equalTo("distributionId"))
         .willReturn(aResponse()
@@ -177,8 +180,8 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("3a40ab73-6694-4e75-bb6d-9a4a86ce35b3");
     modelArtifact.setModelVerId("modelVersionId");
-    // modelArtifact.setModelVer("2.0");
-    
+    modelArtifact.setModelNamespace("v28");
+
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 
@@ -207,7 +210,7 @@ public class ModelArtifactHandlerTest {
     AaiRestClient aaiClient = Mockito.mock(AaiRestClient.class);
     when(aaiClient.putResource(any(), any(), any(), any(), any())).thenReturn(createdResult);
     when(aaiClient.getResource(any(), any(), any(), any())).thenReturn(notFoundResult);
-    modelArtifact.push(aaiClient, config, null, new ArrayList<>());
+    modelArtifact.push(aaiClient, aaiProperties, null, new ArrayList<>());
   }
 
   @Test
@@ -232,7 +235,8 @@ public class ModelArtifactHandlerTest {
     ModelArtifact modelArtifact = new ModelArtifact();
     modelArtifact.setModelInvariantId("modelInvariantId");
     modelArtifact.setModelVerId("modelVersionId");
-    
+    modelArtifact.setModelNamespace("v28");
+
     List<Artifact> completedArtifacts = new ArrayList<>();
     completedArtifacts.add(modelArtifact);
 

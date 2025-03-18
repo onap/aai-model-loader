@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
@@ -77,16 +77,16 @@ public abstract class AbstractModelArtifact extends Artifact implements IModelAr
 
     public abstract String getUniqueIdentifier();
 
-    public abstract boolean push(AaiRestClient aaiClient, ModelLoaderConfig config, String distId,
+    public abstract boolean push(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId,
             List<Artifact> completedArtifacts);
 
-    public abstract void rollbackModel(AaiRestClient aaiClient, ModelLoaderConfig config, String distId);
+    public abstract void rollbackModel(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId);
 
-    protected boolean pushToGizmo(AaiRestClient aaiClient, ModelLoaderConfig config, String distId) {
+    protected boolean pushToGizmo(AaiRestClient aaiClient, AaiProperties aaiProperties, String distId) {
         try {
             String gizmoPayload = GizmoTranslator.translate(getPayload());
             // TODO: Use correct responseType here
-            ResponseEntity<String> postResponse = aaiClient.postResource(config.getAaiBaseUrl().trim(), gizmoPayload, distId,
+            ResponseEntity<String> postResponse = aaiClient.postResource(aaiProperties.getBaseUrl().trim(), gizmoPayload, distId,
                     MediaType.APPLICATION_JSON, String.class);
 
             if (postResponse.getStatusCode() != HttpStatus.OK) {

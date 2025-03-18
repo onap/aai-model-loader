@@ -2,8 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
- * Copyright © 2017-2018 European Software Marketing Ltd.
+ * Copyright © 2025 Deutsche Telekom AG Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +17,24 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.modelloader;
+package org.onap.aai.modelloader.config;
 
-import org.onap.aai.modelloader.config.BabelProperties;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-/**
- * Model Loader Spring Boot Application.
- */
+import lombok.Getter;
+import lombok.Setter;
 
-@SpringBootApplication
-@EnableConfigurationProperties(BabelProperties.class)
-public class ModelLoaderApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(ModelLoaderApplication.class, args);
-    }
-
+@Getter
+@Setter
+@Component
+@ConfigurationProperties(prefix = "ml.aai")
+public class AaiProperties {
+  private String baseUrl;
+  private String modelUrl;
+  private String namedQueryUrl;
+  private String vnfImageUrl;
+  private String authUser;
+  private String authPassword;
+  private boolean useGizmo;
 }

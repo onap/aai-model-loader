@@ -21,15 +21,16 @@
 package org.onap.aai.modelloader.entity;
 
 import java.util.List;
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.restclient.AaiRestClient;
 
 public abstract class ArtifactHandler {
 
-    protected ModelLoaderConfig config;
+    protected final AaiProperties aaiProperties;
 
-    protected ArtifactHandler(ModelLoaderConfig config) {
-        this.config = config;
+    protected ArtifactHandler(AaiProperties aaiProperties) {
+        this.aaiProperties = aaiProperties;
     }
 
     public abstract boolean pushArtifacts(List<Artifact> artifacts, String distributionId,

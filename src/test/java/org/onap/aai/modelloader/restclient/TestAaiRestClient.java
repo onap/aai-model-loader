@@ -26,13 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.onap.aai.modelloader.config.ModelLoaderConfig;
+import org.onap.aai.modelloader.config.AaiProperties;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.entity.model.ModelArtifact;
 import org.onap.aai.modelloader.entity.model.ModelArtifactParser;
@@ -50,12 +49,11 @@ public class TestAaiRestClient {
 
     // This test requires a running A&AI system. To test locally, annotate with org.junit.Test
     public void testRestClient() throws Exception {
-        Properties props = new Properties();
-        props.setProperty("ml.distribution.ARTIFACT_TYPES", "MODEL_INVENTORY_PROFILE,MODEL_QUERY_SPEC,VNF_CATALOG");
-        props.setProperty("ml.aai.BASE_URL", "https://localhost:8443");
-        props.setProperty("ml.aai.MODEL_URL", "/aai/v9/service-design-and-creation/models/model/");
-
-        ModelLoaderConfig config = new ModelLoaderConfig(props, ".");
+        AaiProperties aaiProperties = new AaiProperties();
+        aaiProperties.setBaseUrl("http://aai.onap:80");
+        aaiProperties.setModelUrl("/aai/%s/service-design-and-creation/models/model/");
+        aaiProperties.setNamedQueryUrl("/aai/%s/service-design-and-creation/named-queries/named-query/");
+        aaiProperties.setVnfImageUrl("/aai/%s/service-design-and-creation/vnf-images");
 
         File xmlFile = new File(MODEL_FILE);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -90,20 +88,20 @@ public class TestAaiRestClient {
             model.setPayload(readFile(MODEL_FILE));
             model.setModelNamespace("http://org.openecomp.aai.inventory/v9");
 
-            AaiRestClient aaiClient = new AaiRestClient(config, new RestTemplate());
+            AaiRestClient aaiClient = new AaiRestClient(aaiProperties, new RestTemplate());
 
             // GET model
             ResponseEntity opResult =
-                    aaiClient.getResource(getUrl(model, config), "example-trans-id-0", MediaType.APPLICATION_XML, String.class);
+                    aaiClient.getResource(getUrl(model, aaiProperties), "example-trans-id-0", MediaType.APPLICATION_XML, String.class);
             assertEquals(opResult.getStatusCode(), HttpStatus.NOT_FOUND);
 
             // PUT the model
-            opResult = aaiClient.putResource(getUrl(model, config), model.getPayload(), "example-trans-id-1",
+            opResult = aaiClient.putResource(getUrl(model, aaiProperties), model.getPayload(), "example-trans-id-1",
                     MediaType.APPLICATION_XML, String.class);
             assertEquals(opResult.getStatusCode(), HttpStatus.CREATED);
 
             // DELETE the model
-            opResult = aaiClient.getAndDeleteResource(getUrl(model, config), "example-trans-id-3");
+            opResult = aaiClient.getAndDeleteResource(getUrl(model, aaiProperties), "example-trans-id-3");
             assertEquals(opResult.getStatusCode(), HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,15 +117,15 @@ public class TestAaiRestClient {
         return new String(encoded);
     }
 
-    private String getUrl(ModelArtifact model, ModelLoaderConfig config) {
+    private String getUrl(ModelArtifact model, AaiProperties aaiProperties) {
         String subUrl;
         if (model.getType().equals(ArtifactType.MODEL)) {
-            subUrl = config.getAaiModelUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = String.format(aaiProperties.getModelUrl(), model.getModelNamespaceVersion()).trim();
         } else {
-            subUrl = config.getAaiNamedQueryUrl(model.getModelNamespaceVersion()).trim();
+            subUrl = String.format(aaiProperties.getNamedQueryUrl(), model.getModelNamespaceVersion()).trim();
         }
 
-        String baseUrl = config.getAaiBaseUrl().trim();
+        String baseUrl = aaiProperties.getBaseUrl().trim();
         if (!baseUrl.endsWith("/") && !subUrl.startsWith("/")) {
             baseUrl = baseUrl + "/";
         }
