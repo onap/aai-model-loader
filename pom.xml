@@ -73,8 +73,6 @@
 		<aai.docker.version>1.0.0</aai.docker.version>
 		<aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
 		<aai.docker.namespace>onap</aai.docker.namespace>
-		<aai.base.image>alpine</aai.base.image>
-		<aai.base.image.version>1.13.2</aai.base.image.version>
 		<!-- This will be used for the docker images as the default format of maven build has issues -->
 		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
 
@@ -136,28 +134,6 @@
 						<groupId>org.codehaus.groovy.maven</groupId>
 						<artifactId>gmaven-plugin</artifactId>
 						<version>1.0</version>
-						<executions>
-							<execution>
-								<phase>pre-clean</phase>
-								<goals>
-									<goal>execute</goal>
-								</goals>
-								<configuration>
-									<source>
-										def userAaiBaseImage = session.userProperties['aai.base.image'];
-										def userAaiCommonVersion = session.userProperties['aai.base.image.version'];
-										if (userAaiCommonVersion != null) {
-											project.properties['aai.base.image.version'] = userAaiCommonVersion;
-										}
-										if (userAaiBaseImage != null) {
-											project.properties['aai.base.image'] = userAaiBaseImage;
-										}
-										log.info 'Base image flavour: ' + project.properties['aai.base.image'];
-										log.info 'Base image version: ' + project.properties['aai.base.image.version'];
-									</source>
-								</configuration>
-							</execution>
-						</executions>
 					</plugin>
 					<plugin>
 						<groupId>io.fabric8</groupId>

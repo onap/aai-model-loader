@@ -39,7 +39,7 @@ PROPS="$PROPS -Dcom.att.eelf.logging.path=$AJSC_HOME"
 PROPS="$PROPS -Dcom.att.eelf.logging.file=logback.xml"
 PROPS="$PROPS -Dlogback.configurationFile=$AJSC_HOME/logback.xml"
 PROPS="$PROPS -Dserver.port=9500"
-JVM_MAX_HEAP=${MAX_HEAP:-1024}
+JVM_ARGS="${JVM_ARGS} -XX:MaxRAMPercentage=${MAX_RAM_PERCENTAGE:-70}";
 
 echo "java $java_runtime_arguments $PROPS -jar $JARFILE"
 java $java_runtime_arguments ${JVM_ARGS} $PROPS -jar $JARFILE

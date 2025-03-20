@@ -1,18 +1,9 @@
-FROM @aai.docker.namespace@/aai-common-@aai.base.image@:@aai.base.image.version@
+FROM eclipse-temurin:11-jre-alpine
+USER nobody
 
-ARG MICRO_HOME=/opt/app/model-loader
-
+ENV MICRO_HOME=/opt/app/model-loader
 WORKDIR $MICRO_HOME
 
-USER root
+COPY --chown=nobody:nobody /maven/model-loader/ .
 
-RUN mkdir -p /opt/aaihome $MICRO_HOME /logs && \
-    ln -s /logs $MICRO_HOME/logs && \
-    chown -R aaiadmin:aaiadmin $MICRO_HOME && \
-    chown -R aaiadmin:aaiadmin /logs
-
-COPY --chown=aaiadmin:aaiadmin /maven/model-loader/ .
-
-ENTRYPOINT ["/bin/bash", "/opt/app/model-loader/bin/start.sh"]
-
-USER aaiadmin
+ENTRYPOINT ["/bin/sh", "/opt/app/model-loader/bin/start.sh"]
