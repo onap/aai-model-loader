@@ -16,6 +16,24 @@
       "message": "This is already present. Please remove this here",
       "revId": "6ca55a2f84fafcf6870cb320e0803892c3ed05e2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8134e66a_4fd8721a",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 8520
+      },
+      "writtenOn": "2025-06-05T13:32:13Z",
+      "side": 1,
+      "message": "Sorry, but I don\u0027t see this dependency was already present in the pom.xml, this dependency is newly added to support logs in json format.",
+      "parentUuid": "364cfb73_cb075985",
+      "revId": "6ca55a2f84fafcf6870cb320e0803892c3ed05e2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
