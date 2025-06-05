@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "364cfb73_cb075985",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-06-05T13:23:39Z",
+      "side": 1,
+      "message": "This is already present. Please remove this here",
+      "revId": "6ca55a2f84fafcf6870cb320e0803892c3ed05e2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
