@@ -34,6 +34,24 @@
       "parentUuid": "364cfb73_cb075985",
       "revId": "6ca55a2f84fafcf6870cb320e0803892c3ed05e2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cf352200_9cb44877",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-06-10T06:34:43Z",
+      "side": 1,
+      "message": "Please let the reviewer decide if an issue is resolved. Here is the dependency, so please rebase your CR and then you\u0027ll find that [it is indeed already there](https://git.onap.org/aai/model-loader/tree/pom.xml#n303)",
+      "parentUuid": "8134e66a_4fd8721a",
+      "revId": "6ca55a2f84fafcf6870cb320e0803892c3ed05e2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
