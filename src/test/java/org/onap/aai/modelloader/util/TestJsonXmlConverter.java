@@ -25,7 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,9 +51,9 @@ public class TestJsonXmlConverter {
 
     @Test
     public void testConversion() throws Exception {
-        byte[] encoded = Files.readAllBytes(Paths.get(XML_MODEL_FILE));
+        byte[] encoded = Files.readAllBytes(Path.of(XML_MODEL_FILE));
         assertThat(JsonXmlConverter.isValidJson(new String(encoded)), is(false));
-        encoded = Files.readAllBytes(Paths.get(JSON_MODEL_FILE));
+        encoded = Files.readAllBytes(Path.of(JSON_MODEL_FILE));
         String originalJson = new String(encoded);
 
         assertThat(JsonXmlConverter.isValidJson(originalJson), is(true));

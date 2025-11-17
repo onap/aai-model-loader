@@ -25,7 +25,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -77,7 +77,7 @@ public class DistributionClientIntegrationTest {
   void thatCallbackIsCalled() {
     Thread.sleep(10000);
     String distributionJson = "src/test/resources/messages/distribution.json";
-    String message = Files.readString(Paths.get(distributionJson));
+    String message = Files.readString(Path.of(distributionJson));
 
     kafkaTemplate.send(topic, message);
 

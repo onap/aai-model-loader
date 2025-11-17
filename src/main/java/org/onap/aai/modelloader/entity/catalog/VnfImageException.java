@@ -20,6 +20,7 @@
  */
 package org.onap.aai.modelloader.entity.catalog;
 
+import java.io.Serial;
 import java.util.Optional;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Optional;
  */
 class VnfImageException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     private final String imageId;
     private final transient Optional<Integer> resultCode;

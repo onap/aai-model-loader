@@ -27,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
 
@@ -96,6 +96,6 @@ public class TestBabelServiceClient {
 
 
     private byte[] readBytesFromFile(String resourceFile) throws IOException, URISyntaxException {
-        return Files.readAllBytes(Paths.get(ClassLoader.getSystemResource(resourceFile).toURI()));
+        return Files.readAllBytes(Path.of(ClassLoader.getSystemResource(resourceFile).toURI()));
     }
 }

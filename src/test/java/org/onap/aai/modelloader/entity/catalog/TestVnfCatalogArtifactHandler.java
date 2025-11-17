@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,7 +132,7 @@ public class TestVnfCatalogArtifactHandler {
      */
     private List<Artifact> createVnfCatalogArtifact() throws IOException, UnsupportedEncodingException {
         String examplePath = "src/test/resources/imagedataexample.json";
-        byte[] encoded = Files.readAllBytes(Paths.get(examplePath));
+        byte[] encoded = Files.readAllBytes(Path.of(examplePath));
         List<Artifact> artifacts = new ArrayList<Artifact>();
         artifacts.add(new VnfCatalogArtifact(new String(encoded, "utf-8")));
         return artifacts;
@@ -146,7 +146,7 @@ public class TestVnfCatalogArtifactHandler {
      * @throws UnsupportedEncodingException
      */
     private List<Artifact> createVnfCatalogXmlArtifact() throws IOException, UnsupportedEncodingException {
-        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/xmlFiles/fortigate.xml"));
+        byte[] encoded = Files.readAllBytes(Path.of("src/test/resources/xmlFiles/fortigate.xml"));
         List<Artifact> artifacts = new ArrayList<Artifact>();
         artifacts.add(new VnfCatalogArtifact(ArtifactType.VNF_CATALOG_XML, new String(encoded, "utf-8")));
         return artifacts;

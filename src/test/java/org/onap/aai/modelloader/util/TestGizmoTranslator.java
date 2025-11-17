@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.onap.aai.modelloader.gizmo.GizmoBulkPayload;
@@ -66,7 +66,7 @@ public class TestGizmoTranslator {
     }
 
     private GizmoBulkPayload createBulkRequest(String filePath) throws IOException {
-        final String xmlPayload = new String(Files.readAllBytes(Paths.get(filePath)));
+        final String xmlPayload = new String(Files.readAllBytes(Path.of(filePath)));
         return GizmoBulkPayload.fromJson(GizmoTranslator.translate(xmlPayload));
     }
 

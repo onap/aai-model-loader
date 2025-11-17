@@ -22,7 +22,7 @@ package org.onap.aai.modelloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +42,7 @@ public class BabelClientTestConfiguration {
   @Bean(name = "testProperties")
   public Properties configProperties() throws IOException {
     // Load model loader system configuration
-    InputStream configInputStream = Files.newInputStream(Paths.get(configDir, "model-loader.properties"));
+    InputStream configInputStream = Files.newInputStream(Path.of(configDir, "model-loader.properties"));
     Properties configProperties = new Properties();
     configProperties.load(configInputStream);
 
