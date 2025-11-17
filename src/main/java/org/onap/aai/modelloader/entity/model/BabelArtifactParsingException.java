@@ -20,12 +20,14 @@
  */
 package org.onap.aai.modelloader.entity.model;
 
+import java.io.Serial;
+
 /**
  * This class represents an exception encountered when parsing an XML model Artifact.
  */
 public class BabelArtifactParsingException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for an instance of this exception with just a message.

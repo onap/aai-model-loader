@@ -258,7 +258,7 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     private String getModelUrl(AaiProperties aaiProperties) {
         String baseURL = aaiProperties.getBaseUrl().trim();
-        String subURL = String.format(aaiProperties.getModelUrl(), getModelNamespaceVersion()).trim();
+        String subURL = aaiProperties.getModelUrl().formatted(getModelNamespaceVersion()).trim();
         String instance = getModelInvariantId();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {
@@ -278,7 +278,7 @@ public class ModelArtifact extends AbstractModelArtifact {
 
     private String getModelVerUrl(AaiProperties aaiProperties) {
         String baseURL = aaiProperties.getBaseUrl().trim();
-        String subURL = String.format(aaiProperties.getModelUrl(), getModelNamespaceVersion()).trim() + getModelInvariantId()
+        String subURL = aaiProperties.getModelUrl().formatted(getModelNamespaceVersion()).trim() + getModelInvariantId()
                 + AAI_MODEL_VER_SUB_URL;
         String instance = getModelVerId();
 

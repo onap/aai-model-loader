@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class TestNamedQueryArtifactParser {
     @Test
     public void testParseNamedQuery() throws Exception {
         try {
-            String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE)));
+            String fileString = new String(Files.readAllBytes(Path.of(MODEL_FILE)));
 
             NamedQueryArtifactParser parser = new NamedQueryArtifactParser();
             List<Artifact> modelList = parser.parse(fileString, "test-artifact");

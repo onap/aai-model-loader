@@ -22,7 +22,6 @@
 package org.onap.aai.modelloader.config;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +75,7 @@ public class ModelLoaderConfig implements IConfiguration {
     protected static final String PROP_DEBUG_INGEST_SIMULATOR = PREFIX_DEBUG + "INGEST_SIMULATOR";
     protected static final String FILESEP =
             (System.getProperty("file.separator") == null) ? "/" : System.getProperty("file.separator");
-    private static String configHome;
+    private static String configHome = System.getProperty("CONFIG_HOME");
     private Properties modelLoaderProperties = null;
     private String certLocation = ".";
     private final List<String> artifactTypes = new ArrayList<>();
@@ -110,7 +109,7 @@ public class ModelLoaderConfig implements IConfiguration {
     }
 
     public static Path propertiesFile() {
-        return Paths.get(configHome, "model-loader.properties");
+        return Path.of(configHome, "model-loader.properties");
     }
 
     @Override
