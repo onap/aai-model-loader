@@ -20,12 +20,14 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import java.io.Serial;
+
 /**
  * Failure to download a distribution.
  */
 class DownloadFailureException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for an instance of this exception with just a message.

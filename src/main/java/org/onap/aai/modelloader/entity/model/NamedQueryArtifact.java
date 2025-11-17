@@ -98,7 +98,7 @@ public class NamedQueryArtifact extends AbstractModelArtifact {
 
     private String getNamedQueryUrl(AaiProperties aaiProperties) {
         String baseURL = aaiProperties.getBaseUrl().trim();
-        String subURL = String.format(aaiProperties.getNamedQueryUrl(), getModelNamespaceVersion()).trim();
+        String subURL = aaiProperties.getNamedQueryUrl().formatted(getModelNamespaceVersion()).trim();
         String instance = this.getNamedQueryUuid();
 
         if (!baseURL.endsWith("/") && !subURL.startsWith("/")) {

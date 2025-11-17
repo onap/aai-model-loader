@@ -20,9 +20,11 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import java.io.Serial;
+
 public class ProcessToscaArtifactsException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for an instance of this exception with just a message.

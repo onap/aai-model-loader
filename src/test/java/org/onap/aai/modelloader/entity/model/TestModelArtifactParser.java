@@ -27,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ public class TestModelArtifactParser {
 
     @Test
     public void testParseModelFileNoDeps() throws Exception {
-        String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE)));
+        String fileString = new String(Files.readAllBytes(Path.of(MODEL_FILE)));
 
         ModelArtifactParser parser = new ModelArtifactParser();
         List<Artifact> modelList = parser.parse(fileString, "test-artifact");
@@ -62,7 +62,7 @@ public class TestModelArtifactParser {
 
     @Test
     public void testParseModelFileDeps() throws Exception {
-        String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE_SERVICE)));
+        String fileString = new String(Files.readAllBytes(Path.of(MODEL_FILE_SERVICE)));
 
         ModelArtifactParser parser = new ModelArtifactParser();
         List<Artifact> modelList = parser.parse(fileString, "test-artifact");
@@ -83,7 +83,7 @@ public class TestModelArtifactParser {
 
     @Test
     public void testParseModelFileInvalidArtifact() throws Exception {
-        String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE_INVALID)));
+        String fileString = new String(Files.readAllBytes(Path.of(MODEL_FILE_INVALID)));
 
         ModelArtifactParser parser = new ModelArtifactParser();
         List<Artifact> modelList = parser.parse(fileString, "test-artifact");
@@ -93,7 +93,7 @@ public class TestModelArtifactParser {
 
     @Test
     public void testParseModelFileIncompleteArtifact() throws Exception {
-        String fileString = new String(Files.readAllBytes(Paths.get(MODEL_FILE_INCOMPLETE)));
+        String fileString = new String(Files.readAllBytes(Path.of(MODEL_FILE_INCOMPLETE)));
 
         ModelArtifactParser parser = new ModelArtifactParser();
         List<Artifact> modelList = parser.parse(fileString, "test-artifact");

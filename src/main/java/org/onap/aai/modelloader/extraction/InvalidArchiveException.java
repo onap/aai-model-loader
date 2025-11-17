@@ -20,12 +20,14 @@
  */
 package org.onap.aai.modelloader.extraction;
 
+import java.io.Serial;
+
 /**
  * This class represents an exception encountered when processing an archive in memory.
  */
 public class InvalidArchiveException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for an instance of this exception with just a message.

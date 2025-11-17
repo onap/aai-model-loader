@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -113,16 +113,16 @@ public class TestAaiRestClient {
     }
 
     static String readFile(String path) throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        byte[] encoded = Files.readAllBytes(Path.of(path));
         return new String(encoded);
     }
 
     private String getUrl(ModelArtifact model, AaiProperties aaiProperties) {
         String subUrl;
         if (model.getType().equals(ArtifactType.MODEL)) {
-            subUrl = String.format(aaiProperties.getModelUrl(), model.getModelNamespaceVersion()).trim();
+            subUrl = aaiProperties.getModelUrl().formatted(model.getModelNamespaceVersion()).trim();
         } else {
-            subUrl = String.format(aaiProperties.getNamedQueryUrl(), model.getModelNamespaceVersion()).trim();
+            subUrl = aaiProperties.getNamedQueryUrl().formatted(model.getModelNamespaceVersion()).trim();
         }
 
         String baseUrl = aaiProperties.getBaseUrl().trim();

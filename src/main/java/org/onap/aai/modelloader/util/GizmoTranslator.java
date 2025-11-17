@@ -206,7 +206,7 @@ public class GizmoTranslator {
         Optional<String> parentVersion = Optional.empty();
 
         Node parentNode = node.getParentNode();
-        while (parentNode != null && !parentVersion.isPresent()) {
+        while (parentNode != null && parentVersion.isEmpty()) {
             if (getNodeType(parentNode) == NodeType.VERTEX) {
                 NodeList childNodes = ((Element) parentNode).getElementsByTagName("*");
                 parentVersion = IntStream.range(0, childNodes.getLength()) //
