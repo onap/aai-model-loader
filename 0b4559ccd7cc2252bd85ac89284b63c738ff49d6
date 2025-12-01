@@ -16,6 +16,23 @@
       "message": "recheck",
       "revId": "0b4559ccd7cc2252bd85ac89284b63c738ff49d6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1043cca7_9c568e44",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-12-01T11:10:26Z",
+      "side": 1,
+      "message": "We should use `1.15.0` here I would say",
+      "revId": "0b4559ccd7cc2252bd85ac89284b63c738ff49d6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
