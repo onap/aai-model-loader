@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;

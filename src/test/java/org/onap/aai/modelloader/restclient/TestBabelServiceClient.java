@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onap.aai.babel.service.data.BabelArtifact;
 import org.onap.aai.babel.service.data.BabelRequest;
@@ -60,15 +60,18 @@ public class TestBabelServiceClient {
     @Value("${wiremock.server.port}")
     private int wiremockPort;
 
-    @Autowired BabelServiceClient client;
+    @Autowired
+    private BabelServiceClient client;
 
-    @BeforeAll
-    public static void setup() throws JsonProcessingException {
+    @BeforeEach
+    public void setup() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<BabelArtifact> artifacts = List.of(
             new BabelArtifact("art1", null, ""),
             new BabelArtifact("art2", null, ""),
-            new BabelArtifact("art3", null, ""));
+            new BabelArtifact("art3", null, "")
+        );
+
         WireMock.stubFor(
             WireMock.post(WireMock.urlEqualTo("/services/babel-service/v1/app/generateArtifacts"))
                 .withHeader("X-TransactionId", WireMock.equalTo("Test-Transaction-ID-BabelClient"))
@@ -79,21 +82,23 @@ public class TestBabelServiceClient {
                 .willReturn(
                     WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(artifacts))));
+                        .withBody(objectMapper.writeValueAsString(artifacts))
+                )
+        );
     }
 
     @Test
     public void testRestClient() throws BabelServiceClientException, IOException, URISyntaxException {
         BabelRequest babelRequest = new BabelRequest();
         babelRequest.setArtifactName("service-Vscpass-Test");
-        babelRequest.setCsar(Base64.getEncoder().encodeToString(readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar")));
+        babelRequest.setCsar(Base64.getEncoder().encodeToString(
+            readBytesFromFile("compressedArtifacts/service-VscpaasTest-csar.csar")
+        ));
         babelRequest.setArtifactVersion("1.0");
 
-        List<BabelArtifact> result =
-                client.postArtifact(babelRequest, "Test-Transaction-ID-BabelClient");
+        List<BabelArtifact> result = client.postArtifact(babelRequest, "Test-Transaction-ID-BabelClient");
         assertThat(result.size(), is(equalTo(3)));
     }
-
 
     private byte[] readBytesFromFile(String resourceFile) throws IOException, URISyntaxException {
         return Files.readAllBytes(Path.of(ClassLoader.getSystemResource(resourceFile).toURI()));

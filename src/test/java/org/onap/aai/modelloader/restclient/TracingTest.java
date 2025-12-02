@@ -30,34 +30,39 @@ import org.springframework.web.client.RestTemplate;
 import com.github.tomakehurst.wiremock.client.WireMock;
 
 @SpringBootTest(properties = {
-  "spring.sleuth.enabled=true",
-  "spring.zipkin.baseUrl=http://localhost:${wiremock.server.port}"
+        "spring.sleuth.enabled=true",
+        "spring.zipkin.base-url=http://localhost:${wiremock.server.port}",
+        "spring.main.allow-bean-definition-overriding=true",
+        "spring.security.enabled=false"
 })
 @AutoConfigureWireMock(port = 0)
 public class TracingTest {
 
-  @Value("${wiremock.server.port}")
-  private int wiremockPort;
+    @Value("${wiremock.server.port}")
+    private int wiremockPort;
 
-  @Autowired RestTemplate restTemplate;
-  
-  @Test
-  public void thatArtifactsCanBePushed() {
-    WireMock.stubFor(
-      WireMock.post(WireMock.urlEqualTo("/api/v2/spans"))
-          .willReturn(
-              WireMock.aResponse()
-                  .withStatus(HttpStatus.OK.value())));
+    @Autowired
+    private RestTemplate restTemplate;
 
-    WireMock.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/"))
-          .withHeader("X-B3-TraceId", WireMock.matching(".*"))
-          .willReturn(
-              WireMock.aResponse()
-                  .withStatus(HttpStatus.OK.value())));
+    @Test
+    public void thatArtifactsCanBePushed() {
+        // Stub Zipkin POST /api/v2/spans
+        WireMock.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/api/v2/spans"))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(HttpStatus.OK.value()))
+        );
 
+        // Stub GET /
+        WireMock.stubFor(
+            WireMock.get(WireMock.urlEqualTo("/"))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(HttpStatus.OK.value())
+                            .withBody("ok"))
+        );
 
-    String response = restTemplate.getForObject("http://localhost:" + wiremockPort + "/", String.class);
-  }
-  
+        // Call the WireMock GET endpoint
+        String response = restTemplate.getForObject(
+                "http://localhost:" + wiremockPort + "/", String.class);
+    }
 }

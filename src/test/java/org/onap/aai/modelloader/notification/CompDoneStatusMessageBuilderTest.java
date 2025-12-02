@@ -27,7 +27,8 @@
  import org.onap.sdc.utils.DistributionStatusEnum;
  import org.springframework.boot.test.context.SpringBootTest;
  import org.springframework.test.context.TestPropertySource;
- import static org.mockito.Mockito.*;
+ import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
  import static org.junit.jupiter.api.Assertions.*;
 
  @SpringBootTest

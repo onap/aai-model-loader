@@ -55,12 +55,13 @@
 	</dependencyManagement>
 
 	<properties>
+		<jakarta-servlet.version>5.0.0</jakarta-servlet.version>
 		<maven.compiler.release>17</maven.compiler.release>
 		<start-class>org.onap.aai.modelloader.service.ModelLoaderApplication</start-class>
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
 		<docker.location>${basedir}/target</docker.location>
-		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-cloud.version>2021.0.8</spring-cloud.version>
+		<spring-boot.version>3.1.12</spring-boot.version>
+		<spring-cloud.version>2023.0.6</spring-cloud.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<apache.commons-text.version>1.10.0</apache.commons-text.version>
 		<commons-compress.version>1.27.0</commons-compress.version>
@@ -68,7 +69,7 @@
 		<gson.version>2.10.1</gson.version>
 		<babel.version>1.13.0</babel.version>
 		<sdc-distribution-client.version>2.0.0</sdc-distribution-client.version>
-		<logback.version>1.2.11</logback.version>
+		<logback.version>1.4.14</logback.version>
 		<!-- docker related properties -->
 		<docker.fabric.version>0.39.0</docker.fabric.version>
 		<aai.docker.version>1.0.0</aai.docker.version>
@@ -207,6 +208,10 @@
 			<artifactId>spring-boot-starter-jetty</artifactId>
 		</dependency>
 		<dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+        </dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
@@ -320,12 +325,16 @@
 			<version>${apache.commons-text.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
 		</dependency>
 		<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+		<dependency>
+				<groupId>io.zipkin.reporter2</groupId>
+				<artifactId>zipkin-reporter-brave</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
