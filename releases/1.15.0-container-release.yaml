@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.15.0
+project: model-loader
+ref: c4d904c830adeac6af6013f9d2f38d689d82e342
+containers:
+    - name: model-loader
+      version: 1.15-STAGING-20251222T092836Z
