@@ -27,7 +27,7 @@ import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.onap.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.notification.DistributionStatusEnum;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,5 +80,3 @@ public class DistributionStatusMessageBuilderTest {
         assertEquals(DistributionStatusEnum.DEPLOY_OK, result.getStatus());
     }
 }
-
-

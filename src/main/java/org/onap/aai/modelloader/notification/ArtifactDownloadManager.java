@@ -47,7 +47,7 @@ import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.utils.ArtifactTypeEnum;
-import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.onap.sdc.api.results.DistributionActionResultEnum;
 import org.springframework.stereotype.Component;
 
 /**
@@ -86,7 +86,7 @@ public class ArtifactDownloadManager {
      * @param modelArtifacts collection of artifacts for model query specs
      * @param catalogArtifacts collection of artifacts that represent vnf catalog files
      * @return boolean <code>true</code> if the download process was successful otherwise <code>false</code>
-     * @throws Exception 
+     * @throws Exception
      */
     List<Artifact> downloadArtifacts(INotificationData data, List<IArtifactInfo> artifacts) throws Exception {
 
@@ -138,7 +138,7 @@ public class ArtifactDownloadManager {
         if ("TOSCA_CSAR".equalsIgnoreCase(artifactInfo.getArtifactType())) {
             artifacts = processToscaArtifacts(downloadResult.getArtifactPayload(), artifactInfo,
                     data.getDistributionID(), data.getServiceVersion());
-            
+
         } else if (ArtifactTypeEnum.MODEL_QUERY_SPEC.toString().equalsIgnoreCase(artifactInfo.getArtifactType())) {
             querySpecArtifacts = processModelQuerySpecArtifact(downloadResult);
         } else {

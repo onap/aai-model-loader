@@ -24,7 +24,7 @@
  import org.onap.sdc.api.consumer.IComponentDoneStatusMessage;
  import org.onap.sdc.api.consumer.IConfiguration;
  import org.onap.sdc.api.notification.INotificationData;
- import org.onap.sdc.utils.DistributionStatusEnum;
+ import org.onap.sdc.api.notification.DistributionStatusEnum;
  import org.springframework.boot.test.context.SpringBootTest;
  import org.springframework.test.context.TestPropertySource;
  import static org.mockito.Mockito.mock;

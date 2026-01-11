@@ -63,7 +63,7 @@ import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientDownloadResult;
 import org.onap.sdc.impl.DistributionClientDownloadResultImpl;
-import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.onap.sdc.api.results.DistributionActionResultEnum;
 
 /**
  * Tests {@link ArtifactDownloadManager}.
@@ -98,7 +98,7 @@ public class TestArtifactDownloadManager {
 
     /**
      * Test downloading zero artifacts from SDC.
- * @throws Exception 
+ * @throws Exception
      */
     @Test
     public void testDownloadWithZeroArtifacts() throws Exception {

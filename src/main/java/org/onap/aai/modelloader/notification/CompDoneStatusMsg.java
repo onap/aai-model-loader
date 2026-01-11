@@ -21,7 +21,7 @@
 package org.onap.aai.modelloader.notification;
 
 import org.onap.sdc.api.consumer.IComponentDoneStatusMessage;
-import org.onap.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.notification.DistributionStatusEnum;
 
 public class CompDoneStatusMsg extends BasicStatusMsg implements IComponentDoneStatusMessage {
 
