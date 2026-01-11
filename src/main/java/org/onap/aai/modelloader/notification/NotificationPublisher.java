@@ -36,8 +36,8 @@ import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
-import org.onap.sdc.utils.DistributionActionResultEnum;
-import org.onap.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.results.DistributionActionResultEnum;
+import org.onap.sdc.api.notification.DistributionStatusEnum;
 import org.springframework.stereotype.Component;
 
 /**

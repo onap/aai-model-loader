@@ -31,7 +31,7 @@ import org.mockito.Mock;
 import org.onap.aai.modelloader.notification.EventCallback;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.results.IDistributionClientResult;
-import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.onap.sdc.api.results.DistributionActionResultEnum;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -58,5 +58,5 @@ public class DistributionClientStartupConfigTest {
     startupConfig.destroy();
     verify(distributionClient, times(1)).stop();
   }
-  
+
 }
