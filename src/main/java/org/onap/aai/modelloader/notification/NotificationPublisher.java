@@ -38,6 +38,7 @@ import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
 import org.onap.sdc.utils.DistributionActionResultEnum;
 import org.onap.sdc.utils.DistributionStatusEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -52,6 +53,15 @@ public class NotificationPublisher {
     private boolean publishingEnabled;
 
     public NotificationPublisher() {
+        this(loadConfig());
+    }
+
+    @Autowired
+    public NotificationPublisher(ModelLoaderConfig config) {
+        publishingEnabled = !config.getASDCConnectionDisabled();
+    }
+
+    private static ModelLoaderConfig loadConfig() {
         Properties configProperties = new Properties();
         try (InputStream configInputStream = Files.newInputStream(ModelLoaderConfig.propertiesFile())) {
             configProperties.load(configInputStream);
@@ -59,10 +69,7 @@ public class NotificationPublisher {
             String errorMsg = "Failed to load configuration: " + e.getMessage();
             logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, e, errorMsg);
         }
-
-        ModelLoaderConfig config = new ModelLoaderConfig(configProperties);
-
-        publishingEnabled = !config.getASDCConnectionDisabled();
+        return new ModelLoaderConfig(configProperties);
     }
 
     /**

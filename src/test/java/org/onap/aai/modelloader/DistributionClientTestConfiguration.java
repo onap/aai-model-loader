@@ -89,6 +89,7 @@ public class DistributionClientTestConfiguration {
   private void setOverrides(Properties configProperties) {
     configProperties.setProperty("ml.distribution.ASDC_ADDRESS", "localhost:" + wiremockPort);
     configProperties.setProperty("ml.babel.BASE_URL", "http://localhost:" + wiremockPort);
+    configProperties.setProperty("ml.distribution.ASDC_CONNECTION_DISABLE", "false");
   }
 
   @EventListener(ApplicationStartedEvent.class)
