@@ -21,8 +21,11 @@
 package org.onap.aai.modelloader.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile;
@@ -151,12 +154,13 @@ public class ArtifactDownloadManagerVnfcTest {
         setupValidDownloadCsarMocks(data, artifactInfo);
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifacts());
         when(mockVnfCatalogExtractor.extract(any(), any())).thenReturn(createXmlVnfcArtifacts());
-        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
 
-        InvalidArchiveException invalidArchiveException = assertThrows(InvalidArchiveException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(InvalidArchiveException.class, failure.getCause());
 
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(eq(mockDistributionClient), eq(data), eq(artifactInfo),
+                startsWith("Failed to process artifact " + artifactInfo.getArtifactName() + ": "));
     }
 
     private IDistributionClientDownloadResult createDistributionClientDownloadResult(

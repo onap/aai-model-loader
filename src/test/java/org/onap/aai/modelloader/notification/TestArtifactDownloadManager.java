@@ -23,8 +23,11 @@ package org.onap.aai.modelloader.notification;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder.getNotificationDataWithInvalidType;
@@ -115,17 +118,36 @@ public class TestArtifactDownloadManager {
         String errorMessage = "error msg";
         when(mockDistributionClient.download(artifact)).thenReturn(
                 createDistributionClientDownloadResult(DistributionActionResultEnum.FAIL, errorMessage, null));
-        doNothing().when(mockNotificationPublisher).publishDownloadFailure(mockDistributionClient, data, artifact,
-                errorMessage);
 
-        assertThrows(DownloadFailureException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(DownloadFailureException.class, failure.getCause());
 
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadFailure(mockDistributionClient, data, artifact,
-                errorMessage);
+                "Failed to download artifact " + artifact.getArtifactName() + ": " + errorMessage);
 
         Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
+    }
+
+    @Test
+    public void downloadArtifacts_continuesAfterAFailedArtifact() throws Exception {
+        INotificationData data = getNotificationDataWithOneOfEach();
+        IArtifactInfo csarArtifact = data.getServiceArtifacts().get(0);
+        IArtifactInfo modelSpecArtifact = data.getResources().get(1).getArtifacts().get(0);
+        when(mockDistributionClient.download(csarArtifact)).thenReturn(
+                createDistributionClientDownloadResult(DistributionActionResultEnum.FAIL, "not found", null));
+        setupValidModelQuerySpecMocks(new ArtifactTestUtils(), data, modelSpecArtifact);
+
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
+                () -> downloadManager.downloadArtifacts(data, List.of(csarArtifact, modelSpecArtifact)));
+
+        assertThat(failure.getReportedArtifacts(), is(List.of(csarArtifact)));
+        assertThat(failure.getMessage(),
+                is("Failed to download artifact " + csarArtifact.getArtifactName() + ": not found"));
+        Mockito.verify(mockDistributionClient).download(modelSpecArtifact);
+        Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data,
+                modelSpecArtifact);
     }
 
     @Test
@@ -136,15 +158,16 @@ public class TestArtifactDownloadManager {
                 DistributionActionResultEnum.SUCCESS, null, "This is not a valid Tosca CSAR File".getBytes()));
         doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
         when(mockBabelClient.postArtifact(any(), any())).thenThrow(new BabelServiceClientException(""));
-        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
 
-        assertThrows(ProcessToscaArtifactsException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(ProcessToscaArtifactsException.class, failure.getCause());
 
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
         Mockito.verify(mockBabelClient).postArtifact(any(), any());
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(eq(mockDistributionClient), eq(data), eq(artifact),
+                startsWith("Failed to process artifact " + artifact.getArtifactName() + ": "));
 
         Mockito.verifyNoInteractions(mockBabelArtifactConverter);
 
@@ -161,12 +184,14 @@ public class TestArtifactDownloadManager {
                 DistributionActionResultEnum.SUCCESS, null, "This is not a valid Model Query Spec".getBytes()));
         doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
 
-        assertThrows(BabelArtifactParsingException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(BabelArtifactParsingException.class, failure.getCause());
 
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(eq(mockDistributionClient), eq(data), eq(artifact),
+                startsWith("Failed to process artifact " + artifact.getArtifactName() + ": "));
 
         Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
@@ -290,19 +315,20 @@ public class TestArtifactDownloadManager {
                         artifactTestUtils.loadResource("compressedArtifacts/service-VscpaasTest-csar.csar")));
         when(mockBabelArtifactConverter.convertToModel(any()))
                 .thenThrow(BabelArtifactParsingException.class);
-        doNothing().when(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
         when(mockBabelClient.postArtifact(any(), any())).thenReturn(createBabelArtifacts());
 
         List<Artifact> modelArtifacts = new ArrayList<>();
         List<Artifact> catalogFiles = new ArrayList<>();
-        assertThrows(ProcessToscaArtifactsException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(ProcessToscaArtifactsException.class, failure.getCause());
 
         assertThat(modelArtifacts, is(empty()));
         assertThat(catalogFiles, is(empty()));
 
         Mockito.verify(mockDistributionClient).download(artifactInfo);
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifactInfo);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(eq(mockDistributionClient), eq(data), eq(artifactInfo),
+                startsWith("Failed to process artifact " + artifactInfo.getArtifactName() + ": "));
         Mockito.verify(mockBabelClient).postArtifact(any(), any());
         Mockito.verify(mockBabelArtifactConverter).convertToModel(any());
     }
@@ -317,12 +343,14 @@ public class TestArtifactDownloadManager {
                 DistributionActionResultEnum.SUCCESS, null, "This content does not matter.".getBytes()));
         doNothing().when(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
 
-        assertThrows(InvalidArchiveException.class,
+        ArtifactsFailedException failure = assertThrows(ArtifactsFailedException.class,
                 () -> downloadManager.downloadArtifacts(data, data.getServiceArtifacts()));
+        assertInstanceOf(InvalidArchiveException.class, failure.getCause());
 
         Mockito.verify(mockDistributionClient).download(artifact);
         Mockito.verify(mockNotificationPublisher).publishDownloadSuccess(mockDistributionClient, data, artifact);
-        Mockito.verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, artifact);
+        Mockito.verify(mockNotificationPublisher).publishDeployFailure(eq(mockDistributionClient), eq(data), eq(artifact),
+                startsWith("Failed to process artifact " + artifact.getArtifactName() + ": "));
         Mockito.verifyNoInteractions(mockBabelClient, mockBabelArtifactConverter);
     }
 

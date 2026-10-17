@@ -21,6 +21,7 @@
 package org.onap.aai.modelloader.notification;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.onap.aai.cl.api.Logger;
@@ -43,6 +44,8 @@ public class EventCallback implements INotificationCallback {
     private static Logger logger = LoggerFactory.getInstance().getLogger(EventCallback.class.getName());
     private static Logger auditLogger = LoggerFactory.getInstance().getAuditLogger(EventCallback.class.getName());
 
+    static final String DEPLOY_FAILURE = "Failed to push the distribution artifacts to A&AI";
+
     private final ArtifactDeploymentManager artifactDeploymentManager;
     private final ArtifactDownloadManager artifactDownloadManager;
     private final NotificationPublisher notificationPublisher;
@@ -62,12 +65,19 @@ public class EventCallback implements INotificationCallback {
 
         List<IArtifactInfo> artifacts = new ArtifactInfoExtractor().extract(data);
         boolean success = true;
+        String failureReason = null;
+        List<IArtifactInfo> reportedArtifacts = Collections.emptyList();
         List<Artifact> downloadedArtifacts = new ArrayList<>();
         try {
             downloadedArtifacts =
                     artifactDownloadManager.downloadArtifacts(data, artifacts);
+        } catch (ArtifactsFailedException e) {
+            success = false;
+            failureReason = e.getMessage();
+            reportedArtifacts = e.getReportedArtifacts();
         } catch (Exception e) {
             success = false;
+            failureReason = "Failed to download the distribution artifacts: " + e.getMessage();
         }
 
         List<Artifact> catalogArtifacts = new ArrayList<>();
@@ -84,28 +94,34 @@ public class EventCallback implements INotificationCallback {
 
         if (success) {
             success = artifactDeploymentManager.deploy(data.getDistributionID(), modelArtifacts, catalogArtifacts);
+            if (!success) {
+                failureReason = DEPLOY_FAILURE;
+            }
         }
 
         String statusString = success ? "SUCCESS" : "FAILURE";
         auditLogger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
                 "Processed distribution " + data.getDistributionID() + "  (" + statusString + ")");
 
-        publishNotifications(data, "TOSCA_CSAR", artifacts, success);
+        publishNotifications(data, "TOSCA_CSAR", artifacts, success, failureReason, reportedArtifacts);
 
         MDC.clear();
     }
 
 
     private void publishNotifications(INotificationData data, String filterType, List<IArtifactInfo> artifacts,
-            boolean deploymentSuccess) {
+            boolean deploymentSuccess, String failureReason, List<IArtifactInfo> reportedArtifacts) {
         if (deploymentSuccess) {
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
                     .forEach(a -> notificationPublisher.publishDeploySuccess(client, data, a));
             notificationPublisher.publishComponentSuccess(client, data);
         } else {
+            String artifactReason = reportedArtifacts.isEmpty() ? failureReason
+                    : "Not deployed because another artifact failed: " + failureReason;
             artifacts.stream().filter(a -> filterType.equalsIgnoreCase(a.getArtifactType()))
-                    .forEach(a -> notificationPublisher.publishDeployFailure(client, data, a));
-            notificationPublisher.publishComponentFailure(client, data, "deploy failure");
+                    .filter(a -> !reportedArtifacts.contains(a))
+                    .forEach(a -> notificationPublisher.publishDeployFailure(client, data, a, artifactReason));
+            notificationPublisher.publishComponentFailure(client, data, failureReason);
         }
     }
 }

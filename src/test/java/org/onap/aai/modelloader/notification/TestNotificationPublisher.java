@@ -23,12 +23,16 @@ package org.onap.aai.modelloader.notification;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.consumer.IConfiguration;
 import org.onap.sdc.api.notification.IArtifactInfo;
@@ -80,8 +84,23 @@ public class TestNotificationPublisher {
         publisher.publishComponentSuccess(client, data);
         publisher.publishComponentFailure(client, data, "");
         publisher.publishDeploySuccess(client, data, artifact);
-        publisher.publishDeployFailure(client, data, artifact);
+        publisher.publishDeployFailure(client, data, artifact, "");
         assertTrue(true);
+    }
+
+    @Test
+    public void failuresAreSentWithTheirReason() {
+        when(client.sendDownloadStatus(any(), anyString())).thenReturn(clientResult);
+        when(client.sendDeploymentStatus(any(), anyString())).thenReturn(clientResult);
+        ModelLoaderConfig publishingConfig = mock(ModelLoaderConfig.class);
+        when(publishingConfig.getASDCConnectionDisabled()).thenReturn(false);
+        NotificationPublisher publisher = new NotificationPublisher(publishingConfig);
+
+        publisher.publishDownloadFailure(client, data, artifact, "download reason");
+        publisher.publishDeployFailure(client, data, artifact, "deploy reason");
+
+        verify(client).sendDownloadStatus(any(), eq("download reason"));
+        verify(client).sendDeploymentStatus(any(), eq("deploy reason"));
     }
 
 }

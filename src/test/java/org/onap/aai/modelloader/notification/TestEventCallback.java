@@ -21,6 +21,8 @@
 package org.onap.aai.modelloader.notification;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
@@ -39,6 +41,7 @@ import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.fixture.NotificationDataFixtureBuilder;
 import org.onap.aai.modelloader.service.ArtifactDeploymentManager;
 import org.onap.sdc.api.IDistributionClient;
+import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 
 /**
@@ -79,13 +82,50 @@ public class TestEventCallback {
     public void activateCallback_downloadFails() throws Exception {
         INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
 
-        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)
-        )).thenThrow(DownloadFailureException.class);
+        IArtifactInfo csar = data.getServiceArtifacts().get(0);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
+                .thenThrow(new ArtifactsFailedException("download failed", List.of(csar), null));
 
         eventCallback.activateCallback(data);
 
         verify(mockArtifactDownloadManager).downloadArtifacts(any(INotificationData.class), any(List.class));
         Mockito.verifyNoInteractions(mockArtifactDeploymentManager);
+        verify(mockNotificationPublisher, never()).publishDeployFailure(any(), any(), any(), any());
+        verify(mockNotificationPublisher).publishComponentFailure(mockDistributionClient, data, "download failed");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void activateCallback_otherArtifactFails_csarIsReportedAsNotDeployed() throws Exception {
+        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
+        IArtifactInfo csar = data.getServiceArtifacts().get(0);
+        IArtifactInfo otherArtifact = Mockito.mock(IArtifactInfo.class);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
+                .thenThrow(new ArtifactsFailedException("query spec failed", List.of(otherArtifact), null));
+
+        eventCallback.activateCallback(data);
+
+        verify(mockNotificationPublisher).publishDeployFailure(mockDistributionClient, data, csar,
+                "Not deployed because another artifact failed: query spec failed");
+        verify(mockNotificationPublisher).publishComponentFailure(mockDistributionClient, data, "query spec failed");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void activateCallback_deployFails_reportsEachCsarOnceWithAReason() throws Exception {
+        INotificationData data = NotificationDataFixtureBuilder.getNotificationDataWithToscaCsarFile();
+        IArtifactInfo csar = data.getServiceArtifacts().get(0);
+        when(mockArtifactDownloadManager.downloadArtifacts(any(INotificationData.class), any(List.class)))
+                .thenReturn(Collections.emptyList());
+        when(mockArtifactDeploymentManager.deploy(any(String.class), any(List.class), any(List.class)))
+                .thenReturn(false);
+
+        eventCallback.activateCallback(data);
+
+        verify(mockNotificationPublisher, times(1)).publishDeployFailure(mockDistributionClient, data, csar,
+                EventCallback.DEPLOY_FAILURE);
+        verify(mockNotificationPublisher).publishComponentFailure(mockDistributionClient, data,
+                EventCallback.DEPLOY_FAILURE);
     }
 
     @SuppressWarnings("unchecked")

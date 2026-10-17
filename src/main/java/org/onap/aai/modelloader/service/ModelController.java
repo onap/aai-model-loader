@@ -129,7 +129,8 @@ public class ModelController {
             logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Exception handled: " + responseMessage);
             if (config.getASDCConnectionDisabled()) {
                 // Make sure the NotificationPublisher logger is invoked as per the standard processing flow.
-                new NotificationPublisher().publishDeployFailure(client, new NotificationDataImpl(), artifactInfo);
+                new NotificationPublisher().publishDeployFailure(client, new NotificationDataImpl(), artifactInfo,
+                        responseMessage);
             } else {
                 responseMessage += "\nSDC publishing is enabled but has been bypassed";
             }

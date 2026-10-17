@@ -33,6 +33,7 @@ import org.onap.aai.cl.mdc.MdcOverride;
 import org.onap.aai.modelloader.config.ModelLoaderConfig;
 import org.onap.aai.modelloader.service.ModelLoaderMsgs;
 import org.onap.sdc.api.IDistributionClient;
+import org.onap.sdc.api.consumer.IDistributionStatusMessage;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
@@ -82,19 +83,21 @@ public class NotificationPublisher {
      */
     void publishDownloadFailure(IDistributionClient client, INotificationData data, IArtifactInfo artifact,
             String errorMessage) {
-        publishDownloadStatus(DistributionStatusEnum.DOWNLOAD_ERROR, client, data, artifact, "failure");
+        publishDownloadStatus(DistributionStatusEnum.DOWNLOAD_ERROR, client, data, artifact, "failure",
+                errorMessage);
 
-        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR,
-                "Failed to download artifact " + artifact.getArtifactName() + ": " + errorMessage);
+        logger.error(ModelLoaderMsgs.DISTRIBUTION_EVENT_ERROR, errorMessage);
     }
 
     private void publishDownloadStatus(DistributionStatusEnum distributionStatusEnum, IDistributionClient client,
-            INotificationData data, IArtifactInfo artifact, String result) {
+            INotificationData data, IArtifactInfo artifact, String result, String errorReason) {
         if (publishingEnabled) {
             MdcOverride override = initMDCStartTime();
 
-            IDistributionClientResult sendDownloadStatus = client.sendDownloadStatus(
-                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum));
+            IDistributionStatusMessage message =
+                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum);
+            IDistributionClientResult sendDownloadStatus = errorReason == null ? client.sendDownloadStatus(message)
+                    : client.sendDownloadStatus(message, errorReason);
             metricsLogger.info(ModelLoaderMsgs.EVENT_PUBLISHED, null, override, "download " + result,
                     artifact.getArtifactName(), sendDownloadStatus.getDistributionActionResult().toString());
 
@@ -124,7 +127,7 @@ public class NotificationPublisher {
      * @param artifact the specific artifact to have its distribution status reported on
      */
     void publishDownloadSuccess(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
-        publishDownloadStatus(DistributionStatusEnum.DOWNLOAD_OK, client, data, artifact, "success");
+        publishDownloadStatus(DistributionStatusEnum.DOWNLOAD_OK, client, data, artifact, "success", null);
 
         if (logger.isDebugEnabled()) {
             // @formatter:off
@@ -150,9 +153,11 @@ public class NotificationPublisher {
      * @param client The distribution client this notification relates to
      * @param data data about the notification that resulted in this message being created
      * @param artifact the specific artifact to have its deployment status reported on
+     * @param errorReason why the deployment failed
      */
-    public void publishDeployFailure(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
-        publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_ERROR, "failure");
+    public void publishDeployFailure(IDistributionClient client, INotificationData data, IArtifactInfo artifact,
+            String errorReason) {
+        publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_ERROR, "failure", errorReason);
     }
 
 
@@ -164,7 +169,7 @@ public class NotificationPublisher {
      * @param artifact the specific artifact to have its deployment status reported on
      */
     public void publishDeploySuccess(IDistributionClient client, INotificationData data, IArtifactInfo artifact) {
-        publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_OK, "success");
+        publishDeployStatus(client, data, artifact, DistributionStatusEnum.DEPLOY_OK, "success", null);
     }
 
     public void publishComponentSuccess(IDistributionClient client, INotificationData data) {
@@ -207,12 +212,14 @@ public class NotificationPublisher {
     }
 
     private void publishDeployStatus(IDistributionClient client, INotificationData data, IArtifactInfo artifact,
-            DistributionStatusEnum distributionStatusEnum, String result) {
+            DistributionStatusEnum distributionStatusEnum, String result, String errorReason) {
         if (publishingEnabled) {
             MdcOverride override = initMDCStartTime();
 
-            IDistributionClientResult sendStatus = client.sendDeploymentStatus(
-                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum));
+            IDistributionStatusMessage message =
+                    DistributionStatusMessageBuilder.build(client, data, artifact, distributionStatusEnum);
+            IDistributionClientResult sendStatus = errorReason == null ? client.sendDeploymentStatus(message)
+                    : client.sendDeploymentStatus(message, errorReason);
             metricsLogger.info(ModelLoaderMsgs.EVENT_PUBLISHED, null, override, "deploy " + result,
                     artifact.getArtifactName(), sendStatus.getDistributionActionResult().toString());
 

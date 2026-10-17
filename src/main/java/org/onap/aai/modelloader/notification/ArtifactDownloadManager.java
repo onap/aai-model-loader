@@ -85,26 +85,43 @@ public class ArtifactDownloadManager {
      * @param artifacts the specific artifacts found in the data.
      * @param modelArtifacts collection of artifacts for model query specs
      * @param catalogArtifacts collection of artifacts that represent vnf catalog files
-     * @return boolean <code>true</code> if the download process was successful otherwise <code>false</code>
-     * @throws Exception 
+     * @return the artifacts converted from all downloaded artifacts
+     * @throws ArtifactsFailedException if any artifact failed; every artifact is still attempted
      */
-    List<Artifact> downloadArtifacts(INotificationData data, List<IArtifactInfo> artifacts) throws Exception {
+    List<Artifact> downloadArtifacts(INotificationData data, List<IArtifactInfo> artifacts)
+            throws ArtifactsFailedException {
 
         List<Artifact> allArtifacts = new ArrayList<>();
+        List<IArtifactInfo> failedArtifacts = new ArrayList<>();
+        List<String> failures = new ArrayList<>();
+        Exception firstFailure = null;
         for (IArtifactInfo artifact : artifacts) {
+            String failure;
             try {
                 IDistributionClientDownloadResult downloadResult = downloadIndividualArtifacts(data, artifact);
                 List<Artifact> processedArtifacts = processDownloadedArtifacts(artifact, downloadResult, data);
                 allArtifacts.addAll(processedArtifacts);
+                continue;
             } catch (DownloadFailureException e) {
-                notificationPublisher.publishDownloadFailure(client, data, artifact, e.getMessage());
-                throw e;
+                failure = "Failed to download artifact " + artifact.getArtifactName() + ": " + describe(e);
+                notificationPublisher.publishDownloadFailure(client, data, artifact, failure);
+                firstFailure = firstFailure == null ? e : firstFailure;
             } catch (ProcessToscaArtifactsException | InvalidArchiveException | BabelArtifactParsingException e) {
-                notificationPublisher.publishDeployFailure(client, data, artifact);
-                throw e;
+                failure = "Failed to process artifact " + artifact.getArtifactName() + ": " + describe(e);
+                notificationPublisher.publishDeployFailure(client, data, artifact, failure);
+                firstFailure = firstFailure == null ? e : firstFailure;
             }
+            failedArtifacts.add(artifact);
+            failures.add(failure);
+        }
+        if (!failedArtifacts.isEmpty()) {
+            throw new ArtifactsFailedException(String.join("; ", failures), failedArtifacts, firstFailure);
         }
         return allArtifacts;
+    }
+
+    private static String describe(Exception e) {
+        return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
     }
 
     private IDistributionClientDownloadResult downloadIndividualArtifacts(INotificationData data,
