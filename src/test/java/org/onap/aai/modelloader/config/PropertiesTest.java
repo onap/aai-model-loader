@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 @SpringBootTest(properties = {
   "ml.babel.generate-artifacts-url=/foo"
@@ -33,8 +34,12 @@ public class PropertiesTest {
   @Autowired
   BabelProperties babelProperties;
 
+  @Autowired
+  ApplicationContext applicationContext;
+
   @Test
   void thatBabelPropertiesBindingWorks() {
+    assertEquals(1, applicationContext.getBeansOfType(BabelProperties.class).size());
     assertEquals("/foo", babelProperties.getGenerateArtifactsUrl());
   }
 

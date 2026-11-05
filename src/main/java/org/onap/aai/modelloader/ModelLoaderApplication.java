@@ -20,17 +20,14 @@
  */
 package org.onap.aai.modelloader;
 
-import org.onap.aai.modelloader.config.BabelProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * Model Loader Spring Boot Application.
  */
 
 @SpringBootApplication
-@EnableConfigurationProperties(BabelProperties.class)
 public class ModelLoaderApplication {
 
     public static void main(String[] args) {
