@@ -23,6 +23,24 @@ The Model Loader supports two methods for supplying VNF Catalog data for loading
 
 **Note: Each CSAR should provide VNF Catalog information using only one of the above methods. If a CSAR contains both TOSCA and XML VNF Catalog information, a deploy failure will be logged and published to SDC, and no VNF Catalog data will be loaded into A&AI** 
 		    
+## Distribution tracing
+
+The SDC distribution client 2.4.0 preserves Kafka headers and record coordinates for each
+notification. Set `TRACING_ENABLED=true` (or `management.tracing.enabled=true`) to create
+one consumer processing span per notification. W3C `traceparent` and `tracestate` headers
+connect this span to SDC's producer trace; notifications without a valid trace context
+start a new trace. Babel and A&AI HTTP requests continue the notification trace.
+
+Configure the Zipkin-compatible collector with `ZIPKIN_TRACING_ENDPOINT` (or
+`management.zipkin.tracing.endpoint`), including `/api/v2/spans`. The existing
+`management.tracing.sampling.probability` setting controls sampling. Retain
+`management.tracing.baggage.remote-fields=tracestate` when overriding the current Brave
+bridge configuration so vendor state continues with valid W3C parents. The notification
+boundary uses the OpenTelemetry API's W3C propagator to discard invalid or orphaned vendor state before the
+bridge extracts its baggage. SDC must inject
+trace headers when publishing notifications for upstream continuity. SDK artifact
+downloads and distribution status publications are not instrumented by this callback.
+
 ## Compiling Model Loader
 
 Model Loader can be compiled by running `mvn clean install`

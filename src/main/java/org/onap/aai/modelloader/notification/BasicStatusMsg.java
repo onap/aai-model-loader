@@ -21,7 +21,7 @@
 package org.onap.aai.modelloader.notification;
 
 import org.onap.sdc.api.consumer.IDistributionStatusMessageBasic;
-import org.onap.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.notification.DistributionStatusEnum;
 
 public class BasicStatusMsg implements IDistributionStatusMessageBasic {
 

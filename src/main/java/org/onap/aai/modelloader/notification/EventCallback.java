@@ -20,13 +20,12 @@
  */
 package org.onap.aai.modelloader.notification;
 
+import io.micrometer.tracing.Span;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.onap.aai.cl.api.Logger;
 import org.onap.aai.cl.eelf.LoggerFactory;
-import org.onap.aai.cl.mdc.MdcContext;
 import org.onap.aai.modelloader.entity.Artifact;
 import org.onap.aai.modelloader.entity.ArtifactType;
 import org.onap.aai.modelloader.extraction.ArtifactInfoExtractor;
@@ -36,7 +35,6 @@ import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.consumer.INotificationCallback;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,17 +48,24 @@ public class EventCallback implements INotificationCallback {
     private final ArtifactDownloadManager artifactDownloadManager;
     private final NotificationPublisher notificationPublisher;
     private final IDistributionClient client;
+    private final NotificationTracing notificationTracing;
 
-    public EventCallback(IDistributionClient client, ArtifactDeploymentManager artifactDeploymentManager, ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher) {
+    public EventCallback(IDistributionClient client, ArtifactDeploymentManager artifactDeploymentManager,
+            ArtifactDownloadManager artifactDownloadManager, NotificationPublisher notificationPublisher,
+            NotificationTracing notificationTracing) {
         this.artifactDeploymentManager = artifactDeploymentManager;
         this.artifactDownloadManager = artifactDownloadManager;
         this.notificationPublisher = notificationPublisher;
         this.client = client;
+        this.notificationTracing = notificationTracing;
     }
 
     @Override
     public void activateCallback(INotificationData data) {
-        MdcContext.initialize(data.getDistributionID(), "ModelLoader", "", "Event-Bus", "");
+        notificationTracing.trace(data, span -> processNotification(data, span));
+    }
+
+    private void processNotification(INotificationData data, Span span) {
         logger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT, "Received distribution " + data.getDistributionID());
 
         List<IArtifactInfo> artifacts = new ArtifactInfoExtractor().extract(data);
@@ -103,9 +108,10 @@ public class EventCallback implements INotificationCallback {
         auditLogger.info(ModelLoaderMsgs.DISTRIBUTION_EVENT,
                 "Processed distribution " + data.getDistributionID() + "  (" + statusString + ")");
 
+        if (!success) {
+            span.error(new IllegalStateException(failureReason));
+        }
         publishNotifications(data, "TOSCA_CSAR", artifacts, success, failureReason, reportedArtifacts);
-
-        MDC.clear();
     }
 
 

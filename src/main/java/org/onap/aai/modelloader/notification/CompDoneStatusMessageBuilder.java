@@ -23,7 +23,7 @@ package org.onap.aai.modelloader.notification;
 import org.onap.sdc.api.IDistributionClient;
 import org.onap.sdc.api.consumer.IComponentDoneStatusMessage;
 import org.onap.sdc.api.notification.INotificationData;
-import org.onap.sdc.utils.DistributionStatusEnum;
+import org.onap.sdc.api.notification.DistributionStatusEnum;
 
 /**
  * This class is responsible for building an instance of {@link DistributionStatusMsg}.

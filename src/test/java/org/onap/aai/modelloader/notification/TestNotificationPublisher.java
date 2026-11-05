@@ -38,7 +38,7 @@ import org.onap.sdc.api.consumer.IConfiguration;
 import org.onap.sdc.api.notification.IArtifactInfo;
 import org.onap.sdc.api.notification.INotificationData;
 import org.onap.sdc.api.results.IDistributionClientResult;
-import org.onap.sdc.utils.DistributionActionResultEnum;
+import org.onap.sdc.api.results.DistributionActionResultEnum;
 
 /**
  * Test the Notification Publisher using Mocks

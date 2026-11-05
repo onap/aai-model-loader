@@ -25,10 +25,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import io.micrometer.observation.ObservationRegistry;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +68,8 @@ public class TestEventCallback {
         configProperties = new Properties();
         configProperties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE));
 
-        eventCallback = new EventCallback(mockDistributionClient, mockArtifactDeploymentManager, mockArtifactDownloadManager, mockNotificationPublisher);
+        eventCallback = new EventCallback(mockDistributionClient, mockArtifactDeploymentManager, mockArtifactDownloadManager, mockNotificationPublisher,
+                new NotificationTracing(Optional.empty(), Optional.empty(), ObservationRegistry.NOOP));
     }
 
     @AfterEach
