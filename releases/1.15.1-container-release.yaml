@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.15.1
+project: model-loader
+ref: f27b2af1d1cddab87b54ae0ebc99bdb2f5775c0f
+containers:
+    - name: model-loader
+      version: 1.15-STAGING-TBD
